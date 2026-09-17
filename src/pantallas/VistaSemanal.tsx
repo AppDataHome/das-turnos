@@ -59,7 +59,6 @@ export default function VistaSemanal({
   fechaSeleccionada,
   onSeleccionarFecha,
 }: Props) {
-  
   const hoy = new Date()
 
   const [semanaInicio, setSemanaInicio] = useState<Date>(() =>
