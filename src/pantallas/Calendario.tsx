@@ -4,6 +4,7 @@ import { useUsuario } from '../contexto/UsuarioContexto'
 import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
+import AvisosBanner from './AvisosBanner'
 import type { Turno, DasStatus } from '../tipos'
 import {
   iconoTurno,
@@ -186,6 +187,9 @@ export default function Calendario() {
 
   return (
     <>
+      {/* Avisos */}
+      <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
+
       {/* Tarjetas superiores */}
       <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         {/* Turnos Mes */}
