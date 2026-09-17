@@ -293,7 +293,7 @@ export default function Calendario() {
         onSeleccionarFecha={seleccionarYAbir}
       />
 
-      {/* Panel del día seleccionado (resumen) */}
+            {/* Panel del día seleccionado (resumen ampliado) */}
       <div className="card">
         <div
           style={{
@@ -301,6 +301,7 @@ export default function Calendario() {
             alignItems: 'center',
             gap: 12,
             marginBottom: 16,
+            flexWrap: 'wrap',
           }}
         >
           <h3 style={{ margin: 0 }}>{textoFechaLarga(fecha)}</h3>
@@ -330,32 +331,122 @@ export default function Calendario() {
             añadir alguno.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {turnosDelDia.map((t) => (
-              <div
-                key={t.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: 12,
-                  background: 'var(--fondo-tarjeta-2)',
-                  borderRadius: 8,
-                }}
-              >
-                <span className="chip" style={{ background: t.color }}>
-                  {(t.nombre_turno ?? '').toUpperCase()}
-                </span>
-                <span style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
-                  {t.departamento}
-                </span>
-                {t.notas && (
-                  <span style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
-                    · {t.notas}
-                  </span>
-                )}
-              </div>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {turnosDelDia.map((t) => {
+              // Comprobar si el turno genera DAS (festivo / nocturno)
+              // Festivo: sábado, domingo, o festivo de calendario (aún no lo tenemos en cliente → aproximamos con día de la semana)
+              const fechaD = new Date(t.fecha + 'T00:00:00')
+              const diaSemana = fechaD.getDay() // 0=domingo, 6=sábado
+              const esFinSemana = diaSemana === 0 || diaSemana === 6
+              const esNocturno =
+                t.codigo_turno === 'N' && !esFinSemana // aproximación
+              const esFestivo = esFinSemana && t.codigo_turno !== 'L'
+
+              return (
+                <div
+                  key={t.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: 14,
+                    background: 'var(--fondo-tarjeta-2)',
+                    borderRadius: 10,
+                  }}
+                >
+                  {/* Icono grande */}
+                  <div
+                    style={{
+                      fontSize: 26,
+                      width: 44,
+                      height: 44,
+                      borderRadius: 10,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--fondo-tarjeta)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {t.icono_departamento ?? '📁'}
+                  </div>
+
+                  {/* Info del turno */}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginBottom: 4,
+                      }}
+                    >
+                      <span
+                        className="chip"
+                        style={{ background: t.color }}
+                      >
+                        {(t.nombre_turno ?? '').toUpperCase()}
+                      </span>
+                      {esFestivo && (
+                        <span
+                          className="punto-das punto-festivo"
+                          title="Cuenta como festivo trabajado"
+                        />
+                      )}
+                      {esNocturno && (
+                        <span
+                          className="punto-das punto-nocturno"
+                          title="Cuenta como noche trabajada"
+                        />
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'var(--texto-suave)',
+                        display: 'flex',
+                        gap: 10,
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span>
+                        {t.hora_inicio && t.hora_fin
+                          ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
+                          : 'Todo el día'}
+                      </span>
+                      <span>·</span>
+                      <span>{t.departamento}</span>
+                    </div>
+
+                    {t.notas && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: 'var(--texto-suave)',
+                          marginTop: 4,
+                        }}
+                      >
+                        📝 {t.notas}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Botón Borrar */}
+                  <button
+                    className="btn-mini btn-mini-peligro"
+                    onClick={async () => {
+                      if (!confirm('¿Seguro que quieres borrar este turno?'))
+                        return
+                      await supabase.from('turno').delete().eq('id', t.id)
+                      cargarTodo()
+                    }}
+                  >
+                    Borrar
+                  </button>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
