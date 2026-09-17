@@ -10,29 +10,13 @@ export default function Calendario() {
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
-  const [codigoTurno, setCodigoTurno] = useState('M')
-  const [departamento, setDepartamento] = useState('Patrulla')
-  const [mensaje, setMensaje] = useState('')
-  const [error, setError] = useState('')
-  const [tiposTurno, setTiposTurno] = useState<
-    { codigo: string; nombre: string; color: string; orden: number }[]
-  >([])
 
   useEffect(() => {
     if (usuario) {
       cargarTurnos()
       cargarEstadoDas()
-      cargarTiposTurno()
     }
   }, [usuario])
-
-  async function cargarTiposTurno() {
-    const { data } = await supabase
-      .from('tipo_turno')
-      .select('codigo, nombre, color, orden')
-      .order('orden')
-    if (data) setTiposTurno(data)
-  }
 
   async function cargarTurnos() {
     if (!usuario) return
@@ -79,204 +63,140 @@ export default function Calendario() {
     }
   }
 
-  async function anadirTurno(e: React.FormEvent) {
-    e.preventDefault()
-    if (!usuario) return
-    setError('')
-    setMensaje('')
-
-    const { data: dept } = await supabase
-      .from('departamento')
-      .select('id')
-      .eq('nombre', departamento)
-      .single()
-
-    if (!dept) {
-      setError('Departamento no válido')
-      return
-    }
-
-    const { data: tipo } = await supabase
-      .from('tipo_turno')
-      .select('id')
-      .eq('codigo', codigoTurno)
-      .single()
-
-    if (!tipo) {
-      setError('Tipo de turno no válido')
-      return
-    }
-
-    const { error } = await supabase.from('turno').insert({
-      id_usuario: usuario.id,
-      id_departamento: dept.id,
-      fecha,
-      id_tipo_turno: tipo.id,
-    })
-
-    if (error) {
-      if (error.code === '23505') setError('Ya tienes ese turno en esa fecha')
-      else setError(error.message)
-    } else {
-      setMensaje('Turno añadido correctamente')
-      cargarTurnos()
-      cargarEstadoDas()
-    }
-  }
-
-  async function borrarTurno(id: string) {
-    if (!confirm('¿Seguro que quieres borrar este turno?')) return
-    await supabase.from('turno').delete().eq('id', id)
-    cargarTurnos()
-    cargarEstadoDas()
-  }
-
   if (!usuario) return null
+
+  // Turnos del día seleccionado
+  const turnosDelDia = turnos.filter((t) => t.fecha === fecha)
+
+  // Formatear la fecha seleccionada en texto largo
+  function textoFechaLarga(f: string): string {
+    const date = new Date(f + 'T00:00:00')
+    const opciones: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    }
+    const txt = date.toLocaleDateString('es-ES', opciones)
+    return txt.charAt(0).toUpperCase() + txt.slice(1)
+  }
 
   return (
     <>
-      {/* Vista mensual */}
+      {/* Tarjetas superiores */}
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="card">
+          <h4 style={{ color: 'var(--texto-suave)', fontSize: 12, marginBottom: 8, textTransform: 'uppercase' }}>
+            Turnos del mes
+          </h4>
+          <div className="stat-value">{turnos.length}</div>
+          <div className="stat-label">Registrados</div>
+        </div>
+
+        <div className="card">
+          <h4 style={{ color: 'var(--texto-suave)', fontSize: 12, marginBottom: 8, textTransform: 'uppercase' }}>
+            Vacaciones
+          </h4>
+          <div className="stat-value">0</div>
+          <div className="stat-label">Pendiente de calcular</div>
+        </div>
+
+        <div className="card">
+          <h4 style={{ color: 'var(--texto-suave)', fontSize: 12, marginBottom: 8, textTransform: 'uppercase' }}>
+            DAS
+          </h4>
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--acento)' }}>
+                {dasStatus?.das_generados ?? 0}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Gen.</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--acento)' }}>
+                {dasStatus?.das_disfrutados ?? 0}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Disf.</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--acento)' }}>
+                {dasStatus?.das_disponibles ?? 0}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Disp.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Calendario */}
       <VistaMensual
         turnos={turnos}
         fechaSeleccionada={fecha}
         onSeleccionarFecha={setFecha}
       />
 
-      {/* Panel de contadores DAS */}
+      {/* Panel del día seleccionado */}
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>Mis DAS</h3>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-          <div className="stat">
-            <div className="stat-value">{dasStatus?.das_disponibles ?? 0}</div>
-            <div className="stat-label">DAS disponibles</div>
-          </div>
-          <div className="stat">
-            <div className="stat-value">{dasStatus?.das_generados ?? 0}</div>
-            <div className="stat-label">DAS generados</div>
-          </div>
-          <div className="stat">
-            <div className="stat-value">{dasStatus?.das_disfrutados ?? 0}</div>
-            <div className="stat-label">DAS disfrutados</div>
-          </div>
-          <div className="stat">
-            <div className="stat-value">{dasStatus?.das_remanente_manual ?? 0}</div>
-            <div className="stat-label">Remanente anterior</div>
-          </div>
-        </div>
-        <div style={{ marginTop: 16, fontSize: 13, color: 'var(--texto-suave)' }}>
-          <p>
-            Festivos trabajados: <strong>{dasStatus?.festivos_validos ?? 0}</strong>{' '}
-            (faltan {3 - (dasStatus?.festivos_restantes ?? 0)} para el próximo DAS)
-          </p>
-          <p>
-            Noches trabajadas: <strong>{dasStatus?.noches_validas ?? 0}</strong>{' '}
-            (faltan {6 - (dasStatus?.noches_restantes ?? 0)} para el próximo DAS)
-          </p>
-        </div>
-      </div>
-
-      {/* Formulario de alta de turno */}
-      <div className="card">
-        <h3 style={{ marginBottom: 16 }}>
-          Añadir turno al día {fecha}
-        </h3>
-        <form onSubmit={anadirTurno}>
-          <div
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 16,
+          }}
+        >
+          <h3 style={{ margin: 0 }}>{textoFechaLarga(fecha)}</h3>
+          <span
+            className="chip"
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr auto',
-              gap: 12,
-              alignItems: 'end',
+              background: 'var(--fondo-tarjeta-2)',
+              color: 'var(--texto-suave)',
+              fontSize: 11,
             }}
           >
-            <div>
-              <label className="label">Fecha</label>
-              <input
-                className="input"
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Tipo de turno</label>
-              <select
-                className="input"
-                value={codigoTurno}
-                onChange={(e) => setCodigoTurno(e.target.value)}
-              >
-                {tiposTurno.map((t) => (
-                  <option key={t.codigo} value={t.codigo}>
-                    {t.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Departamento</label>
-              <select
-                className="input"
-                value={departamento}
-                onChange={(e) => setDepartamento(e.target.value)}
-              >
-                <option value="Patrulla">Patrulla</option>
-                <option value="Oficina">Oficina</option>
-              </select>
-            </div>
-            <button className="btn btn-primary" type="submit">
-              Añadir
-            </button>
-          </div>
-          {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
-        </form>
-      </div>
+            {turnosDelDia.length}{' '}
+            {turnosDelDia.length === 1 ? 'turno' : 'turnos'}
+          </span>
+        </div>
 
-      {/* Listado de turnos */}
-      <div className="card">
-        <h3 style={{ marginBottom: 16 }}>Mis turnos</h3>
-        {turnos.length === 0 ? (
+        {turnosDelDia.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>
-            Aún no tienes turnos registrados. Pulsa un día en el calendario y
-            añade el primero.
+            Este día aún no tiene turnos asignados.
+            <br />
+            <span style={{ fontSize: 12, opacity: 0.7 }}>
+              (La opción de añadir turnos desde aquí llegará en la próxima actualización.)
+            </span>
           </p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Turno</th>
-                <th>Departamento</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {turnos
-                .slice()
-                .reverse()
-                .map((t) => (
-                  <tr key={t.id}>
-                    <td>{t.fecha}</td>
-                    <td>
-                      <span className="chip" style={{ background: t.color }}>
-                        {(t.nombre_turno ?? '').toUpperCase()}
-                      </span>
-                    </td>
-                    <td>{t.departamento}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        className="btn btn-danger"
-                        style={{ padding: '6px 12px', fontSize: 12 }}
-                        onClick={() => borrarTurno(t.id)}
-                      >
-                        Borrar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {turnosDelDia.map((t) => (
+              <div
+                key={t.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: 12,
+                  background: 'var(--fondo-tarjeta-2)',
+                  borderRadius: 8,
+                }}
+              >
+                <span
+                  className="chip"
+                  style={{ background: t.color }}
+                >
+                  {(t.nombre_turno ?? '').toUpperCase()}
+                </span>
+                <span style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
+                  {t.departamento}
+                </span>
+                {t.notas && (
+                  <span style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
+                    · {t.notas}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </>
