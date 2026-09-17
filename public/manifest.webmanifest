@@ -1,0 +1,19 @@
+{
+  "name": "DAS · Control de Turnos",
+  "short_name": "DAS Turnos",
+  "description": "Control de turnos y días DAS para la Guardia Civil",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
