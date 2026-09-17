@@ -11,6 +11,9 @@ export interface Usuario {
   rol: Rol
   tema: Tema
   activo: boolean
+  dias_vacaciones_anuales: number
+  dias_vacaciones_arrastradas: number
+  anio_vacaciones_arrastradas: number | null
 }
 
 export interface Departamento {
