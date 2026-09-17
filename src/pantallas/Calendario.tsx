@@ -223,26 +223,26 @@ export default function Calendario() {
           />
 
           <div style={{ fontSize: 12, lineHeight: 1.6 }}>
-            <div style={{ color: 'var(--texto-suave)' }}>
-              Festivos trabajados:{' '}
-              <strong style={{ color: 'var(--texto)' }}>{festivosTotales}</strong>
-            </div>
-            <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
-              {festivosTotales} / {festivosDAS} DAS / {festivosResiduo}{' '}
-              {festivosResiduo === 1 ? 'Residuo' : 'Residuos'}
-            </div>
-          </div>
+  <div style={{ color: 'var(--texto-suave)' }}>
+    Festivos / Fines de semana trabajados:{' '}
+    <strong style={{ color: 'var(--texto)' }}>{festivosTotales}</strong>
+  </div>
+  <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
+    {festivosTotales} / {festivosDAS} DAS / {festivosResiduo}{' '}
+    {festivosResiduo === 1 ? 'Residuo' : 'Residuos'}
+  </div>
+</div>
 
-          <div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 10 }}>
-            <div style={{ color: 'var(--texto-suave)' }}>
-              Noches trabajadas:{' '}
-              <strong style={{ color: 'var(--texto)' }}>{nochesTotales}</strong>
-            </div>
-            <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
-              {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
-              {nochesResiduo === 1 ? 'Residuo' : 'Residuos'}
-            </div>
-          </div>
+<div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 10 }}>
+  <div style={{ color: 'var(--texto-suave)' }}>
+    Noches entre semana trabajadas:{' '}
+    <strong style={{ color: 'var(--texto)' }}>{nochesTotales}</strong>
+  </div>
+  <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
+    {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
+    {nochesResiduo === 1 ? 'Residuo' : 'Residuos'}
+  </div>
+</div>
         </div>
       </div>
 
