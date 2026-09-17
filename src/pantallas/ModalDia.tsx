@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import type { Turno, Departamento, TipoTurno } from '../tipos'
+import { etiquetaSinDepartamento, muestraDepartamento } from '../utilidades/turnos'
 
 interface Props {
   fecha: string
@@ -246,8 +247,12 @@ export default function ModalDia({
                 >
                   {(t.nombre_turno ?? '').toUpperCase()}
                 </span>
-                <div className="detalle">
-                  <div style={{ fontSize: 13 }}>{t.departamento}</div>
+                                <div className="detalle">
+                  <div style={{ fontSize: 13 }}>
+                    {muestraDepartamento(t)
+                      ? t.departamento
+                      : etiquetaSinDepartamento(t)}
+                  </div>
                   {t.notas && <div className="notas">📝 {t.notas}</div>}
                 </div>
                 <button
