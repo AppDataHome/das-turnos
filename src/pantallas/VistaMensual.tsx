@@ -31,7 +31,6 @@ function mismoDia(a: Date, b: Date) {
   )
 }
 
-// Lunes = 0, ..., Domingo = 6
 function diaSemanaLunes(fecha: Date): number {
   const d = fecha.getDay() // 0 = domingo
   return d === 0 ? 6 : d - 1
@@ -49,13 +48,11 @@ export default function VistaMensual({
     new Date(hoy.getFullYear(), hoy.getMonth(), 1)
   )
 
-  // Cuando cambia la fecha seleccionada desde fuera, movemos el mes
   useEffect(() => {
     const f = new Date(fechaSeleccionada)
     setMesActual(new Date(f.getFullYear(), f.getMonth(), 1))
   }, [fechaSeleccionada])
 
-  // Mapa fecha → turnos de ese día
   const turnosPorFecha = useMemo(() => {
     const mapa = new Map<string, Turno[]>()
     for (const t of turnos) {
@@ -65,10 +62,9 @@ export default function VistaMensual({
     return mapa
   }, [turnos])
 
-  // Días que se muestran en la rejilla (42 celdas = 6 semanas)
   const dias = useMemo(() => {
     const primerDia = new Date(mesActual.getFullYear(), mesActual.getMonth(), 1)
-    const offset = diaSemanaLunes(primerDia) // 0 = lunes
+    const offset = diaSemanaLunes(primerDia)
     const inicio = new Date(primerDia)
     inicio.setDate(primerDia.getDate() - offset)
 
@@ -129,6 +125,12 @@ export default function VistaMensual({
           const esHoy = mismoDia(d, hoy)
           const seleccionado = fecha === fechaSeleccionada
 
+          // Juntamos las notas del día (si varias, con " · ")
+          const notasDia = turnosDia
+            .map((t) => t.notas)
+            .filter((n): n is string => !!n && n.trim() !== '')
+            .join(' · ')
+
           return (
             <div
               key={fecha}
@@ -143,22 +145,45 @@ export default function VistaMensual({
               onClick={() => onSeleccionarFecha(fecha)}
             >
               <div className="numero">{d.getDate()}</div>
+
               <div className="chips">
                 {turnosDia.map((t) => {
-                  const esFestivo = t.codigo_turno === 'N' && t.fecha
-                  const texto = (t.nombre_turno ?? t.codigo_turno ?? '?').toUpperCase()
+                  const texto = (
+                    t.nombre_turno ??
+                    t.codigo_turno ??
+                    '?'
+                  ).toUpperCase()
+                  const icono = t.icono_departamento ?? ''
                   return (
                     <span
                       key={t.id}
                       className="chip-mini"
                       style={{ background: t.color ?? '#6b7280' }}
-                      title={texto}
+                      title={`${icono} ${texto}`.trim()}
                     >
+                      {icono && <span style={{ marginRight: 2 }}>{icono}</span>}
                       {texto}
                     </span>
                   )
                 })}
               </div>
+
+              {notasDia && (
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--texto-suave)',
+                    marginTop: 3,
+                    lineHeight: 1.2,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={notasDia}
+                >
+                  📝 {notasDia}
+                </div>
+              )}
             </div>
           )
         })}
