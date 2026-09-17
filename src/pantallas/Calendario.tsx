@@ -8,9 +8,14 @@ import type { Turno, DasStatus } from '../tipos'
 import { iconoTurno, muestraDepartamento, etiquetaSinDepartamento } from '../utilidades/turnos'
 
 interface ResumenVacaciones {
-  total: number
-  disfrutadas: number
-  disponibles: number
+  anio_actual: number
+  total_actual: number
+  disfrutadas_actual: number
+  disponibles_actual: number
+  anio_anterior: number
+  total_anterior: number
+  disfrutadas_anterior: number
+  disponibles_anterior: number
 }
 
 type VistaCalendario = 'mensual' | 'semanal'
