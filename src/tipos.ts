@@ -44,6 +44,9 @@ export interface Turno {
   departamento?: string
   icono_departamento?: string
   orden_turno?: number
+  hora_inicio?: string | null
+  hora_fin?: string | null
+  categoria_turno?: string
 }
 
 export interface DasStatus {
