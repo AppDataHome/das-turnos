@@ -262,3 +262,139 @@ nav a.activo {
   justify-content: center;
   font-size: 18px;
 }
+
+/* ─────────── Vista mensual ─────────── */
+
+.mes-navegador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mes-navegador .mes-titulo {
+  font-size: 20px;
+  font-weight: 700;
+  flex: 1;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.mes-navegador button {
+  background: var(--fondo-tarjeta-2);
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mes-navegador button:hover {
+  border-color: var(--acento);
+}
+
+.mes-navegador .btn-hoy {
+  font-size: 13px;
+  padding: 0 14px;
+  width: auto;
+}
+
+.rejilla-mes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.rejilla-mes .cabecera-dia {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+
+.celda-dia {
+  background: var(--fondo-tarjeta-2);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  min-height: 82px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border 0.15s, transform 0.1s;
+}
+
+.celda-dia:hover {
+  border-color: var(--acento);
+}
+
+.celda-dia.fuera-mes {
+  opacity: 0.35;
+}
+
+.celda-dia.hoy {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 1px var(--acento);
+}
+
+.celda-dia.seleccionado {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+.celda-dia .numero {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  margin-bottom: 4px;
+}
+
+.celda-dia.hoy .numero {
+  color: var(--acento);
+}
+
+.celda-dia .chips {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.chip-mini {
+  display: block;
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  color: #0e1116;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.punto-das {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+
+.punto-festivo {
+  background: #facc15;
+}
+
+.punto-nocturno {
+  background: #3b82f6;
+}
