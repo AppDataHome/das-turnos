@@ -53,11 +53,15 @@ export default function VistaMensual({
     setMesActual(new Date(f.getFullYear(), f.getMonth(), 1))
   }, [fechaSeleccionada])
 
-  const turnosPorFecha = useMemo(() => {
+    const turnosPorFecha = useMemo(() => {
     const mapa = new Map<string, Turno[]>()
     for (const t of turnos) {
       if (!mapa.has(t.fecha)) mapa.set(t.fecha, [])
       mapa.get(t.fecha)!.push(t)
+    }
+    // Ordenar los turnos de cada día por el campo "orden" del tipo de turno
+    for (const lista of mapa.values()) {
+      lista.sort((a, b) => (a.orden_turno ?? 100) - (b.orden_turno ?? 100))
     }
     return mapa
   }, [turnos])
