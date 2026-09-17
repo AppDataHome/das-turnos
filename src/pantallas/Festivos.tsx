@@ -21,6 +21,7 @@ export default function Festivos() {
   const [anio, setAnio] = useState<number>(anioActual)
   const [festivos, setFestivos] = useState<Festivo[]>([])
   const [cargando, setCargando] = useState(false)
+  const [importando, setImportando] = useState(false)
 
   // Formulario
   const [idEditando, setIdEditando] = useState<string | null>(null)
@@ -59,6 +60,40 @@ export default function Festivos() {
       setFestivos(data as Festivo[])
     }
     setCargando(false)
+  }
+
+  async function importarNacionales() {
+    if (
+      !confirm(
+        `¿Importar los festivos nacionales de ${anio}? Los que ya existan no se duplicarán.`
+      )
+    )
+      return
+
+    setImportando(true)
+    setError('')
+    setMensaje('')
+
+    const { data, error } = await supabase.rpc(
+      'importar_festivos_nacionales',
+      { p_anio: anio }
+    )
+
+    setImportando(false)
+
+    if (error) {
+      setError(error.message)
+      return
+    }
+
+    if (data && data[0]) {
+      const { creados, ignorados } = data[0]
+      setMensaje(
+        `Se han añadido ${creados} festivos nacionales.` +
+          (ignorados > 0 ? ` ${ignorados} ya existían.` : '')
+      )
+      cargarFestivos()
+    }
   }
 
   async function guardarFestivo(e: React.FormEvent) {
@@ -131,7 +166,6 @@ export default function Festivos() {
     cargarFestivos()
   }
 
-  // Texto bonito de la fecha
   function textoFecha(f: string): string {
     const date = new Date(f + 'T00:00:00')
     const opciones: Intl.DateTimeFormatOptions = {
@@ -143,14 +177,12 @@ export default function Festivos() {
     return txt.charAt(0).toUpperCase() + txt.slice(1)
   }
 
-  // Color por ámbito
   function colorAmbito(a: string): string {
     if (a === 'nacional') return '#dc2626'
     if (a === 'autonomico') return '#ea580c'
     return '#7c3aed'
   }
 
-  // Años disponibles en el selector: 10 atrás, 10 adelante
   const añosDisponibles: number[] = []
   for (let i = anioActual - 5; i <= anioActual + 5; i++) {
     añosDisponibles.push(i)
@@ -170,7 +202,10 @@ export default function Festivos() {
         >
           <h2 style={{ margin: 0 }}>Festivos del calendario</h2>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <label className="label" style={{ marginBottom: 0, alignSelf: 'center' }}>
+            <label
+              className="label"
+              style={{ marginBottom: 0, alignSelf: 'center' }}
+            >
               Año:
             </label>
             <select
@@ -188,10 +223,37 @@ export default function Festivos() {
           </div>
         </div>
 
-        <p style={{ fontSize: 13, color: 'var(--texto-suave)', marginBottom: 12 }}>
-          Los festivos nacionales se pueden importar automáticamente (próximamente).
-          Los autonómicos y locales se introducen a mano desde aquí.
-        </p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}
+        >
+          <button
+            className="btn btn-primary"
+            onClick={importarNacionales}
+            disabled={importando}
+          >
+            {importando
+              ? 'Importando…'
+              : `Importar nacionales de ${anio}`}
+          </button>
+          <p
+            style={{
+              fontSize: 12,
+              color: 'var(--texto-suave)',
+              margin: 0,
+            }}
+          >
+            Añade automáticamente los 10 festivos nacionales (incluido el
+            Viernes Santo, que varía cada año).
+          </p>
+        </div>
+
+        {error && <p className="error">{error}</p>}
+        {mensaje && <p className="success">{mensaje}</p>}
       </div>
 
       {/* Formulario */}
@@ -296,7 +358,9 @@ export default function Festivos() {
             <tbody>
               {festivos.map((f) => (
                 <tr key={f.id}>
-                  <td style={{ whiteSpace: 'nowrap' }}>{textoFecha(f.fecha)}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {textoFecha(f.fecha)}
+                  </td>
                   <td>
                     <span
                       className="chip"
