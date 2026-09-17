@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import SeccionDatos from './SeccionDatos'
+import SeccionDasRemanente from './SeccionDasRemanente'
 import type { Tema } from '../tipos'
 
 export default function Ajustes() {
@@ -117,7 +118,6 @@ export default function Ajustes() {
     setErrorPass('')
     setMensajePass('')
 
-    // Validaciones básicas
     if (!passActual) {
       setErrorPass('Debes introducir tu contraseña actual')
       return
@@ -137,7 +137,6 @@ export default function Ajustes() {
 
     setCambiandoPass(true)
 
-    // 1) Verificar la contraseña actual intentando iniciar sesión de nuevo
     const { error: errVerif } = await supabase.auth.signInWithPassword({
       email: usuario!.email,
       password: passActual,
@@ -149,7 +148,6 @@ export default function Ajustes() {
       return
     }
 
-    // 2) Cambiar a la nueva contraseña
     const { error: errCambio } = await supabase.auth.updateUser({
       password: pass1,
     })
@@ -371,6 +369,9 @@ export default function Ajustes() {
           </div>
         </form>
       </div>
+
+      {/* DAS remanente */}
+      <SeccionDasRemanente />
 
       {/* Datos: exportar / importar */}
       <SeccionDatos />
