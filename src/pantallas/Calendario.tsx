@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import VistaMensual from './VistaMensual'
+import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
 import type { Turno, DasStatus } from '../tipos'
 
@@ -11,6 +12,8 @@ interface ResumenVacaciones {
   disponibles: number
 }
 
+type VistaCalendario = 'mensual' | 'semanal'
+
 export default function Calendario() {
   const { usuario } = useUsuario()
 
@@ -19,6 +22,16 @@ export default function Calendario() {
   const [vacaciones, setVacaciones] = useState<ResumenVacaciones | null>(null)
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
+
+  // Vista seleccionada (con memoria en localStorage)
+  const [vista, setVista] = useState<VistaCalendario>(() => {
+    const guardada = localStorage.getItem('vista_calendario')
+    return guardada === 'semanal' ? 'semanal' : 'mensual'
+  })
+
+  useEffect(() => {
+    localStorage.setItem('vista_calendario', vista)
+  }, [vista])
 
   useEffect(() => {
     if (usuario) {
@@ -30,7 +43,7 @@ export default function Calendario() {
     await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
   }
 
-   async function cargarTurnos() {
+  async function cargarTurnos() {
     if (!usuario) return
     const { data, error } = await supabase
       .from('turno')
@@ -135,7 +148,6 @@ export default function Calendario() {
   const nochesDAS = Math.floor(nochesTotales / 6)
   const nochesResiduo = nochesTotales % 6
 
-  // Al pulsar un día, seleccionarlo y abrir el modal
   function seleccionarYAbir(fechaNueva: string) {
     setFecha(fechaNueva)
     setModalAbierto(true)
@@ -145,7 +157,7 @@ export default function Calendario() {
     <>
       {/* Tarjetas superiores */}
       <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-        {/* Tarjeta Turnos Mes */}
+        {/* Turnos Mes */}
         <div className="card">
           <h4
             style={{
@@ -200,7 +212,7 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* Tarjeta Vacaciones */}
+        {/* Vacaciones */}
         <div className="card">
           <h4
             style={{
@@ -226,7 +238,7 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* Tarjeta DAS */}
+        {/* DAS */}
         <div className="card">
           <h4
             style={{
@@ -286,14 +298,71 @@ export default function Calendario() {
         </div>
       </div>
 
-      {/* Calendario */}
-      <VistaMensual
-        turnos={turnos}
-        fechaSeleccionada={fecha}
-        onSeleccionarFecha={seleccionarYAbir}
-      />
+      {/* Selector de vista */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 6,
+          marginBottom: 12,
+          padding: 4,
+          background: 'var(--fondo-tarjeta)',
+          border: '1px solid var(--borde)',
+          borderRadius: 10,
+          width: 'fit-content',
+        }}
+      >
+        <button
+          onClick={() => setVista('mensual')}
+          style={{
+            padding: '8px 18px',
+            fontSize: 13,
+            fontWeight: 600,
+            borderRadius: 7,
+            border: 'none',
+            cursor: 'pointer',
+            background:
+              vista === 'mensual' ? 'var(--acento)' : 'transparent',
+            color:
+              vista === 'mensual' ? '#0e1116' : 'var(--texto-suave)',
+          }}
+        >
+          Mensual
+        </button>
+        <button
+          onClick={() => setVista('semanal')}
+          style={{
+            padding: '8px 18px',
+            fontSize: 13,
+            fontWeight: 600,
+            borderRadius: 7,
+            border: 'none',
+            cursor: 'pointer',
+            background:
+              vista === 'semanal' ? 'var(--acento)' : 'transparent',
+            color:
+              vista === 'semanal' ? '#0e1116' : 'var(--texto-suave)',
+          }}
+        >
+          Semanal
+        </button>
+      </div>
 
-            {/* Panel del día seleccionado (resumen ampliado) */}
+      {/* Calendario */}
+      {vista === 'mensual' ? (
+        <VistaMensual
+          turnos={turnos}
+          fechaSeleccionada={fecha}
+          onSeleccionarFecha={seleccionarYAbir}
+        />
+      ) : (
+        <VistaSemanal
+          turnos={turnos}
+          fechaSeleccionada={fecha}
+          onSeleccionarFecha={seleccionarYAbir}
+        />
+      )}
+
+      {/* Panel del día seleccionado */}
       <div className="card">
         <div
           style={{
@@ -333,13 +402,10 @@ export default function Calendario() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {turnosDelDia.map((t) => {
-              // Comprobar si el turno genera DAS (festivo / nocturno)
-              // Festivo: sábado, domingo, o festivo de calendario (aún no lo tenemos en cliente → aproximamos con día de la semana)
               const fechaD = new Date(t.fecha + 'T00:00:00')
-              const diaSemana = fechaD.getDay() // 0=domingo, 6=sábado
+              const diaSemana = fechaD.getDay()
               const esFinSemana = diaSemana === 0 || diaSemana === 6
-              const esNocturno =
-                t.codigo_turno === 'N' && !esFinSemana // aproximación
+              const esNocturno = t.codigo_turno === 'N' && !esFinSemana
               const esFestivo = esFinSemana && t.codigo_turno !== 'L'
 
               return (
@@ -354,7 +420,6 @@ export default function Calendario() {
                     borderRadius: 10,
                   }}
                 >
-                  {/* Icono grande */}
                   <div
                     style={{
                       fontSize: 26,
@@ -371,7 +436,6 @@ export default function Calendario() {
                     {t.icono_departamento ?? '📁'}
                   </div>
 
-                  {/* Info del turno */}
                   <div style={{ flex: 1 }}>
                     <div
                       style={{
@@ -381,10 +445,7 @@ export default function Calendario() {
                         marginBottom: 4,
                       }}
                     >
-                      <span
-                        className="chip"
-                        style={{ background: t.color }}
-                      >
+                      <span className="chip" style={{ background: t.color }}>
                         {(t.nombre_turno ?? '').toUpperCase()}
                       </span>
                       {esFestivo && (
@@ -432,7 +493,6 @@ export default function Calendario() {
                     )}
                   </div>
 
-                  {/* Botón Borrar */}
                   <button
                     className="btn-mini btn-mini-peligro"
                     onClick={async () => {
