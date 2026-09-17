@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import SeccionDatos from './SeccionDatos'
 import type { Tema } from '../tipos'
 
 export default function Ajustes() {
@@ -11,7 +12,6 @@ export default function Ajustes() {
     usuario?.numero_empleado ?? ''
   )
 
-  // Campos de vacaciones
   const [diasAnuales, setDiasAnuales] = useState<number>(
     usuario?.dias_vacaciones_anuales ?? 22
   )
@@ -26,7 +26,6 @@ export default function Ajustes() {
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
-  // Si el usuario cambia en algún momento (por recarga), refrescamos los campos
   useEffect(() => {
     if (usuario) {
       setNombre(usuario.nombre ?? '')
@@ -211,7 +210,8 @@ export default function Ajustes() {
               marginBottom: 14,
             }}
           >
-            Días que te sobraron del año pasado y aún puedes disfrutar este año.
+            Días que te sobraron del año pasado y aún puedes disfrutar este
+            año.
           </p>
 
           <label className="label">Año de los días arrastrados</label>
@@ -258,6 +258,9 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Datos: exportar / importar */}
+      <SeccionDatos />
+
       {/* Tema */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
@@ -292,7 +295,13 @@ export default function Ajustes() {
       {/* Sesión */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Sesión</h2>
-        <p style={{ fontSize: 13, color: 'var(--texto-suave)', marginBottom: 12 }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: 'var(--texto-suave)',
+            marginBottom: 12,
+          }}
+        >
           Cerrar sesión hará que vuelvas a la pantalla de acceso.
         </p>
         <button className="btn btn-danger" onClick={cerrarSesion}>
