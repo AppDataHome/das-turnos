@@ -88,7 +88,9 @@ export default function Calendario() {
 
   if (!usuario) return null
 
-  const turnosDelDia = turnos.filter((t) => t.fecha === fecha)
+  const turnosDelDia = turnos
+    .filter((t) => t.fecha === fecha)
+    .sort((a, b) => (a.orden_turno ?? 100) - (b.orden_turno ?? 100))
 
   const hoy = new Date()
   const anioActual = hoy.getFullYear()
