@@ -30,11 +30,11 @@ export default function Calendario() {
     await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
   }
 
-  async function cargarTurnos() {
+   async function cargarTurnos() {
     if (!usuario) return
     const { data, error } = await supabase
       .from('turno')
-           .select(`
+      .select(`
         id,
         id_usuario,
         id_departamento,
@@ -58,6 +58,7 @@ export default function Calendario() {
           notas: t.notas,
           codigo_turno: t.tipo_turno?.codigo || '?',
           nombre_turno: t.tipo_turno?.nombre || '?',
+          color: t.tipo_turno?.color || '#6b7280',
           orden_turno: t.tipo_turno?.orden ?? 100,
           departamento: t.departamento?.nombre || '?',
           icono_departamento: t.departamento?.icono || '📁',
