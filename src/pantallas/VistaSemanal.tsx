@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import type { Turno } from '../tipos'
+import { iconoTurno, muestraDepartamento } from '../utilidades/turnos'
 
 interface Props {
   turnos: Turno[]
@@ -179,7 +180,7 @@ export default function VistaSemanal({
                         borderLeft: `4px solid ${t.color ?? '#6b7280'}`,
                       }}
                     >
-                      <div
+                                            <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -190,7 +191,7 @@ export default function VistaSemanal({
                           color: t.color,
                         }}
                       >
-                        <span>{t.icono_departamento ?? ''}</span>
+                        <span>{iconoTurno(t)}</span>
                         <span>{t.nombre_turno ?? '?'}</span>
                       </div>
                       <div
@@ -204,14 +205,16 @@ export default function VistaSemanal({
                           ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
                           : 'Todo el día'}
                       </div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          color: 'var(--texto-suave)',
-                        }}
-                      >
-                        {t.departamento}
-                      </div>
+                      {muestraDepartamento(t) && (
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: 'var(--texto-suave)',
+                          }}
+                        >
+                          {t.departamento}
+                        </div>
+                      )}
                       {t.notas && (
                         <div
                           style={{
