@@ -535,3 +535,101 @@ nav a.activo {
   gap: 10px;
   margin-bottom: 10px;
 }
+
+/* ─────────── Vista semanal ─────────── */
+
+.rejilla-semanal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.columna-dia {
+  background: var(--fondo-tarjeta-2);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  min-height: 220px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border 0.15s;
+}
+
+.columna-dia:hover {
+  border-color: var(--acento);
+}
+
+.columna-dia.hoy {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 1px var(--acento);
+}
+
+.columna-dia.seleccionado {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+.columna-cabecera {
+  text-align: center;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 6px;
+}
+
+.columna-cabecera .dia-corto {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.columna-cabecera .dia-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--texto);
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.columna-dia.hoy .columna-cabecera .dia-num {
+  color: var(--acento);
+}
+
+.columna-cabecera .dia-completo {
+  font-size: 10px;
+  color: var(--texto-suave);
+  margin-top: 2px;
+  display: none; /* Ocultamos el nombre completo en pantallas estrechas */
+}
+
+@media (min-width: 900px) {
+  .columna-cabecera .dia-completo {
+    display: block;
+  }
+}
+
+.columna-turnos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.columna-turnos .vacio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-suave);
+  font-size: 18px;
+  opacity: 0.3;
+}
+
+.turno-semana {
+  background: var(--fondo-tarjeta);
+  border-radius: 6px;
+  padding: 6px 8px;
+  overflow: hidden;
+}
