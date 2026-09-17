@@ -34,7 +34,7 @@ export default function Calendario() {
     if (!usuario) return
     const { data, error } = await supabase
       .from('turno')
-      .select(`
+           .select(`
         id,
         id_usuario,
         id_departamento,
@@ -42,7 +42,7 @@ export default function Calendario() {
         fecha,
         notas,
         tipo_turno (codigo, nombre, color),
-        departamento (nombre)
+        departamento (nombre, icono)
       `)
       .eq('id_usuario', usuario.id)
       .order('fecha', { ascending: true })
@@ -60,6 +60,7 @@ export default function Calendario() {
           nombre_turno: t.tipo_turno?.nombre || '?',
           color: t.tipo_turno?.color || '#6b7280',
           departamento: t.departamento?.nombre || '?',
+          icono_departamento: t.departamento?.icono || '📁',
         }))
       )
     }
