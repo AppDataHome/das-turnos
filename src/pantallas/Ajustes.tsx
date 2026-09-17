@@ -26,6 +26,8 @@ export default function Ajustes() {
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
+  // Cambio de contraseña
+  const [passActual, setPassActual] = useState('')
   const [pass1, setPass1] = useState('')
   const [pass2, setPass2] = useState('')
   const [cambiandoPass, setCambiandoPass] = useState(false)
@@ -115,24 +117,51 @@ export default function Ajustes() {
     setErrorPass('')
     setMensajePass('')
 
+    // Validaciones básicas
+    if (!passActual) {
+      setErrorPass('Debes introducir tu contraseña actual')
+      return
+    }
     if (pass1.length < 6) {
-      setErrorPass('La contraseña debe tener al menos 6 caracteres')
+      setErrorPass('La nueva contraseña debe tener al menos 6 caracteres')
       return
     }
     if (pass1 !== pass2) {
-      setErrorPass('Las dos contraseñas no coinciden')
+      setErrorPass('Las dos contraseñas nuevas no coinciden')
+      return
+    }
+    if (passActual === pass1) {
+      setErrorPass('La nueva contraseña debe ser distinta a la actual')
       return
     }
 
     setCambiandoPass(true)
-    const { error } = await supabase.auth.updateUser({ password: pass1 })
-    setCambiandoPass(false)
 
-    if (error) {
-      setErrorPass(error.message)
+    // 1) Verificar la contraseña actual intentando iniciar sesión de nuevo
+    const { error: errVerif } = await supabase.auth.signInWithPassword({
+      email: usuario!.email,
+      password: passActual,
+    })
+
+    if (errVerif) {
+      setCambiandoPass(false)
+      setErrorPass('La contraseña actual no es correcta')
       return
     }
 
+    // 2) Cambiar a la nueva contraseña
+    const { error: errCambio } = await supabase.auth.updateUser({
+      password: pass1,
+    })
+
+    setCambiandoPass(false)
+
+    if (errCambio) {
+      setErrorPass(errCambio.message)
+      return
+    }
+
+    setPassActual('')
     setPass1('')
     setPass2('')
     setMensajePass('Contraseña cambiada correctamente')
@@ -156,6 +185,7 @@ export default function Ajustes() {
 
   return (
     <div className="container">
+      {/* Perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Mi perfil</h2>
 
@@ -201,10 +231,21 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Cambiar contraseña */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Cambiar contraseña</h2>
 
         <form onSubmit={cambiarContrasena}>
+          <label className="label">Contraseña actual</label>
+          <input
+            className="input"
+            type="password"
+            value={passActual}
+            onChange={(e) => setPassActual(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
+
           <label className="label">Nueva contraseña</label>
           <input
             className="input"
@@ -213,6 +254,7 @@ export default function Ajustes() {
             onChange={(e) => setPass1(e.target.value)}
             minLength={6}
             required
+            autoComplete="new-password"
           />
 
           <label className="label">Repetir nueva contraseña</label>
@@ -223,6 +265,7 @@ export default function Ajustes() {
             onChange={(e) => setPass2(e.target.value)}
             minLength={6}
             required
+            autoComplete="new-password"
           />
 
           {errorPass && <p className="error">{errorPass}</p>}
@@ -239,6 +282,7 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Vacaciones</h2>
 
@@ -328,8 +372,10 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Datos: exportar / importar */}
       <SeccionDatos />
 
+      {/* Tema */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -360,6 +406,7 @@ export default function Ajustes() {
         </div>
       </div>
 
+      {/* Sesión */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Sesión</h2>
         <p
