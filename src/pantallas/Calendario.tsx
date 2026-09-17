@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import VistaMensual from './VistaMensual'
 import type { Turno, DasStatus } from '../tipos'
 
 export default function Calendario() {
@@ -13,7 +14,9 @@ export default function Calendario() {
   const [departamento, setDepartamento] = useState('Patrulla')
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
-  const [tiposTurno, setTiposTurno] = useState<{ codigo: string; nombre: string }[]>([])
+  const [tiposTurno, setTiposTurno] = useState<
+    { codigo: string; nombre: string; color: string; orden: number }[]
+  >([])
 
   useEffect(() => {
     if (usuario) {
@@ -26,8 +29,8 @@ export default function Calendario() {
   async function cargarTiposTurno() {
     const { data } = await supabase
       .from('tipo_turno')
-      .select('codigo, nombre')
-      .order('codigo')
+      .select('codigo, nombre, color, orden')
+      .order('orden')
     if (data) setTiposTurno(data)
   }
 
@@ -46,8 +49,7 @@ export default function Calendario() {
         departamento (nombre)
       `)
       .eq('id_usuario', usuario.id)
-      .order('fecha', { ascending: false })
-      .limit(50)
+      .order('fecha', { ascending: true })
 
     if (!error && data) {
       setTurnos(
@@ -133,6 +135,13 @@ export default function Calendario() {
 
   return (
     <>
+      {/* Vista mensual */}
+      <VistaMensual
+        turnos={turnos}
+        fechaSeleccionada={fecha}
+        onSeleccionarFecha={setFecha}
+      />
+
       {/* Panel de contadores DAS */}
       <div className="card">
         <h3 style={{ marginBottom: 16 }}>Mis DAS</h3>
@@ -168,7 +177,9 @@ export default function Calendario() {
 
       {/* Formulario de alta de turno */}
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>Añadir turno</h3>
+        <h3 style={{ marginBottom: 16 }}>
+          Añadir turno al día {fecha}
+        </h3>
         <form onSubmit={anadirTurno}>
           <div
             style={{
@@ -197,7 +208,7 @@ export default function Calendario() {
               >
                 {tiposTurno.map((t) => (
                   <option key={t.codigo} value={t.codigo}>
-                    {t.codigo} — {t.nombre}
+                    {t.nombre}
                   </option>
                 ))}
               </select>
@@ -224,10 +235,11 @@ export default function Calendario() {
 
       {/* Listado de turnos */}
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>Mis turnos recientes</h3>
+        <h3 style={{ marginBottom: 16 }}>Mis turnos</h3>
         {turnos.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>
-            Aún no tienes turnos registrados. Añade el primero arriba.
+            Aún no tienes turnos registrados. Pulsa un día en el calendario y
+            añade el primero.
           </p>
         ) : (
           <table>
@@ -240,29 +252,29 @@ export default function Calendario() {
               </tr>
             </thead>
             <tbody>
-              {turnos.map((t) => (
-                <tr key={t.id}>
-                  <td>{t.fecha}</td>
-                  <td>
-                    <span
-                      className="chip"
-                      style={{ background: t.color }}
-                    >
-                      {t.nombre_turno?.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>{t.departamento}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      className="btn btn-danger"
-                      style={{ padding: '6px 12px', fontSize: 12 }}
-                      onClick={() => borrarTurno(t.id)}
-                    >
-                      Borrar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {turnos
+                .slice()
+                .reverse()
+                .map((t) => (
+                  <tr key={t.id}>
+                    <td>{t.fecha}</td>
+                    <td>
+                      <span className="chip" style={{ background: t.color }}>
+                        {(t.nombre_turno ?? '').toUpperCase()}
+                      </span>
+                    </td>
+                    <td>{t.departamento}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        className="btn btn-danger"
+                        style={{ padding: '6px 12px', fontSize: 12 }}
+                        onClick={() => borrarTurno(t.id)}
+                      >
+                        Borrar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         )}
