@@ -218,7 +218,7 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* Vacaciones */}
+                {/* Vacaciones */}
         <div className="card">
           <h4
             style={{
@@ -231,17 +231,73 @@ export default function Calendario() {
           >
             Vacaciones
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <FilaResumen etiqueta="Total:" valor={vacaciones?.total ?? 0} />
+
+          {/* Año actual */}
+          <div
+            style={{
+              fontSize: 11,
+              color: 'var(--texto-suave)',
+              marginBottom: 6,
+              textTransform: 'uppercase',
+              fontWeight: 600,
+              letterSpacing: 0.3,
+            }}
+          >
+            Año {vacaciones?.anio_actual ?? new Date().getFullYear()}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <FilaResumen
+              etiqueta="Total:"
+              valor={vacaciones?.total_actual ?? 0}
+            />
             <FilaResumen
               etiqueta="Disfrutadas:"
-              valor={vacaciones?.disfrutadas ?? 0}
+              valor={vacaciones?.disfrutadas_actual ?? 0}
             />
             <FilaResumen
               etiqueta="Disponibles:"
-              valor={vacaciones?.disponibles ?? 0}
+              valor={vacaciones?.disponibles_actual ?? 0}
             />
           </div>
+
+          {/* Arrastre del año anterior (solo si hay) */}
+          {(vacaciones?.total_anterior ?? 0) > 0 && (
+            <>
+              <hr
+                style={{
+                  border: 'none',
+                  borderTop: '1px solid var(--borde)',
+                  margin: '12px 0',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'var(--texto-suave)',
+                  marginBottom: 6,
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Arrastre año {vacaciones?.anio_anterior}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <FilaResumenMini
+                  etiqueta="Totales:"
+                  valor={vacaciones?.total_anterior ?? 0}
+                />
+                <FilaResumenMini
+                  etiqueta="Disfrutados:"
+                  valor={vacaciones?.disfrutadas_anterior ?? 0}
+                />
+                <FilaResumenMini
+                  etiqueta="Disponibles:"
+                  valor={vacaciones?.disponibles_anterior ?? 0}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* DAS */}
