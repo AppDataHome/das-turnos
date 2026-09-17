@@ -3,9 +3,10 @@ import { supabase } from './supabase'
 import { UsuarioProveedor, useUsuario } from './contexto/UsuarioContexto'
 import Calendario from './pantallas/Calendario'
 import Ajustes from './pantallas/Ajustes'
+import Festivos from './pantallas/Festivos'
 import type { User } from '@supabase/supabase-js'
 
-type Pestana = 'calendario' | 'ajustes'
+type Pestana = 'calendario' | 'festivos' | 'ajustes'
 
 // ─────────── Componente raíz ───────────
 export default function App() {
@@ -55,11 +56,17 @@ function Aplicacion() {
     <>
       <nav>
         <div className="container">
-          <a
+                    <a
             className={pestana === 'calendario' ? 'activo' : ''}
             onClick={() => setPestana('calendario')}
           >
             Calendario
+          </a>
+          <a
+            className={pestana === 'festivos' ? 'activo' : ''}
+            onClick={() => setPestana('festivos')}
+          >
+            Festivos
           </a>
           <a
             className={pestana === 'ajustes' ? 'activo' : ''}
@@ -83,6 +90,7 @@ function Aplicacion() {
         <Cabecera />
 
         {pestana === 'calendario' && <Calendario />}
+        {pestana === 'festivos' && <Festivos />}
         {pestana === 'ajustes' && <Ajustes />}
       </div>
     </>
