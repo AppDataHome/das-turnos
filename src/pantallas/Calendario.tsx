@@ -5,6 +5,7 @@ import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
 import type { Turno, DasStatus } from '../tipos'
+import { iconoTurno, muestraDepartamento, etiquetaSinDepartamento } from '../utilidades/turnos'
 
 interface ResumenVacaciones {
   total: number
@@ -420,7 +421,7 @@ export default function Calendario() {
                     borderRadius: 10,
                   }}
                 >
-                  <div
+                                    <div
                     style={{
                       fontSize: 26,
                       width: 44,
@@ -433,7 +434,7 @@ export default function Calendario() {
                       flexShrink: 0,
                     }}
                   >
-                    {t.icono_departamento ?? '📁'}
+                    {iconoTurno(t)}
                   </div>
 
                   <div style={{ flex: 1 }}>
@@ -476,8 +477,12 @@ export default function Calendario() {
                           ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
                           : 'Todo el día'}
                       </span>
-                      <span>·</span>
-                      <span>{t.departamento}</span>
+                     <span>·</span>
+                      <span>
+                        {muestraDepartamento(t)
+                          ? t.departamento
+                          : etiquetaSinDepartamento(t)}
+                      </span>
                     </div>
 
                     {t.notas && (
