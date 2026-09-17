@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import type { Turno } from '../tipos'
+import { iconoTurno } from '../utilidades/turnos'
 
 interface Props {
   turnos: Turno[]
@@ -151,13 +152,13 @@ export default function VistaMensual({
               <div className="numero">{d.getDate()}</div>
 
               <div className="chips">
-                                {turnosDia.map((t) => {
+            {turnosDia.map((t) => {
                   const texto = (
                     t.nombre_turno ??
                     t.codigo_turno ??
                     '?'
                   ).toUpperCase()
-                  const icono = t.icono_departamento ?? ''
+                  const icono = iconoTurno(t)
                   return (
                     <span
                       key={t.id}
