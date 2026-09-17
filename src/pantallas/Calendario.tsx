@@ -41,7 +41,7 @@ export default function Calendario() {
         id_tipo_turno,
         fecha,
         notas,
-        tipo_turno (codigo, nombre, color),
+        tipo_turno (codigo, nombre, color, orden),
         departamento (nombre, icono)
       `)
       .eq('id_usuario', usuario.id)
@@ -58,7 +58,7 @@ export default function Calendario() {
           notas: t.notas,
           codigo_turno: t.tipo_turno?.codigo || '?',
           nombre_turno: t.tipo_turno?.nombre || '?',
-          color: t.tipo_turno?.color || '#6b7280',
+          orden_turno: t.tipo_turno?.orden ?? 100,
           departamento: t.departamento?.nombre || '?',
           icono_departamento: t.departamento?.icono || '📁',
         }))
