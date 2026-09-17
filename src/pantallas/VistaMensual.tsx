@@ -151,7 +151,7 @@ export default function VistaMensual({
               <div className="numero">{d.getDate()}</div>
 
               <div className="chips">
-                {turnosDia.map((t) => {
+                                {turnosDia.map((t) => {
                   const texto = (
                     t.nombre_turno ??
                     t.codigo_turno ??
