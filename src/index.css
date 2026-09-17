@@ -1,3 +1,36 @@
+/* ─────────── Variables de tema ─────────── */
+
+:root,
+[data-tema='negro'] {
+  --fondo: #0e1116;
+  --fondo-tarjeta: #161a22;
+  --fondo-tarjeta-2: #1d222c;
+  --texto: #e6e8eb;
+  --texto-suave: #8b93a1;
+  --borde: #2a2f3a;
+  --acento: #d4a43a;
+  --acento-hover: #b98a26;
+  --primario: #2563eb;
+  --peligro: #dc2626;
+  --exito: #16a34a;
+}
+
+[data-tema='verde'] {
+  --fondo: #0a1a10;
+  --fondo-tarjeta: #0f2418;
+  --fondo-tarjeta-2: #143020;
+  --texto: #e6f0e9;
+  --texto-suave: #8fb09c;
+  --borde: #1f3a29;
+  --acento: #7fbf5f;
+  --acento-hover: #6aa84c;
+  --primario: #2e7d4f;
+  --peligro: #c0392b;
+  --exito: #27ae60;
+}
+
+/* ─────────── Base ─────────── */
+
 * {
   margin: 0;
   padding: 0;
@@ -6,9 +39,13 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 100vh;
+  transition: background 0.2s ease, color 0.2s ease;
 }
+
+/* ─────────── Layout ─────────── */
 
 .container {
   max-width: 1200px;
@@ -17,64 +54,81 @@ body {
 }
 
 .card {
-  background: white;
-  border-radius: 8px;
+  background: var(--fondo-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+/* ─────────── Botones ─────────── */
 
 .btn {
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
+  color: white;
+  transition: background 0.15s ease;
 }
 
 .btn-primary {
-  background: #2563eb;
-  color: white;
+  background: var(--primario);
 }
 
 .btn-primary:hover {
-  background: #1d4ed8;
+  background: var(--acento-hover);
 }
 
 .btn-danger {
-  background: #dc2626;
-  color: white;
+  background: var(--peligro);
 }
 
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+/* ─────────── Formularios ─────────── */
+
 .input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
   font-size: 14px;
   width: 100%;
   margin-bottom: 10px;
+  background: var(--fondo-tarjeta-2);
+  color: var(--texto);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--acento);
 }
 
 .label {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  margin-bottom: 4px;
-  color: #555;
+  margin-bottom: 6px;
+  color: var(--texto-suave);
 }
 
 .error {
-  color: #dc2626;
+  color: var(--peligro);
   font-size: 13px;
   margin-top: 8px;
 }
 
 .success {
-  color: #16a34a;
+  color: var(--exito);
   font-size: 13px;
   margin-top: 8px;
 }
+
+/* ─────────── Tablas ─────────── */
 
 table {
   width: 100%;
@@ -85,47 +139,32 @@ th,
 td {
   padding: 10px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--borde);
 }
 
 th {
   font-size: 12px;
   text-transform: uppercase;
-  color: #666;
+  color: var(--texto-suave);
   font-weight: 600;
 }
 
-.badge {
+/* ─────────── Chips de turno (colores de la imagen) ─────────── */
+
+.chip {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 12px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  color: #0e1116;
 }
 
-.badge-festivo {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge-nocturno {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.badge-das {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge-vacaciones {
-  background: #fce7f3;
-  color: #9d174d;
-}
+/* ─────────── Estadísticas ─────────── */
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 16px;
 }
 
@@ -137,19 +176,20 @@ th {
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--acento);
 }
 
 .stat-label {
   font-size: 13px;
-  color: #666;
+  color: var(--texto-suave);
   margin-top: 4px;
 }
 
+/* ─────────── Navegación ─────────── */
+
 nav {
-  background: white;
-  padding: 16px 0;
-  border-bottom: 1px solid #eee;
+  background: var(--fondo-tarjeta);
+  border-bottom: 1px solid var(--borde);
   margin-bottom: 24px;
 }
 
@@ -157,19 +197,68 @@ nav .container {
   display: flex;
   gap: 24px;
   align-items: center;
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
 
 nav a {
   text-decoration: none;
-  color: #555;
+  color: var(--texto-suave);
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
 }
 
 nav a:hover {
-  color: #2563eb;
+  color: var(--acento);
 }
 
-nav a.active {
-  color: #2563eb;
+nav a.activo {
+  color: var(--acento);
+  font-weight: 600;
+}
+
+/* ─────────── Cabecera superior ─────────── */
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.cabecera .logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--fondo-tarjeta-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.cabecera .datos {
+  flex: 1;
+}
+
+.cabecera .nombre {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cabecera .sub {
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.cabecera .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--fondo-tarjeta-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
