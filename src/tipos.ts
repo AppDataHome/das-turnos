@@ -43,6 +43,7 @@ export interface Turno {
   color?: string
   departamento?: string
   icono_departamento?: string
+  orden_turno?: number
 }
 
 export interface DasStatus {
