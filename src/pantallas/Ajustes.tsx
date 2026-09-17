@@ -26,7 +26,6 @@ export default function Ajustes() {
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
-  // Contraseña
   const [pass1, setPass1] = useState('')
   const [pass2, setPass2] = useState('')
   const [cambiandoPass, setCambiandoPass] = useState(false)
@@ -157,7 +156,6 @@ export default function Ajustes() {
 
   return (
     <div className="container">
-      {/* Perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Mi perfil</h2>
 
@@ -203,7 +201,6 @@ export default function Ajustes() {
         </form>
       </div>
 
-      {/* Contraseña */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Cambiar contraseña</h2>
 
@@ -242,7 +239,6 @@ export default function Ajustes() {
         </form>
       </div>
 
-      {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 20 }}>Vacaciones</h2>
 
@@ -332,10 +328,8 @@ export default function Ajustes() {
         </form>
       </div>
 
-      {/* Datos: exportar / importar */}
       <SeccionDatos />
 
-      {/* Tema */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -366,7 +360,6 @@ export default function Ajustes() {
         </div>
       </div>
 
-      {/* Sesión */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Sesión</h2>
         <p
