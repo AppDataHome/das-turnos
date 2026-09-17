@@ -4,6 +4,7 @@ import { iconoTurno, muestraDepartamento } from '../utilidades/turnos'
 
 interface Props {
   turnos: Turno[]
+  festivos: string[]
   fechaSeleccionada: string
   onSeleccionarFecha: (fecha: string) => void
 }
@@ -24,8 +25,6 @@ const MESES = [
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ]
 
-// ─────────── Utilidades de fecha ───────────
-
 function aTexto(fecha: Date): string {
   const y = fecha.getFullYear()
   const m = String(fecha.getMonth() + 1).padStart(2, '0')
@@ -41,13 +40,11 @@ function mismoDia(a: Date, b: Date) {
   )
 }
 
-// Lunes = 0, ..., Domingo = 6
 function diaSemanaLunes(fecha: Date): number {
   const d = fecha.getDay()
   return d === 0 ? 6 : d - 1
 }
 
-// Devuelve el lunes de la semana de la fecha dada
 function inicioSemana(fecha: Date): Date {
   const offset = diaSemanaLunes(fecha)
   const lunes = new Date(fecha)
@@ -56,16 +53,14 @@ function inicioSemana(fecha: Date): Date {
   return lunes
 }
 
-// ─────────── Componente ───────────
-
 export default function VistaSemanal({
   turnos,
+  festivos,
   fechaSeleccionada,
   onSeleccionarFecha,
 }: Props) {
   const hoy = new Date()
 
-  // Semana actual mostrada (basada en la fecha seleccionada)
   const [semanaInicio, setSemanaInicio] = useState<Date>(() =>
     inicioSemana(new Date(fechaSeleccionada + 'T00:00:00'))
   )
@@ -74,21 +69,20 @@ export default function VistaSemanal({
     setSemanaInicio(inicioSemana(new Date(fechaSeleccionada + 'T00:00:00')))
   }, [fechaSeleccionada])
 
-  // Turnos indexados por fecha
+  const festivosSet = useMemo(() => new Set(festivos), [festivos])
+
   const turnosPorFecha = useMemo(() => {
     const mapa = new Map<string, Turno[]>()
     for (const t of turnos) {
       if (!mapa.has(t.fecha)) mapa.set(t.fecha, [])
       mapa.get(t.fecha)!.push(t)
     }
-    // Ordenar por campo "orden_turno"
     for (const lista of mapa.values()) {
       lista.sort((a, b) => (a.orden_turno ?? 100) - (b.orden_turno ?? 100))
     }
     return mapa
   }, [turnos])
 
-  // Días de la semana mostrada (7 días, de lunes a domingo)
   const dias = useMemo(() => {
     const lista: Date[] = []
     for (let i = 0; i < 7; i++) {
@@ -116,7 +110,6 @@ export default function VistaSemanal({
     onSeleccionarFecha(aTexto(hoy))
   }
 
-  // Formatear el rango de la semana ("14 – 20 de octubre 2025")
   const primerDia = dias[0]
   const ultimoDia = dias[6]
   const mismoMes = primerDia.getMonth() === ultimoDia.getMonth()
@@ -149,6 +142,16 @@ export default function VistaSemanal({
           const turnosDia = turnosPorFecha.get(fecha) ?? []
           const esHoy = mismoDia(d, hoy)
           const seleccionado = fecha === fechaSeleccionada
+          const esFestivo = festivosSet.has(fecha)
+          const diaSemana = d.getDay()
+          const esFinSemana = diaSemana === 0 || diaSemana === 6
+
+          let fondo: string | undefined = undefined
+          if (esFestivo) {
+            fondo = 'rgba(239, 68, 68, 0.20)'
+          } else if (esFinSemana) {
+            fondo = 'rgba(239, 68, 68, 0.08)'
+          }
 
           return (
             <div
@@ -160,12 +163,26 @@ export default function VistaSemanal({
               ]
                 .filter(Boolean)
                 .join(' ')}
+              style={{ background: fondo }}
               onClick={() => onSeleccionarFecha(fecha)}
             >
               <div className="columna-cabecera">
-                <div className="dia-corto">{DIAS_SEMANA[i]}</div>
-                <div className="dia-num">{d.getDate()}</div>
-                <div className="dia-completo">{DIAS_COMPLETOS[i]}</div>
+                <div
+                  className="dia-corto"
+                  style={esFestivo ? { color: '#ef4444' } : undefined}
+                >
+                  {DIAS_SEMANA[i]}
+                </div>
+                <div
+                  className="dia-num"
+                  style={esFestivo ? { color: '#ef4444' } : undefined}
+                >
+                  {d.getDate()}
+                </div>
+                <div className="dia-completo">
+                  {DIAS_COMPLETOS[i]}
+                  {esFestivo && ' · Festivo'}
+                </div>
               </div>
 
               <div className="columna-turnos">
@@ -180,7 +197,7 @@ export default function VistaSemanal({
                         borderLeft: `4px solid ${t.color ?? '#6b7280'}`,
                       }}
                     >
-                                            <div
+                      <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
