@@ -5,11 +5,11 @@ import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
 import Ajustes from './pantallas/Ajustes'
+import Ayuda from './pantallas/Ayuda'
 import type { User } from '@supabase/supabase-js'
 
-type Pestana = 'calendario' | 'festivos' | 'configuracion' | 'ajustes'
+type Pestana = 'calendario' | 'festivos' | 'configuracion' | 'ajustes' | 'ayuda'
 
-// ─────────── Componente raíz ───────────
 export default function App() {
   return (
     <UsuarioProveedor>
@@ -18,14 +18,12 @@ export default function App() {
   )
 }
 
-// ─────────── Aplicación con sesión / sin sesión ───────────
 function Aplicacion() {
   const { usuario, cargando } = useUsuario()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [comprobandoSesion, setComprobandoSesion] = useState(true)
   const [pestana, setPestana] = useState<Pestana>('calendario')
 
-  // Comprobar si hay sesión activa
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthUser(session?.user ?? null)
@@ -81,6 +79,12 @@ function Aplicacion() {
           >
             Ajustes
           </a>
+          <a
+            className={pestana === 'ayuda' ? 'activo' : ''}
+            onClick={() => setPestana('ayuda')}
+          >
+            Ayuda
+          </a>
           <span
             style={{
               marginLeft: 'auto',
@@ -100,12 +104,12 @@ function Aplicacion() {
         {pestana === 'festivos' && <Festivos />}
         {pestana === 'configuracion' && <Configuracion />}
         {pestana === 'ajustes' && <Ajustes />}
+        {pestana === 'ayuda' && <Ayuda />}
       </div>
     </>
   )
 }
 
-// ─────────── Cabecera con nombre, Nº y avatar ───────────
 function Cabecera() {
   const { usuario } = useUsuario()
   if (!usuario) return null
@@ -126,7 +130,6 @@ function Cabecera() {
   )
 }
 
-// ─────────── Pantalla de Login / Registro ───────────
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
