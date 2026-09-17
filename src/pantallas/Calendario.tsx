@@ -5,7 +5,11 @@ import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
 import type { Turno, DasStatus } from '../tipos'
-import { iconoTurno, muestraDepartamento, etiquetaSinDepartamento } from '../utilidades/turnos'
+import {
+  iconoTurno,
+  muestraDepartamento,
+  etiquetaSinDepartamento,
+} from '../utilidades/turnos'
 
 interface ResumenVacaciones {
   anio_actual: number
@@ -26,10 +30,10 @@ export default function Calendario() {
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
   const [vacaciones, setVacaciones] = useState<ResumenVacaciones | null>(null)
+  const [festivos, setFestivos] = useState<string[]>([])
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
 
-  // Vista seleccionada (con memoria en localStorage)
   const [vista, setVista] = useState<VistaCalendario>(() => {
     const guardada = localStorage.getItem('vista_calendario')
     return guardada === 'semanal' ? 'semanal' : 'mensual'
@@ -44,6 +48,10 @@ export default function Calendario() {
       cargarTodo()
     }
   }, [usuario])
+
+  useEffect(() => {
+    cargarFestivos()
+  }, [])
 
   async function cargarTodo() {
     await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
@@ -109,6 +117,22 @@ export default function Calendario() {
     }
   }
 
+  async function cargarFestivos() {
+    const anio = new Date().getFullYear()
+    const inicio = `${anio - 5}-01-01`
+    const fin = `${anio + 5}-12-31`
+
+    const { data, error } = await supabase
+      .from('festivo_calendario')
+      .select('fecha')
+      .gte('fecha', inicio)
+      .lte('fecha', fin)
+
+    if (!error && data) {
+      setFestivos(data.map((f: any) => f.fecha))
+    }
+  }
+
   if (!usuario) return null
 
   const turnosDelDia = turnos
@@ -133,7 +157,8 @@ export default function Calendario() {
   const realizados = turnosMes.filter((t) => t.fecha <= hoyTexto).length
   const totalMes = turnosMes.length
   const restantes = totalMes - realizados
-  const progreso = totalMes === 0 ? 0 : Math.round((realizados / totalMes) * 100)
+  const progreso =
+    totalMes === 0 ? 0 : Math.round((realizados / totalMes) * 100)
 
   function textoFechaLarga(f: string): string {
     const date = new Date(f + 'T00:00:00')
@@ -218,7 +243,7 @@ export default function Calendario() {
           </div>
         </div>
 
-                {/* Vacaciones */}
+        {/* Vacaciones */}
         <div className="card">
           <h4
             style={{
@@ -232,7 +257,6 @@ export default function Calendario() {
             Vacaciones
           </h4>
 
-          {/* Año actual */}
           <div
             style={{
               fontSize: 11,
@@ -260,7 +284,6 @@ export default function Calendario() {
             />
           </div>
 
-          {/* Arrastre del año anterior (solo si hay) */}
           {(vacaciones?.total_anterior ?? 0) > 0 && (
             <>
               <hr
@@ -282,7 +305,9 @@ export default function Calendario() {
               >
                 Arrastre año {vacaciones?.anio_anterior}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div
+                style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+              >
                 <FilaResumenMini
                   etiqueta="Totales:"
                   valor={vacaciones?.total_anterior ?? 0}
@@ -339,7 +364,9 @@ export default function Calendario() {
           <div style={{ fontSize: 12, lineHeight: 1.6 }}>
             <div style={{ color: 'var(--texto-suave)' }}>
               Festivos / Fines de semana trabajados:{' '}
-              <strong style={{ color: 'var(--texto)' }}>{festivosTotales}</strong>
+              <strong style={{ color: 'var(--texto)' }}>
+                {festivosTotales}
+              </strong>
             </div>
             <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
               {festivosTotales} / {festivosDAS} DAS / {festivosResiduo}{' '}
@@ -350,7 +377,9 @@ export default function Calendario() {
           <div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 10 }}>
             <div style={{ color: 'var(--texto-suave)' }}>
               Noches entre semana trabajadas:{' '}
-              <strong style={{ color: 'var(--texto)' }}>{nochesTotales}</strong>
+              <strong style={{ color: 'var(--texto)' }}>
+                {nochesTotales}
+              </strong>
             </div>
             <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
               {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
@@ -382,10 +411,8 @@ export default function Calendario() {
             borderRadius: 7,
             border: 'none',
             cursor: 'pointer',
-            background:
-              vista === 'mensual' ? 'var(--acento)' : 'transparent',
-            color:
-              vista === 'mensual' ? '#0e1116' : 'var(--texto-suave)',
+            background: vista === 'mensual' ? 'var(--acento)' : 'transparent',
+            color: vista === 'mensual' ? '#0e1116' : 'var(--texto-suave)',
           }}
         >
           Mensual
@@ -399,10 +426,8 @@ export default function Calendario() {
             borderRadius: 7,
             border: 'none',
             cursor: 'pointer',
-            background:
-              vista === 'semanal' ? 'var(--acento)' : 'transparent',
-            color:
-              vista === 'semanal' ? '#0e1116' : 'var(--texto-suave)',
+            background: vista === 'semanal' ? 'var(--acento)' : 'transparent',
+            color: vista === 'semanal' ? '#0e1116' : 'var(--texto-suave)',
           }}
         >
           Semanal
@@ -413,12 +438,14 @@ export default function Calendario() {
       {vista === 'mensual' ? (
         <VistaMensual
           turnos={turnos}
+          festivos={festivos}
           fechaSeleccionada={fecha}
           onSeleccionarFecha={seleccionarYAbir}
         />
       ) : (
         <VistaSemanal
           turnos={turnos}
+          festivos={festivos}
           fechaSeleccionada={fecha}
           onSeleccionarFecha={seleccionarYAbir}
         />
@@ -482,7 +509,7 @@ export default function Calendario() {
                     borderRadius: 10,
                   }}
                 >
-                                    <div
+                  <div
                     style={{
                       fontSize: 26,
                       width: 44,
@@ -538,7 +565,7 @@ export default function Calendario() {
                           ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
                           : 'Todo el día'}
                       </span>
-                     <span>·</span>
+                      <span>·</span>
                       <span>
                         {muestraDepartamento(t)
                           ? t.departamento
