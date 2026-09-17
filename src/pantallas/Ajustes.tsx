@@ -26,6 +26,13 @@ export default function Ajustes() {
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
+  // Contraseña
+  const [pass1, setPass1] = useState('')
+  const [pass2, setPass2] = useState('')
+  const [cambiandoPass, setCambiandoPass] = useState(false)
+  const [mensajePass, setMensajePass] = useState('')
+  const [errorPass, setErrorPass] = useState('')
+
   useEffect(() => {
     if (usuario) {
       setNombre(usuario.nombre ?? '')
@@ -104,6 +111,34 @@ export default function Ajustes() {
     }
   }
 
+  async function cambiarContrasena(e: React.FormEvent) {
+    e.preventDefault()
+    setErrorPass('')
+    setMensajePass('')
+
+    if (pass1.length < 6) {
+      setErrorPass('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    if (pass1 !== pass2) {
+      setErrorPass('Las dos contraseñas no coinciden')
+      return
+    }
+
+    setCambiandoPass(true)
+    const { error } = await supabase.auth.updateUser({ password: pass1 })
+    setCambiandoPass(false)
+
+    if (error) {
+      setErrorPass(error.message)
+      return
+    }
+
+    setPass1('')
+    setPass2('')
+    setMensajePass('Contraseña cambiada correctamente')
+  }
+
   async function elegirTema(t: Tema) {
     setMensaje('')
     setError('')
@@ -164,6 +199,45 @@ export default function Ajustes() {
             style={{ marginTop: 12 }}
           >
             {guardando ? 'Guardando…' : 'Guardar cambios'}
+          </button>
+        </form>
+      </div>
+
+      {/* Contraseña */}
+      <div className="card">
+        <h2 style={{ marginBottom: 20 }}>Cambiar contraseña</h2>
+
+        <form onSubmit={cambiarContrasena}>
+          <label className="label">Nueva contraseña</label>
+          <input
+            className="input"
+            type="password"
+            value={pass1}
+            onChange={(e) => setPass1(e.target.value)}
+            minLength={6}
+            required
+          />
+
+          <label className="label">Repetir nueva contraseña</label>
+          <input
+            className="input"
+            type="password"
+            value={pass2}
+            onChange={(e) => setPass2(e.target.value)}
+            minLength={6}
+            required
+          />
+
+          {errorPass && <p className="error">{errorPass}</p>}
+          {mensajePass && <p className="success">{mensajePass}</p>}
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={cambiandoPass}
+            style={{ marginTop: 12 }}
+          >
+            {cambiandoPass ? 'Cambiando…' : 'Cambiar contraseña'}
           </button>
         </form>
       </div>
