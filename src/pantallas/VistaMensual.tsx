@@ -4,6 +4,7 @@ import { iconoTurno } from '../utilidades/turnos'
 
 interface Props {
   turnos: Turno[]
+  festivos: string[]
   fechaSeleccionada: string
   onSeleccionarFecha: (fecha: string) => void
 }
@@ -14,8 +15,6 @@ const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ]
-
-// ─────────── Utilidades de fecha ───────────
 
 function aTexto(fecha: Date): string {
   const y = fecha.getFullYear()
@@ -33,14 +32,13 @@ function mismoDia(a: Date, b: Date) {
 }
 
 function diaSemanaLunes(fecha: Date): number {
-  const d = fecha.getDay() // 0 = domingo
+  const d = fecha.getDay()
   return d === 0 ? 6 : d - 1
 }
 
-// ─────────── Componente ───────────
-
 export default function VistaMensual({
   turnos,
+  ,
   fechaSeleccionada,
   onSeleccionarFecha,
 }: Props) {
@@ -50,17 +48,18 @@ export default function VistaMensual({
   )
 
   useEffect(() => {
-    const f = new Date(fechaSeleccionada)
+    const f = new Date(fechaSeleccionada + 'T00:00:00')
     setMesActual(new Date(f.getFullYear(), f.getMonth(), 1))
   }, [fechaSeleccionada])
 
-    const turnosPorFecha = useMemo(() => {
+  const festivosSet = useMemo(() => new Set(festivos), [festivos])
+
+  const turnosPorFecha = useMemo(() => {
     const mapa = new Map<string, Turno[]>()
     for (const t of turnos) {
       if (!mapa.has(t.fecha)) mapa.set(t.fecha, [])
       mapa.get(t.fecha)!.push(t)
     }
-    // Ordenar los turnos de cada día por el campo "orden" del tipo de turno
     for (const lista of mapa.values()) {
       lista.sort((a, b) => (a.orden_turno ?? 100) - (b.orden_turno ?? 100))
     }
@@ -129,8 +128,17 @@ export default function VistaMensual({
           const fueraMes = d.getMonth() !== mesActual.getMonth()
           const esHoy = mismoDia(d, hoy)
           const seleccionado = fecha === fechaSeleccionada
+          const esFestivo = festivosSet.has(fecha)
+          const diaSemana = d.getDay()
+          const esFinSemana = diaSemana === 0 || diaSemana === 6
 
-          // Juntamos las notas del día (si varias, con " · ")
+          let fondo: string | undefined = undefined
+          if (esFestivo) {
+            fondo = 'rgba(239, 68, 68, 0.20)'
+          } else if (esFinSemana) {
+            fondo = 'rgba(239, 68, 68, 0.08)'
+          }
+
           const notasDia = turnosDia
             .map((t) => t.notas)
             .filter((n): n is string => !!n && n.trim() !== '')
@@ -147,12 +155,25 @@ export default function VistaMensual({
               ]
                 .filter(Boolean)
                 .join(' ')}
+              style={{ background: fondo }}
               onClick={() => onSeleccionarFecha(fecha)}
             >
-              <div className="numero">{d.getDate()}</div>
+              <div
+                className="numero"
+                style={{
+                  color: esFestivo
+                    ? '#ef4444'
+                    : esHoy
+                    ? 'var(--acento)'
+                    : 'var(--texto-suave)',
+                  fontWeight: esFestivo ? 800 : 700,
+                }}
+              >
+                {d.getDate()}
+              </div>
 
               <div className="chips">
-            {turnosDia.map((t) => {
+                {turnosDia.map((t) => {
                   const texto = (
                     t.nombre_turno ??
                     t.codigo_turno ??
