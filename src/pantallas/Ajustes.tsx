@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import type { Tema } from '../tipos'
@@ -10,13 +10,39 @@ export default function Ajustes() {
   const [numeroEmpleado, setNumeroEmpleado] = useState(
     usuario?.numero_empleado ?? ''
   )
+
+  // Campos de vacaciones
+  const [diasAnuales, setDiasAnuales] = useState<number>(
+    usuario?.dias_vacaciones_anuales ?? 22
+  )
+  const [diasArrastradas, setDiasArrastradas] = useState<number>(
+    usuario?.dias_vacaciones_arrastradas ?? 0
+  )
+  const [anioArrastre, setAnioArrastre] = useState<number>(
+    usuario?.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
+  )
+
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
+  // Si el usuario cambia en algún momento (por recarga), refrescamos los campos
+  useEffect(() => {
+    if (usuario) {
+      setNombre(usuario.nombre ?? '')
+      setNumeroEmpleado(usuario.numero_empleado ?? '')
+      setDiasAnuales(usuario.dias_vacaciones_anuales ?? 22)
+      setDiasArrastradas(usuario.dias_vacaciones_arrastradas ?? 0)
+      setAnioArrastre(
+        usuario.anio_vacaciones_arrastradas ??
+          new Date().getFullYear() - 1
+      )
+    }
+  }, [usuario?.id])
+
   if (!usuario) return null
 
-  async function guardar(e: React.FormEvent) {
+  async function guardarPerfil(e: React.FormEvent) {
     e.preventDefault()
     setMensaje('')
     setError('')
@@ -27,9 +53,53 @@ export default function Ajustes() {
         nombre: nombre.trim(),
         numero_empleado: numeroEmpleado.trim() || null,
       })
-      setMensaje('Cambios guardados correctamente')
+      setMensaje('Datos guardados correctamente')
     } catch (err: any) {
       setError(err?.message ?? 'Error al guardar')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function guardarVacaciones(e: React.FormEvent) {
+    e.preventDefault()
+    setMensaje('')
+    setError('')
+    setGuardando(true)
+
+    try {
+      await actualizarPerfil({
+        dias_vacaciones_anuales: Number(diasAnuales) || 0,
+        dias_vacaciones_arrastradas: Number(diasArrastradas) || 0,
+        anio_vacaciones_arrastradas: Number(anioArrastre) || null,
+      })
+      setMensaje('Configuración de vacaciones guardada')
+    } catch (err: any) {
+      setError(err?.message ?? 'Error al guardar')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function reiniciarArrastre() {
+    if (
+      !confirm(
+        '¿Seguro que quieres poner a 0 los días de arrastre del año anterior?'
+      )
+    )
+      return
+    setMensaje('')
+    setError('')
+    setGuardando(true)
+
+    try {
+      setDiasArrastradas(0)
+      await actualizarPerfil({
+        dias_vacaciones_arrastradas: 0,
+      })
+      setMensaje('Arrastre reiniciado a 0')
+    } catch (err: any) {
+      setError(err?.message ?? 'Error al reiniciar')
     } finally {
       setGuardando(false)
     }
@@ -53,10 +123,11 @@ export default function Ajustes() {
 
   return (
     <div className="container">
+      {/* Perfil */}
       <div className="card">
-        <h2 style={{ marginBottom: 20 }}>Ajustes</h2>
+        <h2 style={{ marginBottom: 20 }}>Mi perfil</h2>
 
-        <form onSubmit={guardar}>
+        <form onSubmit={guardarPerfil}>
           <label className="label">Correo electrónico</label>
           <input
             className="input"
@@ -98,15 +169,107 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Vacaciones */}
       <div className="card">
-        <h3 style={{ marginBottom: 12 }}>Tema de la aplicación</h3>
+        <h2 style={{ marginBottom: 20 }}>Vacaciones</h2>
+
+        <form onSubmit={guardarVacaciones}>
+          <label className="label">Días de vacaciones anuales</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={60}
+            value={diasAnuales}
+            onChange={(e) => setDiasAnuales(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 12,
+              color: 'var(--texto-suave)',
+              marginTop: -4,
+              marginBottom: 14,
+            }}
+          >
+            Días que te corresponden cada año (por defecto 22).
+          </p>
+
+          <label className="label">Días arrastrados del año anterior</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={60}
+            value={diasArrastradas}
+            onChange={(e) => setDiasArrastradas(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 12,
+              color: 'var(--texto-suave)',
+              marginTop: -4,
+              marginBottom: 14,
+            }}
+          >
+            Días que te sobraron del año pasado y aún puedes disfrutar este año.
+          </p>
+
+          <label className="label">Año de los días arrastrados</label>
+          <input
+            className="input"
+            type="number"
+            min={2000}
+            max={2100}
+            value={anioArrastre}
+            onChange={(e) => setAnioArrastre(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 12,
+              color: 'var(--texto-suave)',
+              marginTop: -4,
+              marginBottom: 14,
+            }}
+          >
+            Normalmente el año pasado (por ejemplo, 2025 si estás en 2026).
+          </p>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={guardando}
+              style={{ flex: 1 }}
+            >
+              {guardando ? 'Guardando…' : 'Guardar vacaciones'}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={reiniciarArrastre}
+              style={{
+                background: 'var(--fondo-tarjeta-2)',
+                color: 'var(--texto)',
+              }}
+            >
+              Poner arrastre a 0
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Tema */}
+      <div className="card">
+        <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
-            className={`btn ${usuario.tema === 'negro' ? 'btn-primary' : ''}`}
+            className="btn"
             onClick={() => elegirTema('negro')}
             style={{
-              background: usuario.tema === 'negro' ? '#2563eb' : '#333',
+              background: '#0e1116',
               color: 'white',
+              outline:
+                usuario.tema === 'negro' ? '2px solid var(--acento)' : 'none',
             }}
           >
             Negro
@@ -115,9 +278,10 @@ export default function Ajustes() {
             className="btn"
             onClick={() => elegirTema('verde')}
             style={{
-              background: '#1f4a2b',
+              background: '#0a1a10',
               color: 'white',
-              outline: usuario.tema === 'verde' ? '2px solid #2563eb' : 'none',
+              outline:
+                usuario.tema === 'verde' ? '2px solid var(--acento)' : 'none',
             }}
           >
             Verde Guardia Civil
@@ -125,9 +289,10 @@ export default function Ajustes() {
         </div>
       </div>
 
+      {/* Sesión */}
       <div className="card">
-        <h3 style={{ marginBottom: 12 }}>Sesión</h3>
-        <p style={{ fontSize: 13, color: '#888', marginBottom: 12 }}>
+        <h2 style={{ marginBottom: 12 }}>Sesión</h2>
+        <p style={{ fontSize: 13, color: 'var(--texto-suave)', marginBottom: 12 }}>
           Cerrar sesión hará que vuelvas a la pantalla de acceso.
         </p>
         <button className="btn btn-danger" onClick={cerrarSesion}>
