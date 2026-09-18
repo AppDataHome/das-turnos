@@ -14,12 +14,14 @@ export interface Usuario {
   dias_vacaciones_anuales: number
   dias_vacaciones_arrastradas: number
   anio_vacaciones_arrastradas: number | null
+  avatar_url: string | null
 }
 
 export interface Departamento {
   id: string
   nombre: string
   activo: boolean
+  icono?: string
 }
 
 export interface TipoTurno {
@@ -31,6 +33,7 @@ export interface TipoTurno {
   cruza_medianoche: boolean
   categoria: 'trabajo' | 'formacion' | 'libre' | 'otros'
   color: string
+  orden?: number
 }
 
 export interface Turno {
