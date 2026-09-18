@@ -45,9 +45,7 @@ export default function Calendario() {
   }, [vista])
 
   useEffect(() => {
-    if (usuario) {
-      cargarTodo()
-    }
+    if (usuario) cargarTodo()
   }, [usuario])
 
   useEffect(() => {
@@ -103,9 +101,7 @@ export default function Calendario() {
     const { data, error } = await supabase.rpc('get_das_status', {
       p_usuario: usuario.id,
     })
-    if (!error && data && data[0]) {
-      setDasStatus(data[0])
-    }
+    if (!error && data && data[0]) setDasStatus(data[0])
   }
 
   async function cargarVacaciones() {
@@ -113,9 +109,7 @@ export default function Calendario() {
     const { data, error } = await supabase.rpc('get_resumen_vacaciones', {
       p_usuario: usuario.id,
     })
-    if (!error && data && data[0]) {
-      setVacaciones(data[0])
-    }
+    if (!error && data && data[0]) setVacaciones(data[0])
   }
 
   async function cargarFestivos() {
@@ -129,9 +123,7 @@ export default function Calendario() {
       .gte('fecha', inicio)
       .lte('fecha', fin)
 
-    if (!error && data) {
-      setFestivos(data.map((f: any) => f.fecha))
-    }
+    if (!error && data) setFestivos(data.map((f: any) => f.fecha))
   }
 
   if (!usuario) return null
@@ -187,62 +179,63 @@ export default function Calendario() {
 
   return (
     <>
-      {/* Avisos */}
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
 
       {/* Tarjetas superiores */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-        {/* Turnos Mes */}
-        <div className="card">
+      <div className="grid-tarjetas">
+        {/* Turnos Mes con cuenta kilómetros */}
+        <div className="card" style={{ textAlign: 'center' }}>
           <h4
             style={{
               color: 'var(--texto-suave)',
-              fontSize: 12,
-              marginBottom: 12,
+              fontSize: 10,
+              marginBottom: 8,
               textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              letterSpacing: 0.6,
+              fontWeight: 700,
             }}
           >
             Turnos Mes
           </h4>
-          <div style={{ textAlign: 'center', marginBottom: 10 }}>
-            <div
-              style={{
-                fontSize: 22,
-                fontWeight: 700,
-                color: 'var(--acento)',
-              }}
-            >
-              {realizados} Realizados
-            </div>
-          </div>
+
+          <CuentaKilometros progreso={progreso} realizados={realizados} />
+
           <div
             style={{
-              height: 8,
-              background: 'var(--fondo-tarjeta-2)',
-              borderRadius: 4,
-              overflow: 'hidden',
-              marginBottom: 10,
+              display: 'flex',
+              justifyContent: 'space-around',
+              gap: 6,
+              marginTop: 4,
+              fontSize: 10,
             }}
           >
-            <div
-              style={{
-                height: '100%',
-                width: `${progreso}%`,
-                background: 'var(--acento)',
-                transition: 'width 0.3s',
-              }}
-            />
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: 'var(--texto)',
-              }}
-            >
-              {restantes} Restantes
+            <div>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: 'var(--exito)',
+                }}
+              >
+                {realizados}
+              </div>
+              <div style={{ color: 'var(--texto-suave)', fontSize: 9 }}>
+                Realizados
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: 'var(--texto)',
+                }}
+              >
+                {restantes}
+              </div>
+              <div style={{ color: 'var(--texto-suave)', fontSize: 9 }}>
+                Restantes
+              </div>
             </div>
           </div>
         </div>
@@ -252,10 +245,12 @@ export default function Calendario() {
           <h4
             style={{
               color: 'var(--texto-suave)',
-              fontSize: 12,
-              marginBottom: 12,
+              fontSize: 10,
+              marginBottom: 8,
               textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              letterSpacing: 0.6,
+              fontWeight: 700,
+              textAlign: 'center',
             }}
           >
             Vacaciones
@@ -263,28 +258,30 @@ export default function Calendario() {
 
           <div
             style={{
-              fontSize: 11,
+              fontSize: 9,
               color: 'var(--texto-suave)',
-              marginBottom: 6,
+              marginBottom: 4,
               textTransform: 'uppercase',
               fontWeight: 600,
-              letterSpacing: 0.3,
+              textAlign: 'center',
             }}
           >
             Año {vacaciones?.anio_actual ?? new Date().getFullYear()}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <FilaResumen
-              etiqueta="Total:"
+              etiqueta="Total"
               valor={vacaciones?.total_actual ?? 0}
             />
             <FilaResumen
-              etiqueta="Disfrutadas:"
+              etiqueta="Disfrutadas"
               valor={vacaciones?.disfrutadas_actual ?? 0}
             />
             <FilaResumen
-              etiqueta="Disponibles:"
+              etiqueta="Disponibles"
               valor={vacaciones?.disponibles_actual ?? 0}
+              destacado
             />
           </div>
 
@@ -294,35 +291,34 @@ export default function Calendario() {
                 style={{
                   border: 'none',
                   borderTop: '1px solid var(--borde)',
-                  margin: '12px 0',
+                  margin: '8px 0',
                 }}
               />
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 9,
                   color: 'var(--texto-suave)',
-                  marginBottom: 6,
+                  marginBottom: 4,
                   textTransform: 'uppercase',
                   fontWeight: 600,
-                  letterSpacing: 0.3,
+                  textAlign: 'center',
                 }}
               >
-                Arrastre año {vacaciones?.anio_anterior}
+                Arrastre {vacaciones?.anio_anterior}
               </div>
-              <div
-                style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
-              >
-                <FilaResumenMini
-                  etiqueta="Totales:"
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <FilaResumen
+                  etiqueta="Totales"
                   valor={vacaciones?.total_anterior ?? 0}
                 />
-                <FilaResumenMini
-                  etiqueta="Disfrutados:"
+                <FilaResumen
+                  etiqueta="Disfrutados"
                   valor={vacaciones?.disfrutadas_anterior ?? 0}
                 />
-                <FilaResumenMini
-                  etiqueta="Disponibles:"
+                <FilaResumen
+                  etiqueta="Disponibles"
                   valor={vacaciones?.disponibles_anterior ?? 0}
+                  destacado
                 />
               </div>
             </>
@@ -334,26 +330,30 @@ export default function Calendario() {
           <h4
             style={{
               color: 'var(--texto-suave)',
-              fontSize: 12,
-              marginBottom: 12,
+              fontSize: 10,
+              marginBottom: 8,
               textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              letterSpacing: 0.6,
+              fontWeight: 700,
+              textAlign: 'center',
             }}
           >
             DAS
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <FilaResumenMini
-              etiqueta="Generados:"
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <FilaResumen
+              etiqueta="Generados"
               valor={dasStatus?.das_generados ?? 0}
             />
-            <FilaResumenMini
-              etiqueta="Disfrutados:"
+            <FilaResumen
+              etiqueta="Disfrutados"
               valor={dasStatus?.das_disfrutados ?? 0}
             />
-            <FilaResumenMini
-              etiqueta="Disponibles:"
+            <FilaResumen
+              etiqueta="Disponibles"
               valor={dasStatus?.das_disponibles ?? 0}
+              destacado
             />
           </div>
 
@@ -361,32 +361,37 @@ export default function Calendario() {
             style={{
               border: 'none',
               borderTop: '1px solid var(--borde)',
-              margin: '12px 0',
+              margin: '8px 0',
             }}
           />
 
-          <div style={{ fontSize: 12, lineHeight: 1.6 }}>
-            <div style={{ color: 'var(--texto-suave)' }}>
-              Festivos / Fines de semana trabajados:{' '}
+          <div style={{ fontSize: 10, lineHeight: 1.4 }}>
+            <div style={{ color: 'var(--texto-suave)', fontSize: 9 }}>
+              Festivos / Fines de semana
+            </div>
+            <div style={{ color: 'var(--texto-suave)', fontSize: 9 }}>
+              trabajados:{' '}
               <strong style={{ color: 'var(--texto)' }}>
                 {festivosTotales}
-              </strong>
-            </div>
-            <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
-              {festivosTotales} / {festivosDAS} DAS / {festivosResiduo}{' '}
+              </strong>{' '}
+              — {festivosTotales} / {festivosDAS} DAS / {festivosResiduo}{' '}
               {festivosResiduo === 1 ? 'Residuo' : 'Residuos'}
             </div>
-          </div>
-
-          <div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 10 }}>
-            <div style={{ color: 'var(--texto-suave)' }}>
-              Noches entre semana trabajadas:{' '}
+            <div
+              style={{
+                color: 'var(--texto-suave)',
+                fontSize: 9,
+                marginTop: 6,
+              }}
+            >
+              Noches entre semana
+            </div>
+            <div style={{ color: 'var(--texto-suave)', fontSize: 9 }}>
+              trabajadas:{' '}
               <strong style={{ color: 'var(--texto)' }}>
                 {nochesTotales}
-              </strong>
-            </div>
-            <div style={{ color: 'var(--texto-suave)', paddingLeft: 12 }}>
-              {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
+              </strong>{' '}
+              — {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
               {nochesResiduo === 1 ? 'Residuo' : 'Residuos'}
             </div>
           </div>
@@ -397,9 +402,9 @@ export default function Calendario() {
       <div
         style={{
           display: 'flex',
-          gap: 6,
-          marginBottom: 12,
-          padding: 4,
+          gap: 4,
+          marginBottom: 8,
+          padding: 3,
           background: 'var(--fondo-tarjeta)',
           border: '1px solid var(--borde)',
           borderRadius: 10,
@@ -409,14 +414,14 @@ export default function Calendario() {
         <button
           onClick={() => setVista('mensual')}
           style={{
-            padding: '8px 18px',
-            fontSize: 13,
+            padding: '6px 14px',
+            fontSize: 11,
             fontWeight: 600,
             borderRadius: 7,
             border: 'none',
             cursor: 'pointer',
             background: vista === 'mensual' ? 'var(--acento)' : 'transparent',
-            color: vista === 'mensual' ? '#0e1116' : 'var(--texto-suave)',
+            color: vista === 'mensual' ? '#0b0e13' : 'var(--texto-suave)',
           }}
         >
           Mensual
@@ -424,14 +429,14 @@ export default function Calendario() {
         <button
           onClick={() => setVista('semanal')}
           style={{
-            padding: '8px 18px',
-            fontSize: 13,
+            padding: '6px 14px',
+            fontSize: 11,
             fontWeight: 600,
             borderRadius: 7,
             border: 'none',
             cursor: 'pointer',
             background: vista === 'semanal' ? 'var(--acento)' : 'transparent',
-            color: vista === 'semanal' ? '#0e1116' : 'var(--texto-suave)',
+            color: vista === 'semanal' ? '#0b0e13' : 'var(--texto-suave)',
           }}
         >
           Semanal
@@ -461,18 +466,19 @@ export default function Calendario() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            marginBottom: 16,
+            gap: 8,
+            marginBottom: 10,
             flexWrap: 'wrap',
           }}
         >
-          <h3 style={{ margin: 0 }}>{textoFechaLarga(fecha)}</h3>
+          <h3 style={{ margin: 0, flex: 1, minWidth: 0 }}>
+            {textoFechaLarga(fecha)}
+          </h3>
           <span
             className="chip"
             style={{
               background: 'var(--fondo-tarjeta-2)',
               color: 'var(--texto-suave)',
-              fontSize: 11,
             }}
           >
             {turnosDelDia.length}{' '}
@@ -480,7 +486,6 @@ export default function Calendario() {
           </span>
           <button
             className="btn btn-primary"
-            style={{ marginLeft: 'auto', padding: '8px 14px', fontSize: 13 }}
             onClick={() => setModalAbierto(true)}
           >
             Editar día
@@ -488,12 +493,11 @@ export default function Calendario() {
         </div>
 
         {turnosDelDia.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>
-            Este día aún no tiene turnos asignados. Pulsa "Editar día" para
-            añadir alguno.
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
+            Este día aún no tiene turnos asignados.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {turnosDelDia.map((t) => {
               const fechaD = new Date(t.fecha + 'T00:00:00')
               const diaSemana = fechaD.getDay()
@@ -507,18 +511,19 @@ export default function Calendario() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 14,
-                    padding: 14,
+                    gap: 8,
+                    padding: 8,
                     background: 'var(--fondo-tarjeta-2)',
-                    borderRadius: 10,
+                    borderRadius: 8,
+                    minWidth: 0,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 26,
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
+                      fontSize: 20,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 8,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -529,13 +534,14 @@ export default function Calendario() {
                     {iconoTurno(t)}
                   </div>
 
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
-                        marginBottom: 4,
+                        gap: 6,
+                        marginBottom: 2,
+                        flexWrap: 'wrap',
                       }}
                     >
                       <span className="chip" style={{ background: t.color }}>
@@ -557,10 +563,10 @@ export default function Calendario() {
 
                     <div
                       style={{
-                        fontSize: 12,
+                        fontSize: 10,
                         color: 'var(--texto-suave)',
                         display: 'flex',
-                        gap: 10,
+                        gap: 8,
                         flexWrap: 'wrap',
                       }}
                     >
@@ -569,7 +575,6 @@ export default function Calendario() {
                           ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
                           : 'Todo el día'}
                       </span>
-                      <span>·</span>
                       <span>
                         {muestraDepartamento(t)
                           ? t.departamento
@@ -580,9 +585,10 @@ export default function Calendario() {
                     {t.notas && (
                       <div
                         style={{
-                          fontSize: 12,
+                          fontSize: 10,
                           color: 'var(--texto-suave)',
-                          marginTop: 4,
+                          marginTop: 2,
+                          overflowWrap: 'break-word',
                         }}
                       >
                         📝 {t.notas}
@@ -608,7 +614,6 @@ export default function Calendario() {
         )}
       </div>
 
-      {/* Modal del día */}
       {modalAbierto && (
         <ModalDia
           fecha={fecha}
@@ -623,22 +628,30 @@ export default function Calendario() {
 
 // ─────────── Componentes auxiliares ───────────
 
-function FilaResumen({ etiqueta, valor }: { etiqueta: string; valor: number }) {
+function FilaResumen({
+  etiqueta,
+  valor,
+  destacado = false,
+}: {
+  etiqueta: string
+  valor: number
+  destacado?: boolean
+}) {
   return (
     <div
       style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        fontSize: 15,
+        fontSize: 11,
       }}
     >
       <span style={{ color: 'var(--texto-suave)' }}>{etiqueta}</span>
       <span
         style={{
-          fontWeight: 700,
-          fontSize: 20,
-          color: 'var(--acento)',
+          fontWeight: 800,
+          fontSize: destacado ? 16 : 13,
+          color: destacado ? 'var(--acento)' : 'var(--texto)',
         }}
       >
         {valor}
@@ -647,26 +660,82 @@ function FilaResumen({ etiqueta, valor }: { etiqueta: string; valor: number }) {
   )
 }
 
-function FilaResumenMini({
-  etiqueta,
-  valor,
+function CuentaKilometros({
+  progreso,
+  realizados,
 }: {
-  etiqueta: string
-  valor: number
+  progreso: number
+  realizados: number
 }) {
+  // Semicírculo de radio 50 con circunferencia = π * 50 ≈ 157.08
+  const circunferencia = Math.PI * 50
+  const offset = circunferencia * (1 - progreso / 100)
+
   return (
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        fontSize: 13,
+        position: 'relative',
+        width: 130,
+        height: 78,
+        margin: '0 auto',
       }}
     >
-      <span style={{ color: 'var(--texto-suave)' }}>{etiqueta}</span>
-      <span style={{ fontWeight: 700, color: 'var(--acento)', fontSize: 16 }}>
-        {valor}
-      </span>
+      <svg viewBox="0 0 120 70" width="130" height="78">
+        {/* Pista de fondo */}
+        <path
+          d="M 10 60 A 50 50 0 0 1 110 60"
+          fill="none"
+          stroke="var(--fondo-tarjeta-3)"
+          strokeWidth="10"
+          strokeLinecap="round"
+        />
+        {/* Progreso */}
+        <path
+          d="M 10 60 A 50 50 0 0 1 110 60"
+          fill="none"
+          stroke="var(--acento)"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={circunferencia}
+          strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+        />
+      </svg>
+
+      {/* Número en el centro */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 42,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 800,
+            color: 'var(--acento)',
+            lineHeight: 1,
+            letterSpacing: '-0.03em',
+          }}
+        >
+          {progreso}%
+        </div>
+        <div
+          style={{
+            fontSize: 8,
+            color: 'var(--texto-suave)',
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            fontWeight: 700,
+            marginTop: 2,
+          }}
+        >
+          Realizados
+        </div>
+      </div>
     </div>
   )
 }
