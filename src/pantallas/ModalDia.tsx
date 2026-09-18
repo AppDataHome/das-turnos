@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import { useToast } from '../contexto/ToastContexto'
+import { X } from 'lucide-react'
 import type { Turno, Departamento, TipoTurno } from '../tipos'
-import { etiquetaSinDepartamento, muestraDepartamento } from '../utilidades/turnos'
 
 interface Props {
   fecha: string
@@ -20,19 +21,18 @@ export default function ModalDia({
   onCambio,
 }: Props) {
   const { usuario } = useUsuario()
+  const toast = useToast()
 
   const [modo, setModo] = useState<Modo>('un-dia')
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([])
   const [tiposTurno, setTiposTurno] = useState<TipoTurno[]>([])
 
-  // ─── Modo "un día" ───
   const [codigoTurno, setCodigoTurno] = useState('')
   const [idDepartamento, setIdDepartamento] = useState('')
   const [notas, setNotas] = useState('')
   const [idEditando, setIdEditando] = useState<string | null>(null)
 
-  // ─── Modo "varios días" ───
   const [fechaInicio, setFechaInicio] = useState(fecha)
   const [fechaFin, setFechaFin] = useState(fecha)
   const [codigoTurnoBloque, setCodigoTurnoBloque] = useState('VAC')
@@ -41,7 +41,6 @@ export default function ModalDia({
   const [anioOrigen, setAnioOrigen] = useState<number>(
     new Date().getFullYear()
   )
-  const [resultadoBloque, setResultadoBloque] = useState<string>('')
 
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -72,7 +71,6 @@ export default function ModalDia({
     }
   }
 
-  // ─── Guardar un turno (modo un día) ───
   async function guardarTurno(e: React.FormEvent) {
     e.preventDefault()
     if (!usuario) return
@@ -98,11 +96,16 @@ export default function ModalDia({
 
       setGuardando(false)
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya tienes ese tipo de turno en este día')
-        else setError(error.message)
+          toast.error('Ya tienes ese tipo de turno en este día')
+        } else {
+          setError(error.message)
+          toast.error('Error al guardar: ' + error.message)
+        }
         return
       }
+      toast.exito('Turno actualizado correctamente')
       cancelarEdicion()
       onCambio()
     } else {
@@ -116,22 +119,25 @@ export default function ModalDia({
 
       setGuardando(false)
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya tienes ese turno en este día')
-        else setError(error.message)
+          toast.error('Ya tienes ese turno en este día')
+        } else {
+          setError(error.message)
+          toast.error('Error al guardar: ' + error.message)
+        }
         return
       }
+      toast.exito('Turno añadido correctamente')
       setNotas('')
       onCambio()
     }
   }
 
-  // ─── Crear en bloque (modo varios días) ───
   async function crearBloque(e: React.FormEvent) {
     e.preventDefault()
     if (!usuario) return
     setError('')
-    setResultadoBloque('')
     setGuardando(true)
 
     const { data, error } = await supabase.rpc('crear_turnos_en_bloque', {
@@ -148,14 +154,15 @@ export default function ModalDia({
 
     if (error) {
       setError(error.message)
+      toast.error('Error al crear: ' + error.message)
       return
     }
 
     if (data && data[0]) {
       const { creados, ignorados, total } = data[0]
-      setResultadoBloque(
+      toast.exito(
         `Se han creado ${creados} de ${total} días.` +
-          (ignorados > 0 ? ` (${ignorados} ya existían y se han ignorado)` : '')
+          (ignorados > 0 ? ` (${ignorados} ya existían)` : '')
       )
       onCambio()
     }
@@ -178,7 +185,12 @@ export default function ModalDia({
 
   async function borrarTurno(id: string) {
     if (!confirm('¿Seguro que quieres borrar este turno?')) return
-    await supabase.from('turno').delete().eq('id', id)
+    const { error } = await supabase.from('turno').delete().eq('id', id)
+    if (error) {
+      toast.error('Error al borrar: ' + error.message)
+      return
+    }
+    toast.exito('Turno borrado')
     if (idEditando === id) cancelarEdicion()
     onCambio()
   }
@@ -197,8 +209,6 @@ export default function ModalDia({
 
   const anioActual = new Date().getFullYear()
   const anioAnterior = anioActual - 1
-
-  // Si el tipo de turno del bloque es VAC, mostramos selector de año
   const mostrarSelectorAnio = codigoTurnoBloque === 'VAC'
 
   return (
@@ -211,7 +221,7 @@ export default function ModalDia({
             onClick={onCerrar}
             aria-label="Cerrar"
           >
-            ✕
+            <X size={14} />
           </button>
         </div>
 
@@ -222,7 +232,7 @@ export default function ModalDia({
           </div>
 
           {turnosDelDia.length === 0 ? (
-            <p style={{ color: 'var(--texto-suave)', fontSize: 13 }}>
+            <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
               Este día aún no tiene turnos.
             </p>
           ) : (
@@ -241,23 +251,19 @@ export default function ModalDia({
                   className="chip"
                   style={{
                     background: t.color,
-                    minWidth: 80,
+                    minWidth: 60,
                     textAlign: 'center',
                   }}
                 >
                   {(t.nombre_turno ?? '').toUpperCase()}
                 </span>
-                                <div className="detalle">
-                  <div style={{ fontSize: 13 }}>
-                    {muestraDepartamento(t)
-                      ? t.departamento
-                      : etiquetaSinDepartamento(t)}
-                  </div>
+                <div className="detalle">
+                  <div style={{ fontSize: 11 }}>{t.departamento}</div>
                   {t.notas && <div className="notas">📝 {t.notas}</div>}
                 </div>
                 <button
                   className="btn-mini"
-                  style={{ background: 'var(--acento)', color: '#0e1116' }}
+                  style={{ background: 'var(--acento)', color: '#0b0e13' }}
                   onClick={() => empezarEdicion(t)}
                 >
                   Editar
@@ -277,11 +283,11 @@ export default function ModalDia({
         <div
           style={{
             display: 'flex',
-            gap: 6,
-            marginBottom: 14,
-            padding: 4,
+            gap: 4,
+            marginBottom: 10,
+            padding: 3,
             background: 'var(--fondo-tarjeta-2)',
-            borderRadius: 10,
+            borderRadius: 8,
           }}
         >
           <button
@@ -289,14 +295,14 @@ export default function ModalDia({
             onClick={() => setModo('un-dia')}
             style={{
               flex: 1,
-              padding: '8px 12px',
-              fontSize: 13,
+              padding: '6px 10px',
+              fontSize: 11,
               fontWeight: 600,
-              borderRadius: 7,
+              borderRadius: 6,
               border: 'none',
               cursor: 'pointer',
               background: modo === 'un-dia' ? 'var(--acento)' : 'transparent',
-              color: modo === 'un-dia' ? '#0e1116' : 'var(--texto-suave)',
+              color: modo === 'un-dia' ? '#0b0e13' : 'var(--texto-suave)',
             }}
           >
             Un día
@@ -306,23 +312,22 @@ export default function ModalDia({
             onClick={() => setModo('varios-dias')}
             style={{
               flex: 1,
-              padding: '8px 12px',
-              fontSize: 13,
+              padding: '6px 10px',
+              fontSize: 11,
               fontWeight: 600,
-              borderRadius: 7,
+              borderRadius: 6,
               border: 'none',
               cursor: 'pointer',
               background:
                 modo === 'varios-dias' ? 'var(--acento)' : 'transparent',
               color:
-                modo === 'varios-dias' ? '#0e1116' : 'var(--texto-suave)',
+                modo === 'varios-dias' ? '#0b0e13' : 'var(--texto-suave)',
             }}
           >
             Varios días
           </button>
         </div>
 
-        {/* Modo un día */}
         {modo === 'un-dia' && (
           <div className="modal-seccion">
             <div className="modal-seccion-titulo">
@@ -368,12 +373,12 @@ export default function ModalDia({
                 type="text"
                 value={notas}
                 onChange={(e) => setNotas(e.target.value)}
-                placeholder="Por ejemplo: apoyo a unidad canina"
+                placeholder="Apoyo a unidad canina"
               />
 
               {error && <p className="error">{error}</p>}
 
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
                 <button
                   className="btn btn-primary"
                   type="submit"
@@ -388,13 +393,9 @@ export default function ModalDia({
                 </button>
                 {idEditando && (
                   <button
-                    className="btn"
+                    className="btn btn-secondary"
                     type="button"
                     onClick={cancelarEdicion}
-                    style={{
-                      background: 'var(--fondo-tarjeta-2)',
-                      color: 'var(--texto)',
-                    }}
                   >
                     Cancelar
                   </button>
@@ -404,7 +405,6 @@ export default function ModalDia({
           </div>
         )}
 
-        {/* Modo varios días */}
         {modo === 'varios-dias' && (
           <div className="modal-seccion">
             <div className="modal-seccion-titulo">
@@ -469,7 +469,7 @@ export default function ModalDia({
 
               {mostrarSelectorAnio && (
                 <div>
-                  <label className="label">Año de origen de las vacaciones</label>
+                  <label className="label">Año de origen</label>
                   <select
                     className="input"
                     value={anioOrigen}
@@ -479,7 +479,7 @@ export default function ModalDia({
                       {anioActual} (año actual)
                     </option>
                     <option value={anioAnterior}>
-                      {anioAnterior} (arrastre del año anterior)
+                      {anioAnterior} (arrastre)
                     </option>
                   </select>
                 </div>
@@ -491,19 +491,16 @@ export default function ModalDia({
                 type="text"
                 value={notasBloque}
                 onChange={(e) => setNotasBloque(e.target.value)}
-                placeholder="Por ejemplo: vacaciones de verano"
+                placeholder="Vacaciones de verano"
               />
 
               {error && <p className="error">{error}</p>}
-              {resultadoBloque && (
-                <p className="success">{resultadoBloque}</p>
-              )}
 
               <button
                 className="btn btn-primary"
                 type="submit"
                 disabled={guardando}
-                style={{ width: '100%', marginTop: 8 }}
+                style={{ width: '100%', marginTop: 6 }}
               >
                 {guardando ? 'Creando…' : 'Crear en bloque'}
               </button>
@@ -512,13 +509,9 @@ export default function ModalDia({
         )}
 
         <button
-          className="btn"
+          className="btn btn-secondary"
           onClick={onCerrar}
-          style={{
-            width: '100%',
-            background: 'var(--fondo-tarjeta-2)',
-            color: 'var(--texto)',
-          }}
+          style={{ width: '100%' }}
         >
           Cerrar
         </button>
