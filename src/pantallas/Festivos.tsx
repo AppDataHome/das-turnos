@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { useToast } from '../contexto/ToastContexto'
+import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 
 interface Festivo {
   id: string
@@ -16,6 +18,9 @@ const AMBITOS = [
 ] as const
 
 export default function Festivos() {
+  const toast = useToast()
+  const { confirmar } = useConfirmacion()
+
   const anioActual = new Date().getFullYear()
 
   const [anio, setAnio] = useState<number>(anioActual)
@@ -30,7 +35,6 @@ export default function Festivos() {
   )
   const [descripcion, setDescripcion] = useState('')
 
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -39,7 +43,6 @@ export default function Festivos() {
 
   async function cargarFestivos() {
     setCargando(true)
-    setMensaje('')
     setError('')
 
     const inicio = `${anio}-01-01`
@@ -62,16 +65,16 @@ export default function Festivos() {
   }
 
   async function importarNacionales() {
-    if (
-      !confirm(
-        `¿Importar los festivos nacionales de ${anio}? Los que ya existan no se duplicarán.`
-      )
-    )
-      return
+    const ok = await confirmar({
+      titulo: `Importar festivos nacionales de ${anio}`,
+      mensaje:
+        'Se añadirán los 10 festivos nacionales (incluido el Viernes Santo). Los que ya existan no se duplicarán.',
+      textoConfirmar: 'Importar',
+    })
+    if (!ok) return
 
     setImportando(true)
     setError('')
-    setMensaje('')
 
     const { data, error } = await supabase.rpc(
       'importar_festivos_nacionales',
@@ -82,12 +85,13 @@ export default function Festivos() {
 
     if (error) {
       setError(error.message)
+      toast.error('Error al importar: ' + error.message)
       return
     }
 
     if (data && data[0]) {
       const { creados, ignorados } = data[0]
-      setMensaje(
+      toast.exito(
         `Se han añadido ${creados} festivos nacionales.` +
           (ignorados > 0 ? ` ${ignorados} ya existían.` : '')
       )
@@ -98,7 +102,6 @@ export default function Festivos() {
   async function guardarFestivo(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setMensaje('')
 
     if (!fecha) {
       setError('Debes indicar una fecha')
@@ -117,9 +120,10 @@ export default function Festivos() {
 
       if (error) {
         setError(error.message)
+        toast.error('Error: ' + error.message)
         return
       }
-      setMensaje('Festivo actualizado')
+      toast.exito('Festivo actualizado')
       cancelarEdicion()
       cargarFestivos()
     } else {
@@ -131,12 +135,16 @@ export default function Festivos() {
       })
 
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ese festivo ya existe para esa fecha y ámbito')
-        else setError(error.message)
+          toast.error('Ese festivo ya existe')
+        } else {
+          setError(error.message)
+          toast.error('Error: ' + error.message)
+        }
         return
       }
-      setMensaje('Festivo añadido')
+      toast.exito('Festivo añadido')
       setFecha('')
       setDescripcion('')
       cargarFestivos()
@@ -149,7 +157,6 @@ export default function Festivos() {
     setAmbito(f.ambito)
     setDescripcion(f.descripcion ?? '')
     setError('')
-    setMensaje('')
   }
 
   function cancelarEdicion() {
@@ -160,8 +167,24 @@ export default function Festivos() {
   }
 
   async function borrarFestivo(id: string) {
-    if (!confirm('¿Seguro que quieres borrar este festivo?')) return
-    await supabase.from('festivo_calendario').delete().eq('id', id)
+    const ok = await confirmar({
+      titulo: '¿Borrar este festivo?',
+      mensaje: 'Esta acción no se puede deshacer.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
+
+    const { error } = await supabase
+      .from('festivo_calendario')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      toast.error('Error al borrar: ' + error.message)
+      return
+    }
+    toast.exito('Festivo borrado')
     cargarFestivos()
   }
 
@@ -250,10 +273,8 @@ export default function Festivos() {
         </div>
 
         {error && <p className="error">{error}</p>}
-        {mensaje && <p className="success">{mensaje}</p>}
       </div>
 
-      {/* Formulario */}
       <div className="card">
         <h3 style={{ marginBottom: 10 }}>
           {idEditando ? 'Editar festivo' : 'Añadir festivo'}
@@ -303,7 +324,7 @@ export default function Festivos() {
                 type="text"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Por ejemplo: Año Nuevo"
+                placeholder="Año Nuevo"
               />
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -324,7 +345,6 @@ export default function Festivos() {
         </form>
       </div>
 
-      {/* Lista */}
       <div className="card">
         <h3 style={{ marginBottom: 10 }}>
           Festivos de {anio} ({festivos.length})
@@ -338,7 +358,6 @@ export default function Festivos() {
           </p>
         ) : (
           <>
-            {/* Vista móvil: items apilados */}
             <div className="lista-movil">
               {festivos.map((f) => (
                 <div key={f.id} className="item-lista">
@@ -396,7 +415,6 @@ export default function Festivos() {
               ))}
             </div>
 
-            {/* Vista escritorio: tabla */}
             <div className="tabla-desktop">
               <table>
                 <thead>
