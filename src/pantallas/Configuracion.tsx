@@ -9,13 +9,12 @@ export default function Configuracion() {
 
   return (
     <div className="container">
-      {/* Selector de sección */}
       <div
         style={{
           display: 'flex',
-          gap: 6,
-          marginBottom: 20,
-          padding: 4,
+          gap: 4,
+          marginBottom: 10,
+          padding: 3,
           background: 'var(--fondo-tarjeta)',
           border: '1px solid var(--borde)',
           borderRadius: 10,
@@ -25,8 +24,8 @@ export default function Configuracion() {
         <button
           onClick={() => setSeccion('departamentos')}
           style={{
-            padding: '8px 18px',
-            fontSize: 13,
+            padding: '6px 12px',
+            fontSize: 11,
             fontWeight: 600,
             borderRadius: 7,
             border: 'none',
@@ -34,7 +33,7 @@ export default function Configuracion() {
             background:
               seccion === 'departamentos' ? 'var(--acento)' : 'transparent',
             color:
-              seccion === 'departamentos' ? '#0e1116' : 'var(--texto-suave)',
+              seccion === 'departamentos' ? '#0b0e13' : 'var(--texto-suave)',
           }}
         >
           Departamentos
@@ -42,8 +41,8 @@ export default function Configuracion() {
         <button
           onClick={() => setSeccion('tipos-turno')}
           style={{
-            padding: '8px 18px',
-            fontSize: 13,
+            padding: '6px 12px',
+            fontSize: 11,
             fontWeight: 600,
             borderRadius: 7,
             border: 'none',
@@ -51,7 +50,7 @@ export default function Configuracion() {
             background:
               seccion === 'tipos-turno' ? 'var(--acento)' : 'transparent',
             color:
-              seccion === 'tipos-turno' ? '#0e1116' : 'var(--texto-suave)',
+              seccion === 'tipos-turno' ? '#0b0e13' : 'var(--texto-suave)',
           }}
         >
           Tipos de turno
@@ -64,9 +63,9 @@ export default function Configuracion() {
   )
 }
 
-// ─────────────────────────────────────────────────────────
-// SECCIÓN: DEPARTAMENTOS
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// DEPARTAMENTOS
+// ─────────────────────────────────────────
 
 function SeccionDepartamentos() {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([])
@@ -186,16 +185,17 @@ function SeccionDepartamentos() {
   return (
     <>
       <div className="card">
-        <h2 style={{ marginBottom: 16 }}>Departamentos</h2>
+        <h2 style={{ marginBottom: 10 }}>Departamentos</h2>
 
         <form onSubmit={guardar}>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'auto 1fr auto',
-              gap: 12,
+              gridTemplateColumns: '70px 1fr auto',
+              gap: 6,
               alignItems: 'end',
             }}
+            className="form-depto"
           >
             <div>
               <label className="label">Icono</label>
@@ -204,7 +204,7 @@ function SeccionDepartamentos() {
                 type="text"
                 value={icono}
                 onChange={(e) => setIcono(e.target.value)}
-                style={{ width: 80, textAlign: 'center', fontSize: 20 }}
+                style={{ textAlign: 'center', fontSize: 18 }}
                 maxLength={4}
               />
             </div>
@@ -215,23 +215,19 @@ function SeccionDepartamentos() {
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Por ejemplo: Unidad Canina"
+                placeholder="Unidad Canina"
                 required
               />
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 6, paddingBottom: 6 }}>
               <button className="btn btn-primary" type="submit">
                 {idEditando ? 'Guardar' : 'Añadir'}
               </button>
               {idEditando && (
                 <button
                   type="button"
-                  className="btn"
+                  className="btn btn-secondary"
                   onClick={cancelar}
-                  style={{
-                    background: 'var(--fondo-tarjeta-2)',
-                    color: 'var(--texto)',
-                  }}
                 >
                   Cancelar
                 </button>
@@ -245,53 +241,55 @@ function SeccionDepartamentos() {
       </div>
 
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>
-          Listado ({departamentos.length})
-        </h3>
+        <h3 style={{ marginBottom: 10 }}>Listado ({departamentos.length})</h3>
 
         {cargando ? (
-          <p style={{ color: 'var(--texto-suave)' }}>Cargando…</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>Cargando…</p>
         ) : departamentos.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)' }}>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
             No hay departamentos registrados.
           </p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 60 }}>Icono</th>
-                <th>Nombre</th>
-                <th style={{ width: 100 }}>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* MÓVIL: tarjetas apiladas */}
+            <div className="lista-movil">
               {departamentos.map((d) => (
-                <tr key={d.id} style={{ opacity: d.activo ? 1 : 0.5 }}>
-                  <td style={{ fontSize: 22 }}>
-                    {(d as any).icono ?? '📁'}
-                  </td>
-                  <td>{d.nombre}</td>
-                  <td>
+                <div
+                  key={d.id}
+                  className="item-lista"
+                  style={{ opacity: d.activo ? 1 : 0.5 }}
+                >
+                  <div className="cabecera-item">
+                    <span style={{ fontSize: 22, flexShrink: 0 }}>
+                      {(d as any).icono ?? '📁'}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {d.nombre}
+                    </span>
                     <span
                       className="chip"
                       style={{
                         background: d.activo ? '#16a34a' : '#6b7280',
                         color: 'white',
-                        fontSize: 11,
                       }}
                     >
                       {d.activo ? 'ACTIVO' : 'INACTIVO'}
                     </span>
-                  </td>
-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  </div>
+                  <div className="acciones-item">
                     <button
                       className="btn-mini"
-                      style={{
-                        background: 'var(--acento)',
-                        color: '#0e1116',
-                        marginRight: 6,
-                      }}
+                      style={{ background: 'var(--acento)', color: '#0b0e13' }}
                       onClick={() => editar(d)}
                     >
                       Editar
@@ -301,7 +299,6 @@ function SeccionDepartamentos() {
                       style={{
                         background: d.activo ? '#6b7280' : '#16a34a',
                         color: 'white',
-                        marginRight: 6,
                       }}
                       onClick={() => cambiarActivo(d)}
                     >
@@ -313,23 +310,102 @@ function SeccionDepartamentos() {
                     >
                       Borrar
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ESCRITORIO: tabla */}
+            <div className="tabla-desktop">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50 }}>Icono</th>
+                    <th>Nombre</th>
+                    <th style={{ width: 80 }}>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departamentos.map((d) => (
+                    <tr key={d.id} style={{ opacity: d.activo ? 1 : 0.5 }}>
+                      <td style={{ fontSize: 18 }}>
+                        {(d as any).icono ?? '📁'}
+                      </td>
+                      <td>{d.nombre}</td>
+                      <td>
+                        <span
+                          className="chip"
+                          style={{
+                            background: d.activo ? '#16a34a' : '#6b7280',
+                            color: 'white',
+                          }}
+                        >
+                          {d.activo ? 'ACTIVO' : 'INACTIVO'}
+                        </span>
+                      </td>
+                      <td
+                        style={{ textAlign: 'right', whiteSpace: 'nowrap' }}
+                      >
+                        <button
+                          className="btn-mini"
+                          style={{
+                            background: 'var(--acento)',
+                            color: '#0b0e13',
+                            marginRight: 4,
+                          }}
+                          onClick={() => editar(d)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-mini"
+                          style={{
+                            background: d.activo ? '#6b7280' : '#16a34a',
+                            color: 'white',
+                            marginRight: 4,
+                          }}
+                          onClick={() => cambiarActivo(d)}
+                        >
+                          {d.activo ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          className="btn-mini btn-mini-peligro"
+                          onClick={() => borrar(d)}
+                        >
+                          Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .form-depto {
+            grid-template-columns: 60px 1fr !important;
+          }
+          .form-depto > div:last-child {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+          }
+        }
+      `}</style>
     </>
   )
 }
 
-// ─────────────────────────────────────────────────────────
-// SECCIÓN: TIPOS DE TURNO
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// TIPOS DE TURNO
+// ─────────────────────────────────────────
 
 const CATEGORIAS = [
-  { valor: 'trabajo', etiqueta: 'Trabajo (cuenta para DAS)' },
+  { valor: 'trabajo', etiqueta: 'Trabajo (DAS)' },
   { valor: 'libre', etiqueta: 'Libre / Ausencia' },
   { valor: 'formacion', etiqueta: 'Formación' },
   { valor: 'otros', etiqueta: 'Otros' },
@@ -444,12 +520,6 @@ function SeccionTiposTurno() {
     setOrden(100)
   }
 
-  async function cambiarActivo(t: TipoTurno) {
-    // Nota: no tenemos campo "activo" en tipo_turno actualmente.
-    // Si quieres, se puede añadir después. Por ahora, no hace nada.
-    alert('Por ahora los tipos de turno no se desactivan. En una próxima versión.')
-  }
-
   async function borrar(t: TipoTurno) {
     if (
       !confirm(
@@ -474,23 +544,31 @@ function SeccionTiposTurno() {
     cargar()
   }
 
+  function colorCategoria(c: string): string {
+    if (c === 'trabajo') return '#2563eb'
+    if (c === 'libre') return '#f59e0b'
+    if (c === 'formacion') return '#0ea5e9'
+    return '#6b7280'
+  }
+
   return (
     <>
       <div className="card">
-        <h2 style={{ marginBottom: 16 }}>Tipos de turno</h2>
+        <h2 style={{ marginBottom: 10 }}>Tipos de turno</h2>
 
         <form onSubmit={guardar}>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '90px 1fr 100px 100px 1fr',
-              gap: 12,
+              gridTemplateColumns: '60px 1fr 80px 80px 1fr',
+              gap: 6,
               alignItems: 'end',
-              marginBottom: 12,
+              marginBottom: 6,
             }}
+            className="form-tipo-1"
           >
             <div>
-              <label className="label">Código</label>
+              <label className="label">Cód.</label>
               <input
                 className="input"
                 type="text"
@@ -557,10 +635,11 @@ function SeccionTiposTurno() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '120px 90px 120px 1fr auto',
-              gap: 12,
+              gridTemplateColumns: '90px 70px 100px 1fr auto',
+              gap: 6,
               alignItems: 'end',
             }}
+            className="form-tipo-2"
           >
             <div>
               <label className="label">Color</label>
@@ -569,7 +648,6 @@ function SeccionTiposTurno() {
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                style={{ height: 40, padding: 4 }}
               />
             </div>
             <div>
@@ -584,7 +662,7 @@ function SeccionTiposTurno() {
               />
             </div>
             <div>
-              <label className="label">Cruza medianoche</label>
+              <label className="label">Cruza med.</label>
               <select
                 className="input"
                 value={cruzaMedianoche ? 'si' : 'no'}
@@ -595,19 +673,15 @@ function SeccionTiposTurno() {
               </select>
             </div>
             <div></div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 6, paddingBottom: 6 }}>
               <button className="btn btn-primary" type="submit">
                 {idEditando ? 'Guardar' : 'Añadir'}
               </button>
               {idEditando && (
                 <button
                   type="button"
-                  className="btn"
+                  className="btn btn-secondary"
                   onClick={cancelar}
-                  style={{
-                    background: 'var(--fondo-tarjeta-2)',
-                    color: 'var(--texto)',
-                  }}
                 >
                   Cancelar
                 </button>
@@ -621,77 +695,84 @@ function SeccionTiposTurno() {
       </div>
 
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>Listado ({tipos.length})</h3>
+        <h3 style={{ marginBottom: 10 }}>Listado ({tipos.length})</h3>
 
         {cargando ? (
-          <p style={{ color: 'var(--texto-suave)' }}>Cargando…</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>Cargando…</p>
         ) : tipos.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)' }}>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
             No hay tipos de turno registrados.
           </p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 60 }}>Color</th>
-                <th style={{ width: 70 }}>Código</th>
-                <th>Nombre</th>
-                <th>Horario</th>
-                <th>Categoría</th>
-                <th style={{ width: 60 }}>Orden</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* MÓVIL */}
+            <div className="lista-movil">
               {tipos.map((t) => (
-                <tr key={t.id}>
-                  <td>
+                <div key={t.id} className="item-lista">
+                  <div className="cabecera-item">
                     <div
                       style={{
-                        width: 30,
-                        height: 30,
-                        borderRadius: 6,
+                        width: 22,
+                        height: 22,
+                        borderRadius: 5,
                         background: t.color,
+                        flexShrink: 0,
                       }}
                     />
-                  </td>
-                  <td style={{ fontWeight: 700 }}>{t.codigo}</td>
-                  <td>{t.nombre}</td>
-                  <td style={{ fontSize: 12 }}>
-                    {t.hora_inicio && t.hora_fin
-                      ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
-                      : '—'}
-                  </td>
-                  <td>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        minWidth: 24,
+                      }}
+                    >
+                      {t.codigo}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {t.nombre}
+                    </span>
                     <span
                       className="chip"
                       style={{
-                        background:
-                          t.categoria === 'trabajo'
-                            ? '#2563eb'
-                            : t.categoria === 'libre'
-                            ? '#f59e0b'
-                            : t.categoria === 'formacion'
-                            ? '#0ea5e9'
-                            : '#6b7280',
+                        background: colorCategoria(t.categoria),
                         color: 'white',
-                        fontSize: 10,
                       }}
                     >
                       {t.categoria.toUpperCase()}
                     </span>
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    {(t as any).orden ?? 100}
-                  </td>
-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: 'var(--texto-suave)',
+                      display: 'flex',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span>
+                      🕒 {t.hora_inicio?.slice(0, 5) ?? '—'}–
+                      {t.hora_fin?.slice(0, 5) ?? '—'}
+                    </span>
+                    <span>· Orden: {(t as any).orden ?? 100}</span>
+                    {t.cruza_medianoche && <span>· Cruza medianoche</span>}
+                  </div>
+
+                  <div className="acciones-item">
                     <button
                       className="btn-mini"
-                      style={{
-                        background: 'var(--acento)',
-                        color: '#0e1116',
-                        marginRight: 6,
-                      }}
+                      style={{ background: 'var(--acento)', color: '#0b0e13' }}
                       onClick={() => editar(t)}
                     >
                       Editar
@@ -702,13 +783,106 @@ function SeccionTiposTurno() {
                     >
                       Borrar
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ESCRITORIO */}
+            <div className="tabla-desktop">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>Color</th>
+                    <th style={{ width: 50 }}>Cód.</th>
+                    <th>Nombre</th>
+                    <th>Horario</th>
+                    <th>Categoría</th>
+                    <th style={{ width: 50 }}>Orden</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tipos.map((t) => (
+                    <tr key={t.id}>
+                      <td>
+                        <div
+                          style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: 5,
+                            background: t.color,
+                          }}
+                        />
+                      </td>
+                      <td style={{ fontWeight: 700 }}>{t.codigo}</td>
+                      <td>{t.nombre}</td>
+                      <td style={{ fontSize: 11 }}>
+                        {t.hora_inicio && t.hora_fin
+                          ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
+                          : '—'}
+                      </td>
+                      <td>
+                        <span
+                          className="chip"
+                          style={{
+                            background: colorCategoria(t.categoria),
+                            color: 'white',
+                          }}
+                        >
+                          {t.categoria.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        {(t as any).orden ?? 100}
+                      </td>
+                      <td
+                        style={{ textAlign: 'right', whiteSpace: 'nowrap' }}
+                      >
+                        <button
+                          className="btn-mini"
+                          style={{
+                            background: 'var(--acento)',
+                            color: '#0b0e13',
+                            marginRight: 4,
+                          }}
+                          onClick={() => editar(t)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-mini btn-mini-peligro"
+                          onClick={() => borrar(t)}
+                        >
+                          Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .form-tipo-1 {
+            grid-template-columns: 60px 1fr 70px 70px !important;
+          }
+          .form-tipo-1 > div:last-child {
+            grid-column: 1 / -1;
+          }
+          .form-tipo-2 {
+            grid-template-columns: 1fr 1fr 1fr !important;
+          }
+          .form-tipo-2 > div:last-child {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+          }
+        }
+      `}</style>
     </>
   )
 }
