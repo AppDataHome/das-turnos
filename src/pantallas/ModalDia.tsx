@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
+import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import { X } from 'lucide-react'
 import type { Turno, Departamento, TipoTurno } from '../tipos'
 
@@ -22,6 +23,7 @@ export default function ModalDia({
 }: Props) {
   const { usuario } = useUsuario()
   const toast = useToast()
+  const { confirmar } = useConfirmacion()
 
   const [modo, setModo] = useState<Modo>('un-dia')
 
@@ -184,7 +186,14 @@ export default function ModalDia({
   }
 
   async function borrarTurno(id: string) {
-    if (!confirm('¿Seguro que quieres borrar este turno?')) return
+    const ok = await confirmar({
+      titulo: '¿Borrar este turno?',
+      mensaje: 'Esta acción no se puede deshacer.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
+
     const { error } = await supabase.from('turno').delete().eq('id', id)
     if (error) {
       toast.error('Error al borrar: ' + error.message)
@@ -225,7 +234,6 @@ export default function ModalDia({
           </button>
         </div>
 
-        {/* Turnos ya asignados */}
         <div className="modal-seccion">
           <div className="modal-seccion-titulo">
             Turnos asignados ({turnosDelDia.length})
@@ -279,7 +287,6 @@ export default function ModalDia({
           )}
         </div>
 
-        {/* Selector de modo */}
         <div
           style={{
             display: 'flex',
