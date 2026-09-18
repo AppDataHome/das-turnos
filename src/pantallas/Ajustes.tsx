@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import { useToast } from '../contexto/ToastContexto'
+import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import SeccionDatos from './SeccionDatos'
 import SeccionDasRemanente from './SeccionDasRemanente'
 import type { Tema } from '../tipos'
 
 export default function Ajustes() {
   const { usuario, actualizarPerfil, cambiarTema } = useUsuario()
+  const toast = useToast()
+  const { confirmar } = useConfirmacion()
 
   const [nombre, setNombre] = useState(usuario?.nombre ?? '')
   const [numeroEmpleado, setNumeroEmpleado] = useState(
@@ -24,15 +28,12 @@ export default function Ajustes() {
   )
 
   const [guardando, setGuardando] = useState(false)
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
-  // Cambio de contraseña
   const [passActual, setPassActual] = useState('')
   const [pass1, setPass1] = useState('')
   const [pass2, setPass2] = useState('')
   const [cambiandoPass, setCambiandoPass] = useState(false)
-  const [mensajePass, setMensajePass] = useState('')
   const [errorPass, setErrorPass] = useState('')
 
   useEffect(() => {
@@ -52,7 +53,6 @@ export default function Ajustes() {
 
   async function guardarPerfil(e: React.FormEvent) {
     e.preventDefault()
-    setMensaje('')
     setError('')
     setGuardando(true)
 
@@ -61,9 +61,11 @@ export default function Ajustes() {
         nombre: nombre.trim(),
         numero_empleado: numeroEmpleado.trim() || null,
       })
-      setMensaje('Datos guardados correctamente')
+      toast.exito('Datos guardados correctamente')
     } catch (err: any) {
-      setError(err?.message ?? 'Error al guardar')
+      const msg = err?.message ?? 'Error al guardar'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setGuardando(false)
     }
@@ -71,7 +73,6 @@ export default function Ajustes() {
 
   async function guardarVacaciones(e: React.FormEvent) {
     e.preventDefault()
-    setMensaje('')
     setError('')
     setGuardando(true)
 
@@ -81,33 +82,37 @@ export default function Ajustes() {
         dias_vacaciones_arrastradas: Number(diasArrastradas) || 0,
         anio_vacaciones_arrastradas: Number(anioArrastre) || null,
       })
-      setMensaje('Configuración de vacaciones guardada')
+      toast.exito('Configuración de vacaciones guardada')
     } catch (err: any) {
-      setError(err?.message ?? 'Error al guardar')
+      const msg = err?.message ?? 'Error al guardar'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setGuardando(false)
     }
   }
 
   async function reiniciarArrastre() {
-    if (
-      !confirm(
-        '¿Seguro que quieres poner a 0 los días de arrastre del año anterior?'
-      )
-    )
-      return
-    setMensaje('')
+    const ok = await confirmar({
+      titulo: '¿Poner el arrastre a 0?',
+      mensaje:
+        'Los días de vacaciones pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
+      textoConfirmar: 'Poner a 0',
+      peligro: true,
+    })
+    if (!ok) return
+
     setError('')
     setGuardando(true)
 
     try {
       setDiasArrastradas(0)
-      await actualizarPerfil({
-        dias_vacaciones_arrastradas: 0,
-      })
-      setMensaje('Arrastre reiniciado a 0')
+      await actualizarPerfil({ dias_vacaciones_arrastradas: 0 })
+      toast.exito('Arrastre reiniciado a 0')
     } catch (err: any) {
-      setError(err?.message ?? 'Error al reiniciar')
+      const msg = err?.message ?? 'Error al reiniciar'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setGuardando(false)
     }
@@ -116,7 +121,6 @@ export default function Ajustes() {
   async function cambiarContrasena(e: React.FormEvent) {
     e.preventDefault()
     setErrorPass('')
-    setMensajePass('')
 
     if (!passActual) {
       setErrorPass('Debes introducir tu contraseña actual')
@@ -145,6 +149,7 @@ export default function Ajustes() {
     if (errVerif) {
       setCambiandoPass(false)
       setErrorPass('La contraseña actual no es correcta')
+      toast.error('La contraseña actual no es correcta')
       return
     }
 
@@ -156,36 +161,44 @@ export default function Ajustes() {
 
     if (errCambio) {
       setErrorPass(errCambio.message)
+      toast.error('Error: ' + errCambio.message)
       return
     }
 
     setPassActual('')
     setPass1('')
     setPass2('')
-    setMensajePass('Contraseña cambiada correctamente')
+    toast.exito('Contraseña cambiada correctamente')
   }
 
   async function elegirTema(t: Tema) {
-    setMensaje('')
     setError('')
     try {
       await cambiarTema(t)
-      setMensaje('Tema actualizado')
+      toast.exito('Tema actualizado')
     } catch (err: any) {
-      setError(err?.message ?? 'Error al cambiar tema')
+      const msg = err?.message ?? 'Error al cambiar tema'
+      setError(msg)
+      toast.error(msg)
     }
   }
 
   async function cerrarSesion() {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      textoConfirmar: 'Cerrar sesión',
+      peligro: true,
+    })
+    if (!ok) return
     await supabase.auth.signOut()
     window.location.reload()
   }
 
   return (
     <div className="container">
-      {/* Perfil */}
       <div className="card">
-        <h2 style={{ marginBottom: 20 }}>Mi perfil</h2>
+        <h2 style={{ marginBottom: 12 }}>Mi perfil</h2>
 
         <form onSubmit={guardarPerfil}>
           <label className="label">Correo electrónico</label>
@@ -212,26 +225,24 @@ export default function Ajustes() {
             type="text"
             value={numeroEmpleado}
             onChange={(e) => setNumeroEmpleado(e.target.value)}
-            placeholder="Por ejemplo: 123456789"
+            placeholder="123456789"
           />
 
           {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
 
           <button
             className="btn btn-primary"
             type="submit"
             disabled={guardando}
-            style={{ marginTop: 12 }}
+            style={{ marginTop: 6 }}
           >
             {guardando ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </form>
       </div>
 
-      {/* Cambiar contraseña */}
       <div className="card">
-        <h2 style={{ marginBottom: 20 }}>Cambiar contraseña</h2>
+        <h2 style={{ marginBottom: 12 }}>Cambiar contraseña</h2>
 
         <form onSubmit={cambiarContrasena}>
           <label className="label">Contraseña actual</label>
@@ -267,22 +278,20 @@ export default function Ajustes() {
           />
 
           {errorPass && <p className="error">{errorPass}</p>}
-          {mensajePass && <p className="success">{mensajePass}</p>}
 
           <button
             className="btn btn-primary"
             type="submit"
             disabled={cambiandoPass}
-            style={{ marginTop: 12 }}
+            style={{ marginTop: 6 }}
           >
             {cambiandoPass ? 'Cambiando…' : 'Cambiar contraseña'}
           </button>
         </form>
       </div>
 
-      {/* Vacaciones */}
       <div className="card">
-        <h2 style={{ marginBottom: 20 }}>Vacaciones</h2>
+        <h2 style={{ marginBottom: 12 }}>Vacaciones</h2>
 
         <form onSubmit={guardarVacaciones}>
           <label className="label">Días de vacaciones anuales</label>
@@ -296,10 +305,10 @@ export default function Ajustes() {
           />
           <p
             style={{
-              fontSize: 12,
+              fontSize: 10,
               color: 'var(--texto-suave)',
-              marginTop: -4,
-              marginBottom: 14,
+              marginTop: -2,
+              marginBottom: 10,
             }}
           >
             Días que te corresponden cada año (por defecto 22).
@@ -316,14 +325,13 @@ export default function Ajustes() {
           />
           <p
             style={{
-              fontSize: 12,
+              fontSize: 10,
               color: 'var(--texto-suave)',
-              marginTop: -4,
-              marginBottom: 14,
+              marginTop: -2,
+              marginBottom: 10,
             }}
           >
-            Días que te sobraron del año pasado y aún puedes disfrutar este
-            año.
+            Días que te sobraron del año pasado y aún puedes disfrutar.
           </p>
 
           <label className="label">Año de los días arrastrados</label>
@@ -337,16 +345,16 @@ export default function Ajustes() {
           />
           <p
             style={{
-              fontSize: 12,
+              fontSize: 10,
               color: 'var(--texto-suave)',
-              marginTop: -4,
-              marginBottom: 14,
+              marginTop: -2,
+              marginBottom: 10,
             }}
           >
             Normalmente el año pasado (por ejemplo, 2025 si estás en 2026).
           </p>
 
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
             <button
               className="btn btn-primary"
               type="submit"
@@ -357,12 +365,8 @@ export default function Ajustes() {
             </button>
             <button
               type="button"
-              className="btn"
+              className="btn btn-secondary"
               onClick={reiniciarArrastre}
-              style={{
-                background: 'var(--fondo-tarjeta-2)',
-                color: 'var(--texto)',
-              }}
             >
               Poner arrastre a 0
             </button>
@@ -370,16 +374,13 @@ export default function Ajustes() {
         </form>
       </div>
 
-      {/* DAS remanente */}
       <SeccionDasRemanente />
 
-      {/* Datos: exportar / importar */}
       <SeccionDatos />
 
-      {/* Tema */}
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <h2 style={{ marginBottom: 10 }}>Tema de la aplicación</h2>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="btn"
             onClick={() => elegirTema('negro')}
@@ -407,14 +408,13 @@ export default function Ajustes() {
         </div>
       </div>
 
-      {/* Sesión */}
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Sesión</h2>
+        <h2 style={{ marginBottom: 10 }}>Sesión</h2>
         <p
           style={{
-            fontSize: 13,
+            fontSize: 11,
             color: 'var(--texto-suave)',
-            marginBottom: 12,
+            marginBottom: 10,
           }}
         >
           Cerrar sesión hará que vuelvas a la pantalla de acceso.
