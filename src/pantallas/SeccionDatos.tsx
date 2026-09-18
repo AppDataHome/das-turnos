@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import { useToast } from '../contexto/ToastContexto'
 import {
   generarCSV,
   descargarCSV,
@@ -9,23 +10,19 @@ import {
 
 export default function SeccionDatos() {
   const { usuario } = useUsuario()
+  const toast = useToast()
 
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [trabajando, setTrabajando] = useState(false)
 
   if (!usuario) return null
 
-  // Fecha en formato YYYY-MM-DD para el nombre del archivo
   function hoy(): string {
     return new Date().toISOString().split('T')[0]
   }
 
-  // ─────────── EXPORTAR TURNOS ───────────
-
   async function exportarTurnos() {
     setError('')
-    setMensaje('')
     setTrabajando(true)
 
     const { data, error } = await supabase
@@ -44,6 +41,7 @@ export default function SeccionDatos() {
 
     if (error) {
       setError(error.message)
+      toast.error('Error al exportar: ' + error.message)
       return
     }
 
@@ -58,14 +56,11 @@ export default function SeccionDatos() {
 
     const csv = generarCSV(cabeceras, filas)
     descargarCSV(`turnos_${hoy()}.csv`, csv)
-    setMensaje(`Exportados ${filas.length} turnos`)
+    toast.exito(`Exportados ${filas.length} turnos`)
   }
-
-  // ─────────── IMPORTAR TURNOS ───────────
 
   async function importarTurnos(archivo: File) {
     setError('')
-    setMensaje('')
     setTrabajando(true)
 
     const texto = await archivo.text()
@@ -73,6 +68,7 @@ export default function SeccionDatos() {
 
     if (filas.length < 2) {
       setError('El archivo está vacío o no tiene datos')
+      toast.error('El archivo está vacío')
       setTrabajando(false)
       return
     }
@@ -87,14 +83,12 @@ export default function SeccionDatos() {
     }
 
     if (idx.fecha === -1 || idx.tipo === -1 || idx.departamento === -1) {
-      setError(
-        'Faltan columnas obligatorias: fecha, tipo, departamento'
-      )
+      setError('Faltan columnas obligatorias: fecha, tipo, departamento')
+      toast.error('Faltan columnas obligatorias en el CSV')
       setTrabajando(false)
       return
     }
 
-    // Cargamos catálogos para convertir código/nombre a ids
     const [{ data: tipos }, { data: depts }] = await Promise.all([
       supabase.from('tipo_turno').select('id, codigo'),
       supabase.from('departamento').select('id, nombre'),
@@ -155,16 +149,13 @@ export default function SeccionDatos() {
     }
 
     setTrabajando(false)
-    setMensaje(
-      `Importación de turnos: ${creados} añadidos, ${ignorados} ya existían, ${errores} con error`
+    toast.exito(
+      `Turnos importados: ${creados} añadidos, ${ignorados} ya existían, ${errores} con error`
     )
   }
 
-  // ─────────── EXPORTAR FESTIVOS ───────────
-
   async function exportarFestivos() {
     setError('')
-    setMensaje('')
     setTrabajando(true)
 
     const { data, error } = await supabase
@@ -176,6 +167,7 @@ export default function SeccionDatos() {
 
     if (error) {
       setError(error.message)
+      toast.error('Error al exportar: ' + error.message)
       return
     }
 
@@ -188,14 +180,11 @@ export default function SeccionDatos() {
 
     const csv = generarCSV(cabeceras, filas)
     descargarCSV(`festivos_${hoy()}.csv`, csv)
-    setMensaje(`Exportados ${filas.length} festivos`)
+    toast.exito(`Exportados ${filas.length} festivos`)
   }
-
-  // ─────────── IMPORTAR FESTIVOS ───────────
 
   async function importarFestivos(archivo: File) {
     setError('')
-    setMensaje('')
     setTrabajando(true)
 
     const texto = await archivo.text()
@@ -203,6 +192,7 @@ export default function SeccionDatos() {
 
     if (filas.length < 2) {
       setError('El archivo está vacío o no tiene datos')
+      toast.error('El archivo está vacío')
       setTrabajando(false)
       return
     }
@@ -216,6 +206,7 @@ export default function SeccionDatos() {
 
     if (idx.fecha === -1 || idx.ambito === -1) {
       setError('Faltan columnas obligatorias: fecha, ambito')
+      toast.error('Faltan columnas obligatorias en el CSV')
       setTrabajando(false)
       return
     }
@@ -258,12 +249,10 @@ export default function SeccionDatos() {
     }
 
     setTrabajando(false)
-    setMensaje(
-      `Importación de festivos: ${creados} añadidos, ${ignorados} ya existían, ${errores} con error`
+    toast.exito(
+      `Festivos importados: ${creados} añadidos, ${ignorados} ya existían, ${errores} con error`
     )
   }
-
-  // ─────────── MANEJADORES DE ARCHIVO ───────────
 
   function manejarArchivoTurnos(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -282,40 +271,35 @@ export default function SeccionDatos() {
   return (
     <>
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Datos · Turnos</h2>
+        <h2 style={{ marginBottom: 8 }}>Datos · Turnos</h2>
         <p
           style={{
-            fontSize: 13,
+            fontSize: 11,
             color: 'var(--texto-suave)',
-            marginBottom: 14,
+            marginBottom: 12,
           }}
         >
-          Exporta tus turnos a un archivo CSV (se abre en Excel) o importa
-          desde uno. La importación no borra nada: los duplicados se ignoran.
+          Exporta tus turnos a un CSV (se abre en Excel) o impórtalos. La
+          importación no borra nada: los duplicados se ignoran.
         </p>
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="btn btn-primary"
             onClick={exportarTurnos}
             disabled={trabajando}
           >
-            ⬇ Exportar turnos a CSV
+            ⬇ Exportar turnos
           </button>
 
           <label
-            className="btn"
+            className="btn btn-secondary"
             style={{
-              background: 'var(--fondo-tarjeta-2)',
-              color: 'var(--texto)',
               cursor: trabajando ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
               opacity: trabajando ? 0.6 : 1,
             }}
           >
-            ⬆ Importar turnos desde CSV
+            ⬆ Importar turnos
             <input
               type="file"
               accept=".csv,text/csv"
@@ -328,40 +312,34 @@ export default function SeccionDatos() {
       </div>
 
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Datos · Festivos</h2>
+        <h2 style={{ marginBottom: 8 }}>Datos · Festivos</h2>
         <p
           style={{
-            fontSize: 13,
+            fontSize: 11,
             color: 'var(--texto-suave)',
-            marginBottom: 14,
+            marginBottom: 12,
           }}
         >
-          Exporta o importa el calendario de festivos. Igual que con los
-          turnos, la importación ignora duplicados.
+          Exporta o importa el calendario de festivos.
         </p>
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="btn btn-primary"
             onClick={exportarFestivos}
             disabled={trabajando}
           >
-            ⬇ Exportar festivos a CSV
+            ⬇ Exportar festivos
           </button>
 
           <label
-            className="btn"
+            className="btn btn-secondary"
             style={{
-              background: 'var(--fondo-tarjeta-2)',
-              color: 'var(--texto)',
               cursor: trabajando ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
               opacity: trabajando ? 0.6 : 1,
             }}
           >
-            ⬆ Importar festivos desde CSV
+            ⬆ Importar festivos
             <input
               type="file"
               accept=".csv,text/csv"
@@ -373,10 +351,9 @@ export default function SeccionDatos() {
         </div>
       </div>
 
-      {(mensaje || error) && (
+      {error && (
         <div className="card">
-          {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
+          <p className="error">{error}</p>
         </div>
       )}
     </>
