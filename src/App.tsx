@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { UsuarioProveedor, useUsuario } from './contexto/UsuarioContexto'
+import { ToastProveedor } from './contexto/ToastContexto'
+import ContenedorToasts from './componentes/ContenedorToasts'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
@@ -18,9 +20,11 @@ import type { User } from '@supabase/supabase-js'
 
 export default function App() {
   return (
-    <UsuarioProveedor>
-      <Aplicacion />
-    </UsuarioProveedor>
+    <ToastProveedor>
+      <UsuarioProveedor>
+        <Aplicacion />
+      </UsuarioProveedor>
+    </ToastProveedor>
   )
 }
 
@@ -57,7 +61,12 @@ function Aplicacion() {
   }
 
   if (!authUser) {
-    return <Login />
+    return (
+      <>
+        <Login />
+        <ContenedorToasts />
+      </>
+    )
   }
 
   return (
@@ -102,7 +111,7 @@ function Aplicacion() {
           <span
             style={{
               marginLeft: 'auto',
-              fontSize: 13,
+              fontSize: 12,
               color: 'var(--texto-suave)',
             }}
           >
@@ -122,6 +131,7 @@ function Aplicacion() {
       </div>
 
       <BarraInferior pestana={pestana} onCambiar={setPestana} />
+      <ContenedorToasts />
     </>
   )
 }
@@ -173,7 +183,8 @@ function Login() {
   }
 
   function traducirError(msg: string): string {
-    if (msg.includes('Invalid login credentials')) return 'Credenciales incorrectas'
+    if (msg.includes('Invalid login credentials'))
+      return 'Credenciales incorrectas'
     if (msg.includes('Email not confirmed'))
       return 'Debes confirmar tu correo antes de entrar'
     if (msg.includes('User already registered'))
@@ -184,9 +195,9 @@ function Login() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 400, marginTop: 100 }}>
+    <div className="container" style={{ maxWidth: 400, marginTop: 60 }}>
       <div className="card">
-        <h2 style={{ marginBottom: 20 }}>DAS · Control de Turnos</h2>
+        <h2 style={{ marginBottom: 16 }}>DAS · Control de Turnos</h2>
         <form onSubmit={manejarAuth}>
           <label className="label">Correo electrónico</label>
           <input
@@ -209,13 +220,13 @@ function Login() {
           {mensaje && <p className="success">{mensaje}</p>}
           <button
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: 8 }}
+            style={{ width: '100%', marginTop: 6 }}
             type="submit"
           >
             {registro ? 'Registrarse' : 'Iniciar sesión'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>
+        <p style={{ textAlign: 'center', marginTop: 12, fontSize: 12 }}>
           <a
             href="#"
             style={{ color: 'var(--acento)' }}
