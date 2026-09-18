@@ -5,6 +5,7 @@ import { ToastProveedor } from './contexto/ToastContexto'
 import { ConfirmacionProveedor } from './contexto/ConfirmacionContexto'
 import ContenedorToasts from './componentes/ContenedorToasts'
 import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
+import Avatar from './componentes/Avatar'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
@@ -146,8 +147,6 @@ function Cabecera() {
   const { usuario } = useUsuario()
   if (!usuario) return null
 
-  const inicial = (usuario.nombre?.[0] ?? '?').toUpperCase()
-
   return (
     <div className="cabecera">
       <div className="logo">🛡️</div>
@@ -155,7 +154,11 @@ function Cabecera() {
         <div className="nombre">{usuario.nombre}</div>
         <div className="sub">Nº: {usuario.numero_empleado || '—'}</div>
       </div>
-      <div className="avatar">{inicial}</div>
+      <Avatar
+        nombre={usuario.nombre ?? '?'}
+        avatarUrl={usuario.avatar_url}
+        tamano={40}
+      />
     </div>
   )
 }
