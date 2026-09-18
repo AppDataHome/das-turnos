@@ -6,9 +6,15 @@ import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
 import Ajustes from './pantallas/Ajustes'
 import Ayuda from './pantallas/Ayuda'
+import BarraInferior, { type Pestana } from './pantallas/BarraInferior'
+import {
+  Calendar,
+  CalendarDays,
+  Cog,
+  Settings,
+  HelpCircle,
+} from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
-
-type Pestana = 'calendario' | 'festivos' | 'configuracion' | 'ajustes' | 'ayuda'
 
 export default function App() {
   return (
@@ -41,7 +47,10 @@ function Aplicacion() {
 
   if (comprobandoSesion || cargando) {
     return (
-      <div className="container" style={{ textAlign: 'center', paddingTop: 100 }}>
+      <div
+        className="container"
+        style={{ textAlign: 'center', paddingTop: 100 }}
+      >
         Cargando…
       </div>
     )
@@ -59,30 +68,35 @@ function Aplicacion() {
             className={pestana === 'calendario' ? 'activo' : ''}
             onClick={() => setPestana('calendario')}
           >
+            <Calendar size={16} />
             Calendario
           </a>
           <a
             className={pestana === 'festivos' ? 'activo' : ''}
             onClick={() => setPestana('festivos')}
           >
+            <CalendarDays size={16} />
             Festivos
           </a>
           <a
             className={pestana === 'configuracion' ? 'activo' : ''}
             onClick={() => setPestana('configuracion')}
           >
+            <Cog size={16} />
             Configuración
           </a>
           <a
             className={pestana === 'ajustes' ? 'activo' : ''}
             onClick={() => setPestana('ajustes')}
           >
+            <Settings size={16} />
             Ajustes
           </a>
           <a
             className={pestana === 'ayuda' ? 'activo' : ''}
             onClick={() => setPestana('ayuda')}
           >
+            <HelpCircle size={16} />
             Ayuda
           </a>
           <span
@@ -106,6 +120,8 @@ function Aplicacion() {
         {pestana === 'ajustes' && <Ajustes />}
         {pestana === 'ayuda' && <Ayuda />}
       </div>
+
+      <BarraInferior pestana={pestana} onCambiar={setPestana} />
     </>
   )
 }
@@ -121,9 +137,7 @@ function Cabecera() {
       <div className="logo">🛡️</div>
       <div className="datos">
         <div className="nombre">{usuario.nombre}</div>
-        <div className="sub">
-          Nº: {usuario.numero_empleado || '—'}
-        </div>
+        <div className="sub">Nº: {usuario.numero_empleado || '—'}</div>
       </div>
       <div className="avatar">{inicial}</div>
     </div>
