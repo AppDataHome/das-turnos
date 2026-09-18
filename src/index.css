@@ -756,3 +756,46 @@ nav a.activo { color: var(--acento); background: var(--acento-suave); }
   background: rgba(0, 0, 0, 0.15);
   color: #0b0e13;
 }
+
+
+/* ═══════════════════════════════════════════════════
+   CONFIRMACIÓN
+   ═══════════════════════════════════════════════════ */
+
+.confirmacion-icono {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px auto 14px;
+}
+
+.confirmacion-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.confirmacion-mensaje {
+  font-size: 12px;
+  color: var(--texto-suave);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.confirmacion-acciones {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.confirmacion-acciones .btn {
+  flex: 1;
+}
