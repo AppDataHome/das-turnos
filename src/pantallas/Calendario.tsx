@@ -7,6 +7,11 @@ import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
 import AvisosBanner from './AvisosBanner'
+import {
+  SkeletonTarjetas,
+  SkeletonCalendario,
+  SkeletonPanelDia,
+} from '../componentes/Skeleton'
 import type { Turno, DasStatus } from '../tipos'
 import {
   iconoTurno,
@@ -38,6 +43,7 @@ export default function Calendario() {
   const [festivos, setFestivos] = useState<string[]>([])
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
+  const [cargando, setCargando] = useState(true)
 
   const [vista, setVista] = useState<VistaCalendario>(() => {
     const guardada = localStorage.getItem('vista_calendario')
@@ -57,7 +63,9 @@ export default function Calendario() {
   }, [])
 
   async function cargarTodo() {
+    setCargando(true)
     await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
+    setCargando(false)
   }
 
   async function cargarTurnos() {
@@ -199,6 +207,18 @@ export default function Calendario() {
     setModalAbierto(true)
   }
 
+  // ─────────── SKELETON MIENTRAS CARGA ───────────
+  if (cargando) {
+    return (
+      <>
+        <SkeletonTarjetas />
+        <SkeletonCalendario />
+        <SkeletonPanelDia />
+      </>
+    )
+  }
+
+  // ─────────── CONTENIDO REAL ───────────
   return (
     <>
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
