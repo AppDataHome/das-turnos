@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { useToast } from '../contexto/ToastContexto'
+import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import type { Departamento, TipoTurno } from '../tipos'
 
 type Seccion = 'departamentos' | 'tipos-turno'
@@ -68,6 +70,9 @@ export default function Configuracion() {
 // ─────────────────────────────────────────
 
 function SeccionDepartamentos() {
+  const toast = useToast()
+  const { confirmar } = useConfirmacion()
+
   const [departamentos, setDepartamentos] = useState<Departamento[]>([])
   const [cargando, setCargando] = useState(true)
 
@@ -75,7 +80,6 @@ function SeccionDepartamentos() {
   const [nombre, setNombre] = useState('')
   const [icono, setIcono] = useState('📁')
 
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -96,7 +100,6 @@ function SeccionDepartamentos() {
   async function guardar(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setMensaje('')
 
     if (!nombre.trim()) {
       setError('El nombre no puede estar vacío')
@@ -110,12 +113,16 @@ function SeccionDepartamentos() {
         .eq('id', idEditando)
 
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya existe un departamento con ese nombre')
-        else setError(error.message)
+          toast.error('Ya existe un departamento con ese nombre')
+        } else {
+          setError(error.message)
+          toast.error('Error: ' + error.message)
+        }
         return
       }
-      setMensaje('Departamento actualizado')
+      toast.exito('Departamento actualizado')
       cancelar()
       cargar()
     } else {
@@ -124,12 +131,16 @@ function SeccionDepartamentos() {
         .insert({ nombre: nombre.trim(), icono, activo: true })
 
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya existe un departamento con ese nombre')
-        else setError(error.message)
+          toast.error('Ya existe un departamento con ese nombre')
+        } else {
+          setError(error.message)
+          toast.error('Error: ' + error.message)
+        }
         return
       }
-      setMensaje('Departamento añadido')
+      toast.exito('Departamento añadido')
       cancelar()
       cargar()
     }
@@ -140,7 +151,6 @@ function SeccionDepartamentos() {
     setNombre(d.nombre)
     setIcono((d as any).icono ?? '📁')
     setError('')
-    setMensaje('')
   }
 
   function cancelar() {
@@ -154,31 +164,39 @@ function SeccionDepartamentos() {
       .from('departamento')
       .update({ activo: !d.activo })
       .eq('id', d.id)
-    if (error) setError(error.message)
-    else cargar()
+
+    if (error) {
+      toast.error('Error: ' + error.message)
+      return
+    }
+    toast.exito(d.activo ? 'Departamento desactivado' : 'Departamento activado')
+    cargar()
   }
 
   async function borrar(d: Departamento) {
-    if (
-      !confirm(
-        `¿Seguro que quieres borrar "${d.nombre}"? Esta acción no se puede deshacer.`
-      )
-    )
-      return
+    const ok = await confirmar({
+      titulo: `¿Borrar "${d.nombre}"?`,
+      mensaje: 'Esta acción no se puede deshacer.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
 
     const { error } = await supabase.from('departamento').delete().eq('id', d.id)
 
     if (error) {
       if (error.code === '23503') {
-        setError(
+        const msg =
           'No se puede borrar: hay turnos que usan este departamento. Desactívalo en su lugar.'
-        )
+        setError(msg)
+        toast.error(msg, 5000)
       } else {
         setError(error.message)
+        toast.error('Error: ' + error.message)
       }
       return
     }
-    setMensaje('Departamento borrado')
+    toast.exito('Departamento borrado')
     cargar()
   }
 
@@ -236,7 +254,6 @@ function SeccionDepartamentos() {
           </div>
 
           {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
         </form>
       </div>
 
@@ -251,7 +268,6 @@ function SeccionDepartamentos() {
           </p>
         ) : (
           <>
-            {/* MÓVIL: tarjetas apiladas */}
             <div className="lista-movil">
               {departamentos.map((d) => (
                 <div
@@ -315,7 +331,6 @@ function SeccionDepartamentos() {
               ))}
             </div>
 
-            {/* ESCRITORIO: tabla */}
             <div className="tabla-desktop">
               <table>
                 <thead>
@@ -344,9 +359,7 @@ function SeccionDepartamentos() {
                           {d.activo ? 'ACTIVO' : 'INACTIVO'}
                         </span>
                       </td>
-                      <td
-                        style={{ textAlign: 'right', whiteSpace: 'nowrap' }}
-                      >
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <button
                           className="btn-mini"
                           style={{
@@ -412,6 +425,9 @@ const CATEGORIAS = [
 ] as const
 
 function SeccionTiposTurno() {
+  const toast = useToast()
+  const { confirmar } = useConfirmacion()
+
   const [tipos, setTipos] = useState<TipoTurno[]>([])
   const [cargando, setCargando] = useState(true)
 
@@ -427,7 +443,6 @@ function SeccionTiposTurno() {
   const [color, setColor] = useState('#6b7280')
   const [orden, setOrden] = useState(100)
 
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -448,7 +463,6 @@ function SeccionTiposTurno() {
   async function guardar(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setMensaje('')
 
     if (!codigo.trim() || !nombre.trim()) {
       setError('El código y el nombre son obligatorios')
@@ -472,23 +486,31 @@ function SeccionTiposTurno() {
         .update(payload)
         .eq('id', idEditando)
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya existe un tipo de turno con ese código')
-        else setError(error.message)
+          toast.error('Ya existe un tipo de turno con ese código')
+        } else {
+          setError(error.message)
+          toast.error('Error: ' + error.message)
+        }
         return
       }
-      setMensaje('Tipo de turno actualizado')
+      toast.exito('Tipo de turno actualizado')
       cancelar()
       cargar()
     } else {
       const { error } = await supabase.from('tipo_turno').insert(payload)
       if (error) {
-        if (error.code === '23505')
+        if (error.code === '23505') {
           setError('Ya existe un tipo de turno con ese código')
-        else setError(error.message)
+          toast.error('Ya existe un tipo de turno con ese código')
+        } else {
+          setError(error.message)
+          toast.error('Error: ' + error.message)
+        }
         return
       }
-      setMensaje('Tipo de turno añadido')
+      toast.exito('Tipo de turno añadido')
       cancelar()
       cargar()
     }
@@ -505,7 +527,6 @@ function SeccionTiposTurno() {
     setColor(t.color ?? '#6b7280')
     setOrden((t as any).orden ?? 100)
     setError('')
-    setMensaje('')
   }
 
   function cancelar() {
@@ -521,26 +542,29 @@ function SeccionTiposTurno() {
   }
 
   async function borrar(t: TipoTurno) {
-    if (
-      !confirm(
-        `¿Seguro que quieres borrar "${t.nombre}"? Esta acción no se puede deshacer.`
-      )
-    )
-      return
+    const ok = await confirmar({
+      titulo: `¿Borrar "${t.nombre}"?`,
+      mensaje: 'Esta acción no se puede deshacer.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
 
     const { error } = await supabase.from('tipo_turno').delete().eq('id', t.id)
 
     if (error) {
       if (error.code === '23503') {
-        setError(
+        const msg =
           'No se puede borrar: hay turnos que usan este tipo. Cámbialos antes.'
-        )
+        setError(msg)
+        toast.error(msg, 5000)
       } else {
         setError(error.message)
+        toast.error('Error: ' + error.message)
       }
       return
     }
-    setMensaje('Tipo de turno borrado')
+    toast.exito('Tipo de turno borrado')
     cargar()
   }
 
@@ -690,7 +714,6 @@ function SeccionTiposTurno() {
           </div>
 
           {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
         </form>
       </div>
 
@@ -705,7 +728,6 @@ function SeccionTiposTurno() {
           </p>
         ) : (
           <>
-            {/* MÓVIL */}
             <div className="lista-movil">
               {tipos.map((t) => (
                 <div key={t.id} className="item-lista">
@@ -788,7 +810,6 @@ function SeccionTiposTurno() {
               ))}
             </div>
 
-            {/* ESCRITORIO */}
             <div className="tabla-desktop">
               <table>
                 <thead>
@@ -836,9 +857,7 @@ function SeccionTiposTurno() {
                       <td style={{ textAlign: 'center' }}>
                         {(t as any).orden ?? 100}
                       </td>
-                      <td
-                        style={{ textAlign: 'right', whiteSpace: 'nowrap' }}
-                      >
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <button
                           className="btn-mini"
                           style={{
