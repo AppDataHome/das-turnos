@@ -5,10 +5,11 @@ import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import SeccionDatos from './SeccionDatos'
 import SeccionDasRemanente from './SeccionDasRemanente'
+import Avatar from '../componentes/Avatar'
 import type { Tema } from '../tipos'
 
 export default function Ajustes() {
-  const { usuario, actualizarPerfil, cambiarTema } = useUsuario()
+  const { usuario, actualizarPerfil, cambiarTema, recargar } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
@@ -29,6 +30,8 @@ export default function Ajustes() {
 
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+
+  const [subiendoAvatar, setSubiendoAvatar] = useState(false)
 
   const [passActual, setPassActual] = useState('')
   const [pass1, setPass1] = useState('')
@@ -51,6 +54,93 @@ export default function Ajustes() {
 
   if (!usuario) return null
 
+  // ─────────── Subir avatar ───────────
+  async function manejarArchivoAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+
+    if (archivo.size > 2 * 1024 * 1024) {
+      toast.error('La imagen no puede superar 2 MB')
+      e.target.value = ''
+      return
+    }
+
+    if (!archivo.type.startsWith('image/')) {
+      toast.error('El archivo debe ser una imagen')
+      e.target.value = ''
+      return
+    }
+
+    setSubiendoAvatar(true)
+
+    // Extensión del archivo
+    const ext = archivo.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const ruta = `${usuario!.id}/avatar.${ext}`
+
+    // Subimos el archivo (upsert = reemplaza si ya existe)
+    const { error: errSubida } = await supabase.storage
+      .from('avatares')
+      .upload(ruta, archivo, { upsert: true, cacheControl: '3600' })
+
+    if (errSubida) {
+      setSubiendoAvatar(false)
+      toast.error('Error al subir la imagen: ' + errSubida.message)
+      e.target.value = ''
+      return
+    }
+
+    // Obtener la URL pública con un pequeño cache-buster para forzar recarga
+    const { data: urlData } = supabase.storage
+      .from('avatares')
+      .getPublicUrl(ruta)
+
+    const urlPublica = `${urlData.publicUrl}?t=${Date.now()}`
+
+    try {
+      await actualizarPerfil({ avatar_url: urlPublica })
+      await recargar()
+      toast.exito('Foto de perfil actualizada')
+    } catch (err: any) {
+      toast.error('Error al guardar la URL: ' + (err?.message ?? ''))
+    } finally {
+      setSubiendoAvatar(false)
+      e.target.value = ''
+    }
+  }
+
+  async function borrarAvatar() {
+    const ok = await confirmar({
+      titulo: '¿Borrar tu foto de perfil?',
+      mensaje: 'Volverás a mostrar tu inicial como avatar.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
+
+    setSubiendoAvatar(true)
+
+    // Intentamos borrar todos los archivos de la carpeta del usuario
+    const { data: listado } = await supabase.storage
+      .from('avatares')
+      .list(usuario!.id)
+
+    if (listado && listado.length > 0) {
+      const rutas = listado.map((f) => `${usuario!.id}/${f.name}`)
+      await supabase.storage.from('avatares').remove(rutas)
+    }
+
+    try {
+      await actualizarPerfil({ avatar_url: null })
+      await recargar()
+      toast.exito('Foto de perfil borrada')
+    } catch (err: any) {
+      toast.error('Error: ' + (err?.message ?? ''))
+    } finally {
+      setSubiendoAvatar(false)
+    }
+  }
+
+  // ─────────── Guardar perfil ───────────
   async function guardarPerfil(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -71,6 +161,7 @@ export default function Ajustes() {
     }
   }
 
+  // ─────────── Guardar vacaciones ───────────
   async function guardarVacaciones(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -197,6 +288,75 @@ export default function Ajustes() {
 
   return (
     <div className="container">
+      {/* Foto de perfil */}
+      <div className="card">
+        <h2 style={{ marginBottom: 12 }}>Foto de perfil</h2>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Avatar
+            nombre={usuario.nombre ?? '?'}
+            avatarUrl={usuario.avatar_url}
+            tamano={80}
+          />
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            <p style={{ fontSize: 11, color: 'var(--texto-suave)', margin: 0 }}>
+              Sube una foto tuya (JPG, PNG o WEBP, máximo 2 MB). Si no subes
+              ninguna, se mostrará tu inicial.
+            </p>
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <label
+                className="btn btn-primary"
+                style={{
+                  cursor: subiendoAvatar ? 'not-allowed' : 'pointer',
+                  opacity: subiendoAvatar ? 0.6 : 1,
+                }}
+              >
+                {subiendoAvatar
+                  ? 'Procesando…'
+                  : usuario.avatar_url
+                  ? 'Cambiar foto'
+                  : 'Subir foto'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={manejarArchivoAvatar}
+                  disabled={subiendoAvatar}
+                  style={{ display: 'none' }}
+                />
+              </label>
+
+              {usuario.avatar_url && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={borrarAvatar}
+                  disabled={subiendoAvatar}
+                >
+                  Borrar foto
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mi perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Mi perfil</h2>
 
@@ -241,6 +401,7 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Contraseña */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Cambiar contraseña</h2>
 
@@ -290,6 +451,7 @@ export default function Ajustes() {
         </form>
       </div>
 
+      {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Vacaciones</h2>
 
@@ -354,7 +516,9 @@ export default function Ajustes() {
             Normalmente el año pasado (por ejemplo, 2025 si estás en 2026).
           </p>
 
-          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+          <div
+            style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}
+          >
             <button
               className="btn btn-primary"
               type="submit"
@@ -378,6 +542,7 @@ export default function Ajustes() {
 
       <SeccionDatos />
 
+      {/* Tema */}
       <div className="card">
         <h2 style={{ marginBottom: 10 }}>Tema de la aplicación</h2>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -408,6 +573,7 @@ export default function Ajustes() {
         </div>
       </div>
 
+      {/* Sesión */}
       <div className="card">
         <h2 style={{ marginBottom: 10 }}>Sesión</h2>
         <p
