@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
+import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
@@ -29,6 +30,7 @@ type VistaCalendario = 'mensual' | 'semanal'
 export default function Calendario() {
   const { usuario } = useUsuario()
   const toast = useToast()
+  const { confirmar } = useConfirmacion()
 
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
@@ -129,7 +131,14 @@ export default function Calendario() {
   }
 
   async function borrarTurnoRapido(id: string) {
-    if (!confirm('¿Seguro que quieres borrar este turno?')) return
+    const ok = await confirmar({
+      titulo: '¿Borrar este turno?',
+      mensaje: 'Esta acción no se puede deshacer.',
+      textoConfirmar: 'Borrar',
+      peligro: true,
+    })
+    if (!ok) return
+
     const { error } = await supabase.from('turno').delete().eq('id', id)
     if (error) {
       toast.error('Error al borrar: ' + error.message)
@@ -194,9 +203,7 @@ export default function Calendario() {
     <>
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
 
-      {/* Tarjetas superiores */}
       <div className="grid-tarjetas">
-        {/* Turnos Mes con cuenta kilómetros */}
         <div className="card" style={{ textAlign: 'center' }}>
           <h4
             style={{
@@ -253,7 +260,6 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* Vacaciones */}
         <div className="card">
           <h4
             style={{
@@ -338,7 +344,6 @@ export default function Calendario() {
           )}
         </div>
 
-        {/* DAS */}
         <div className="card">
           <h4
             style={{
@@ -411,7 +416,6 @@ export default function Calendario() {
         </div>
       </div>
 
-      {/* Selector de vista */}
       <div
         style={{
           display: 'flex',
@@ -456,7 +460,6 @@ export default function Calendario() {
         </button>
       </div>
 
-      {/* Calendario */}
       {vista === 'mensual' ? (
         <VistaMensual
           turnos={turnos}
@@ -473,7 +476,6 @@ export default function Calendario() {
         />
       )}
 
-      {/* Panel del día seleccionado */}
       <div className="card">
         <div
           style={{
@@ -633,8 +635,6 @@ export default function Calendario() {
     </>
   )
 }
-
-// ─────────── Componentes auxiliares ───────────
 
 function FilaResumen({
   etiqueta,
