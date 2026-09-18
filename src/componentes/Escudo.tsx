@@ -7,40 +7,47 @@ export default function Escudo({ tamano = 44 }: Props) {
     <svg
       width={tamano}
       height={tamano}
-      viewBox="0 0 64 64"
+      viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Escudo"
+      aria-label="Escudo DAS"
     >
       <defs>
-        <linearGradient id="oroEscudo" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#e8c860" />
-          <stop offset="100%" stopColor="#a67c1f" />
+        <linearGradient id="fondoEscudo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1a1f2e" />
+          <stop offset="100%" stopColor="#0e1116" />
         </linearGradient>
       </defs>
 
-      {/* Corona */}
-      <path
-        d="M18 12 L22 5 L26 11 L32 3 L38 11 L42 5 L46 12 Z"
-        fill="url(#oroEscudo)"
-      />
-      <rect x="18" y="12" width="28" height="3" rx="1" fill="url(#oroEscudo)" />
+      {/* Fondo redondeado */}
+      <rect width="512" height="512" rx="96" fill="url(#fondoEscudo)" />
 
-      {/* Escudo */}
+      {/* Escudo relleno sutil */}
       <path
-        d="M14 16 L50 16 L50 38 C50 50 42 58 32 62 C22 58 14 50 14 38 Z"
-        fill="#0b0e13"
-        stroke="url(#oroEscudo)"
-        strokeWidth="2.2"
+        d="M256 80 L400 140 L400 260 C400 340 330 410 256 440 C182 410 112 340 112 260 L112 140 Z"
+        fill="#d4a43a"
+        opacity="0.15"
       />
 
-      {/* Cruz central */}
+      {/* Escudo borde */}
       <path
-        d="M29 22 L35 22 L35 32 L46 32 L46 38 L35 38 L35 52 L29 52 L29 38 L18 38 L18 32 L29 32 Z"
-        fill="url(#oroEscudo)"
+        d="M256 80 L400 140 L400 260 C400 340 330 410 256 440 C182 410 112 340 112 260 L112 140 Z"
+        fill="none"
+        stroke="#d4a43a"
+        strokeWidth="10"
       />
 
-      {/* Punto central decorativo */}
-      <circle cx="32" cy="35" r="2.5" fill="#0b0e13" />
+      {/* Texto DAS */}
+      <text
+        x="256"
+        y="280"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="140"
+        fontWeight="bold"
+        fill="#d4a43a"
+        textAnchor="middle"
+      >
+        DAS
+      </text>
     </svg>
   )
 }
