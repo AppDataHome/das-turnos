@@ -23,7 +23,6 @@ export default function Festivos() {
   const [cargando, setCargando] = useState(false)
   const [importando, setImportando] = useState(false)
 
-  // Formulario
   const [idEditando, setIdEditando] = useState<string | null>(null)
   const [fecha, setFecha] = useState('')
   const [ambito, setAmbito] = useState<'nacional' | 'autonomico' | 'local'>(
@@ -169,9 +168,9 @@ export default function Festivos() {
   function textoFecha(f: string): string {
     const date = new Date(f + 'T00:00:00')
     const opciones: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
+      weekday: 'short',
       day: 'numeric',
-      month: 'long',
+      month: 'short',
     }
     const txt = date.toLocaleDateString('es-ES', opciones)
     return txt.charAt(0).toUpperCase() + txt.slice(1)
@@ -195,17 +194,14 @@ export default function Festivos() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            marginBottom: 16,
+            gap: 8,
+            marginBottom: 10,
             flexWrap: 'wrap',
           }}
         >
-          <h2 style={{ margin: 0 }}>Festivos del calendario</h2>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <label
-              className="label"
-              style={{ marginBottom: 0, alignSelf: 'center' }}
-            >
+          <h2 style={{ margin: 0, flex: 1 }}>Festivos del calendario</h2>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <label className="label" style={{ marginBottom: 0 }}>
               Año:
             </label>
             <select
@@ -226,8 +222,8 @@ export default function Festivos() {
         <div
           style={{
             display: 'flex',
+            gap: 8,
             alignItems: 'center',
-            gap: 12,
             flexWrap: 'wrap',
           }}
         >
@@ -242,13 +238,14 @@ export default function Festivos() {
           </button>
           <p
             style={{
-              fontSize: 12,
+              fontSize: 10,
               color: 'var(--texto-suave)',
               margin: 0,
+              flex: 1,
+              minWidth: 0,
             }}
           >
-            Añade automáticamente los 10 festivos nacionales (incluido el
-            Viernes Santo, que varía cada año).
+            Añade los 10 festivos nacionales (incluido el Viernes Santo).
           </p>
         </div>
 
@@ -258,7 +255,7 @@ export default function Festivos() {
 
       {/* Formulario */}
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>
+        <h3 style={{ marginBottom: 10 }}>
           {idEditando ? 'Editar festivo' : 'Añadir festivo'}
         </h3>
         <form onSubmit={guardarFestivo}>
@@ -266,9 +263,10 @@ export default function Festivos() {
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr 2fr auto',
-              gap: 12,
+              gap: 6,
               alignItems: 'end',
             }}
+            className="form-festivo"
           >
             <div>
               <label className="label">Fecha</label>
@@ -308,80 +306,81 @@ export default function Festivos() {
                 placeholder="Por ejemplo: Año Nuevo"
               />
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
               <button className="btn btn-primary" type="submit">
                 {idEditando ? 'Guardar' : 'Añadir'}
               </button>
               {idEditando && (
                 <button
                   type="button"
-                  className="btn"
+                  className="btn btn-secondary"
                   onClick={cancelarEdicion}
-                  style={{
-                    background: 'var(--fondo-tarjeta-2)',
-                    color: 'var(--texto)',
-                  }}
                 >
                   Cancelar
                 </button>
               )}
             </div>
           </div>
-
-          {error && <p className="error">{error}</p>}
-          {mensaje && <p className="success">{mensaje}</p>}
         </form>
       </div>
 
       {/* Lista */}
       <div className="card">
-        <h3 style={{ marginBottom: 16 }}>
+        <h3 style={{ marginBottom: 10 }}>
           Festivos de {anio} ({festivos.length})
         </h3>
 
         {cargando ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Cargando…</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>Cargando…</p>
         ) : festivos.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
             No hay festivos registrados para {anio}.
           </p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Ámbito</th>
-                <th>Descripción</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Vista móvil: items apilados */}
+            <div className="lista-movil">
               {festivos.map((f) => (
-                <tr key={f.id}>
-                  <td style={{ whiteSpace: 'nowrap' }}>
-                    {textoFecha(f.fecha)}
-                  </td>
-                  <td>
+                <div key={f.id} className="item-lista">
+                  <div className="cabecera-item">
                     <span
                       className="chip"
                       style={{
                         background: colorAmbito(f.ambito),
                         color: 'white',
-                        fontSize: 11,
                       }}
                     >
                       {f.ambito.toUpperCase()}
                     </span>
-                  </td>
-                  <td>{f.descripcion ?? '—'}</td>
-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {textoFecha(f.fecha)}
+                    </span>
+                  </div>
+                  {f.descripcion && (
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--texto-suave)',
+                        overflowWrap: 'break-word',
+                      }}
+                    >
+                      {f.descripcion}
+                    </div>
+                  )}
+                  <div className="acciones-item">
                     <button
                       className="btn-mini"
-                      style={{
-                        background: 'var(--acento)',
-                        color: '#0e1116',
-                        marginRight: 6,
-                      }}
+                      style={{ background: 'var(--acento)', color: '#0b0e13' }}
                       onClick={() => empezarEdicion(f)}
                     >
                       Editar
@@ -392,13 +391,75 @@ export default function Festivos() {
                     >
                       Borrar
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Vista escritorio: tabla */}
+            <div className="tabla-desktop">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Ámbito</th>
+                    <th>Descripción</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {festivos.map((f) => (
+                    <tr key={f.id}>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {textoFecha(f.fecha)}
+                      </td>
+                      <td>
+                        <span
+                          className="chip"
+                          style={{
+                            background: colorAmbito(f.ambito),
+                            color: 'white',
+                          }}
+                        >
+                          {f.ambito.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>{f.descripcion ?? '—'}</td>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <button
+                          className="btn-mini"
+                          style={{
+                            background: 'var(--acento)',
+                            color: '#0b0e13',
+                            marginRight: 4,
+                          }}
+                          onClick={() => empezarEdicion(f)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-mini btn-mini-peligro"
+                          onClick={() => borrarFestivo(f.id)}
+                        >
+                          Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .form-festivo {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </>
   )
 }
