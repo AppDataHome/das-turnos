@@ -6,6 +6,7 @@ import { ConfirmacionProveedor } from './contexto/ConfirmacionContexto'
 import ContenedorToasts from './componentes/ContenedorToasts'
 import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
 import Avatar from './componentes/Avatar'
+import Escudo from './componentes/Escudo'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
@@ -149,7 +150,9 @@ function Cabecera() {
 
   return (
     <div className="cabecera">
-      <div className="logo">🛡️</div>
+      <div className="logo">
+        <Escudo tamano={38} />
+      </div>
       <div className="datos">
         <div className="nombre">{usuario.nombre}</div>
         <div className="sub">Nº: {usuario.numero_empleado || '—'}</div>
@@ -204,10 +207,35 @@ function Login() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 400, marginTop: 60 }}>
-      <div className="card">
-        <h2 style={{ marginBottom: 16 }}>DAS · Control de Turnos</h2>
-        <form onSubmit={manejarAuth}>
+    <div className="container" style={{ maxWidth: 400, marginTop: 40 }}>
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: 16,
+          }}
+        >
+          <Escudo tamano={80} />
+        </div>
+
+        <h2 style={{ marginBottom: 4, fontSize: 22, letterSpacing: -0.5 }}>
+          DAS
+        </h2>
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--texto-suave)',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 600,
+            marginBottom: 20,
+          }}
+        >
+          Distribución y Asignación de Servicios
+        </p>
+
+        <form onSubmit={manejarAuth} style={{ textAlign: 'left' }}>
           <label className="label">Correo electrónico</label>
           <input
             className="input"
