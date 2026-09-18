@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
+import { useToast } from '../contexto/ToastContexto'
 import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import ModalDia from './ModalDia'
@@ -27,6 +28,7 @@ type VistaCalendario = 'mensual' | 'semanal'
 
 export default function Calendario() {
   const { usuario } = useUsuario()
+  const toast = useToast()
 
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
@@ -124,6 +126,17 @@ export default function Calendario() {
       .lte('fecha', fin)
 
     if (!error && data) setFestivos(data.map((f: any) => f.fecha))
+  }
+
+  async function borrarTurnoRapido(id: string) {
+    if (!confirm('¿Seguro que quieres borrar este turno?')) return
+    const { error } = await supabase.from('turno').delete().eq('id', id)
+    if (error) {
+      toast.error('Error al borrar: ' + error.message)
+      return
+    }
+    toast.exito('Turno borrado')
+    cargarTodo()
   }
 
   if (!usuario) return null
@@ -598,12 +611,7 @@ export default function Calendario() {
 
                   <button
                     className="btn-mini btn-mini-peligro"
-                    onClick={async () => {
-                      if (!confirm('¿Seguro que quieres borrar este turno?'))
-                        return
-                      await supabase.from('turno').delete().eq('id', t.id)
-                      cargarTodo()
-                    }}
+                    onClick={() => borrarTurnoRapido(t.id)}
                   >
                     Borrar
                   </button>
@@ -667,7 +675,6 @@ function CuentaKilometros({
   progreso: number
   realizados: number
 }) {
-  // Semicírculo de radio 50 con circunferencia = π * 50 ≈ 157.08
   const circunferencia = Math.PI * 50
   const offset = circunferencia * (1 - progreso / 100)
 
@@ -681,7 +688,6 @@ function CuentaKilometros({
       }}
     >
       <svg viewBox="0 0 120 70" width="130" height="78">
-        {/* Pista de fondo */}
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
@@ -689,7 +695,6 @@ function CuentaKilometros({
           strokeWidth="10"
           strokeLinecap="round"
         />
-        {/* Progreso */}
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
@@ -702,7 +707,6 @@ function CuentaKilometros({
         />
       </svg>
 
-      {/* Número en el centro */}
       <div
         style={{
           position: 'absolute',
