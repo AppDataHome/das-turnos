@@ -5,6 +5,7 @@ import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
+import VistaAnual from './VistaAnual'
 import ModalDia from './ModalDia'
 import AvisosBanner from './AvisosBanner'
 import {
@@ -30,7 +31,7 @@ interface ResumenVacaciones {
   disponibles_anterior: number
 }
 
-type VistaCalendario = 'mensual' | 'semanal'
+type VistaCalendario = 'mensual' | 'semanal' | 'anual'
 
 export default function Calendario() {
   const { usuario } = useUsuario()
@@ -47,7 +48,9 @@ export default function Calendario() {
 
   const [vista, setVista] = useState<VistaCalendario>(() => {
     const guardada = localStorage.getItem('vista_calendario')
-    return guardada === 'semanal' ? 'semanal' : 'mensual'
+    if (guardada === 'semanal') return 'semanal'
+    if (guardada === 'anual') return 'anual'
+    return 'mensual'
   })
 
   useEffect(() => {
@@ -205,6 +208,12 @@ export default function Calendario() {
   function seleccionarYAbir(fechaNueva: string) {
     setFecha(fechaNueva)
     setModalAbierto(true)
+  }
+
+  // Cuando se pulsa un día en la vista anual, cambiamos a la vista mensual
+  function seleccionarDesdeAnual(fechaNueva: string) {
+    setFecha(fechaNueva)
+    setVista('mensual')
   }
 
   // ─────────── SKELETON MIENTRAS CARGA ───────────
@@ -478,16 +487,33 @@ export default function Calendario() {
         >
           Semanal
         </button>
+        <button
+          onClick={() => setVista('anual')}
+          style={{
+            padding: '6px 14px',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: 7,
+            border: 'none',
+            cursor: 'pointer',
+            background: vista === 'anual' ? 'var(--acento)' : 'transparent',
+            color: vista === 'anual' ? '#0b0e13' : 'var(--texto-suave)',
+          }}
+        >
+          Anual
+        </button>
       </div>
 
-      {vista === 'mensual' ? (
+      {vista === 'mensual' && (
         <VistaMensual
           turnos={turnos}
           festivos={festivos}
           fechaSeleccionada={fecha}
           onSeleccionarFecha={seleccionarYAbir}
         />
-      ) : (
+      )}
+
+      {vista === 'semanal' && (
         <VistaSemanal
           turnos={turnos}
           festivos={festivos}
@@ -496,153 +522,162 @@ export default function Calendario() {
         />
       )}
 
-      <div className="card">
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 10,
-            flexWrap: 'wrap',
-          }}
-        >
-          <h3 style={{ margin: 0, flex: 1, minWidth: 0 }}>
-            {textoFechaLarga(fecha)}
-          </h3>
-          <span
-            className="chip"
+      {vista === 'anual' && (
+        <VistaAnual
+          turnos={turnos}
+          onSeleccionarFecha={seleccionarDesdeAnual}
+        />
+      )}
+
+      {vista !== 'anual' && (
+        <div className="card">
+          <div
             style={{
-              background: 'var(--fondo-tarjeta-2)',
-              color: 'var(--texto-suave)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 10,
+              flexWrap: 'wrap',
             }}
           >
-            {turnosDelDia.length}{' '}
-            {turnosDelDia.length === 1 ? 'turno' : 'turnos'}
-          </span>
-          <button
-            className="btn btn-primary"
-            onClick={() => setModalAbierto(true)}
-          >
-            Editar día
-          </button>
-        </div>
+            <h3 style={{ margin: 0, flex: 1, minWidth: 0 }}>
+              {textoFechaLarga(fecha)}
+            </h3>
+            <span
+              className="chip"
+              style={{
+                background: 'var(--fondo-tarjeta-2)',
+                color: 'var(--texto-suave)',
+              }}
+            >
+              {turnosDelDia.length}{' '}
+              {turnosDelDia.length === 1 ? 'turno' : 'turnos'}
+            </span>
+            <button
+              className="btn btn-primary"
+              onClick={() => setModalAbierto(true)}
+            >
+              Editar día
+            </button>
+          </div>
 
-        {turnosDelDia.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
-            Este día aún no tiene turnos asignados.
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {turnosDelDia.map((t) => {
-              const fechaD = new Date(t.fecha + 'T00:00:00')
-              const diaSemana = fechaD.getDay()
-              const esFinSemana = diaSemana === 0 || diaSemana === 6
-              const esNocturno = t.codigo_turno === 'N' && !esFinSemana
-              const esFestivo = esFinSemana && t.codigo_turno !== 'L'
+          {turnosDelDia.length === 0 ? (
+            <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
+              Este día aún no tiene turnos asignados.
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {turnosDelDia.map((t) => {
+                const fechaD = new Date(t.fecha + 'T00:00:00')
+                const diaSemana = fechaD.getDay()
+                const esFinSemana = diaSemana === 0 || diaSemana === 6
+                const esNocturno = t.codigo_turno === 'N' && !esFinSemana
+                const esFestivo = esFinSemana && t.codigo_turno !== 'L'
 
-              return (
-                <div
-                  key={t.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: 8,
-                    background: 'var(--fondo-tarjeta-2)',
-                    borderRadius: 8,
-                    minWidth: 0,
-                  }}
-                >
+                return (
                   <div
+                    key={t.id}
                     style={{
-                      fontSize: 20,
-                      width: 34,
-                      height: 34,
-                      borderRadius: 8,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      background: 'var(--fondo-tarjeta)',
-                      flexShrink: 0,
+                      gap: 8,
+                      padding: 8,
+                      background: 'var(--fondo-tarjeta-2)',
+                      borderRadius: 8,
+                      minWidth: 0,
                     }}
                   >
-                    {iconoTurno(t)}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
+                        fontSize: 20,
+                        width: 34,
+                        height: 34,
+                        borderRadius: 8,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 6,
-                        marginBottom: 2,
-                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        background: 'var(--fondo-tarjeta)',
+                        flexShrink: 0,
                       }}
                     >
-                      <span className="chip" style={{ background: t.color }}>
-                        {(t.nombre_turno ?? '').toUpperCase()}
-                      </span>
-                      {esFestivo && (
-                        <span
-                          className="punto-das punto-festivo"
-                          title="Cuenta como festivo trabajado"
-                        />
-                      )}
-                      {esNocturno && (
-                        <span
-                          className="punto-das punto-nocturno"
-                          title="Cuenta como noche trabajada"
-                        />
-                      )}
+                      {iconoTurno(t)}
                     </div>
 
-                    <div
-                      style={{
-                        fontSize: 10,
-                        color: 'var(--texto-suave)',
-                        display: 'flex',
-                        gap: 8,
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <span>
-                        {t.hora_inicio && t.hora_fin
-                          ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
-                          : 'Todo el día'}
-                      </span>
-                      <span>
-                        {muestraDepartamento(t)
-                          ? t.departamento
-                          : etiquetaSinDepartamento(t)}
-                      </span>
-                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          marginBottom: 2,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <span className="chip" style={{ background: t.color }}>
+                          {(t.nombre_turno ?? '').toUpperCase()}
+                        </span>
+                        {esFestivo && (
+                          <span
+                            className="punto-das punto-festivo"
+                            title="Cuenta como festivo trabajado"
+                          />
+                        )}
+                        {esNocturno && (
+                          <span
+                            className="punto-das punto-nocturno"
+                            title="Cuenta como noche trabajada"
+                          />
+                        )}
+                      </div>
 
-                    {t.notas && (
                       <div
                         style={{
                           fontSize: 10,
                           color: 'var(--texto-suave)',
-                          marginTop: 2,
-                          overflowWrap: 'break-word',
+                          display: 'flex',
+                          gap: 8,
+                          flexWrap: 'wrap',
                         }}
                       >
-                        📝 {t.notas}
+                        <span>
+                          {t.hora_inicio && t.hora_fin
+                            ? `${t.hora_inicio.slice(0, 5)} – ${t.hora_fin.slice(0, 5)}`
+                            : 'Todo el día'}
+                        </span>
+                        <span>
+                          {muestraDepartamento(t)
+                            ? t.departamento
+                            : etiquetaSinDepartamento(t)}
+                        </span>
                       </div>
-                    )}
-                  </div>
 
-                  <button
-                    className="btn-mini btn-mini-peligro"
-                    onClick={() => borrarTurnoRapido(t.id)}
-                  >
-                    Borrar
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+                      {t.notas && (
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: 'var(--texto-suave)',
+                            marginTop: 2,
+                            overflowWrap: 'break-word',
+                          }}
+                        >
+                          📝 {t.notas}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      className="btn-mini btn-mini-peligro"
+                      onClick={() => borrarTurnoRapido(t.id)}
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {modalAbierto && (
         <ModalDia
