@@ -23,12 +23,12 @@ export default function Ayuda() {
       contenido: (
         <>
           <p>
-            <strong>DAS · Control de Turnos</strong> es una aplicación para
-            llevar el calendario de turnos del personal y calcular
-            automáticamente los <strong>días DAS</strong> generados por
-            servicios festivos y nocturnos, según la normativa de la Guardia
-            Civil.
-          </p>
+              <strong>DAS · Distribución y Asignación de Servicios</strong> es
+  una aplicación para llevar el calendario de turnos del personal
+  y calcular automáticamente los <strong>días DAS</strong>{' '}
+  generados por servicios festivos y nocturnos, según la normativa
+  de la Guardia Civil.
+</p>
           <p>
             Toda la información se guarda en la nube y solo tú puedes ver y
             modificar tus turnos. Los cambios se sincronizan al instante entre
@@ -728,7 +728,19 @@ fecha,tipo,departamento,notas,anio_origen
   return (
     <div className="container">
       <div className="card">
-        <h2 style={{ marginBottom: 8 }}>Centro de ayuda</h2>
+        <h2 style={{ marginBottom: 4 }}>Centro de ayuda</h2>
+<p
+  style={{
+    fontSize: 11,
+    color: 'var(--texto-suave)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: 600,
+    marginBottom: 6,
+  }}
+>
+  DAS · Distribución y Asignación de Servicios
+</p>
         <p style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
           Toca cualquier sección para ver su contenido. También puedes usar el
           buscador de tu navegador (Ctrl+F) para encontrar algo concreto.
