@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { UsuarioProveedor, useUsuario } from './contexto/UsuarioContexto'
 import { ToastProveedor } from './contexto/ToastContexto'
+import { ConfirmacionProveedor } from './contexto/ConfirmacionContexto'
 import ContenedorToasts from './componentes/ContenedorToasts'
+import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
@@ -21,9 +23,11 @@ import type { User } from '@supabase/supabase-js'
 export default function App() {
   return (
     <ToastProveedor>
-      <UsuarioProveedor>
-        <Aplicacion />
-      </UsuarioProveedor>
+      <ConfirmacionProveedor>
+        <UsuarioProveedor>
+          <Aplicacion />
+        </UsuarioProveedor>
+      </ConfirmacionProveedor>
     </ToastProveedor>
   )
 }
@@ -65,6 +69,7 @@ function Aplicacion() {
       <>
         <Login />
         <ContenedorToasts />
+        <ContenedorConfirmacion />
       </>
     )
   }
@@ -132,6 +137,7 @@ function Aplicacion() {
 
       <BarraInferior pestana={pestana} onCambiar={setPestana} />
       <ContenedorToasts />
+      <ContenedorConfirmacion />
     </>
   )
 }
