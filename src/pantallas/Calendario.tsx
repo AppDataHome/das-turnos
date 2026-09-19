@@ -49,6 +49,7 @@ export default function Calendario() {
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
   const [vacaciones, setVacaciones] = useState<ResumenVacaciones | null>(null)
+  const [asuntos, setAsuntos] = useState<ResumenVacaciones | null>(null)
   const [festivos, setFestivos] = useState<string[]>([])
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -80,13 +81,16 @@ export default function Calendario() {
     cargarFestivos()
   }, [])
 
-  // ID del propietario cuyos datos estamos viendo
-  // (el propio usuario, o el de quien nos ha invitado)
   const idPropietario = usuario?.invitado_de ?? usuario?.id ?? ''
 
   async function cargarTodo() {
     setCargando(true)
-    await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
+    await Promise.all([
+      cargarTurnos(),
+      cargarEstadoDas(),
+      cargarVacaciones(),
+      cargarAsuntosPropios(),
+    ])
     setCargando(false)
   }
 
@@ -144,6 +148,15 @@ export default function Calendario() {
       p_usuario: idPropietario,
     })
     if (!error && data && data[0]) setVacaciones(data[0])
+  }
+
+  async function cargarAsuntosPropios() {
+    if (!idPropietario) return
+    const { data, error } = await supabase.rpc(
+      'get_resumen_asuntos_propios',
+      { p_usuario: idPropietario }
+    )
+    if (!error && data && data[0]) setAsuntos(data[0])
   }
 
   async function cargarFestivos() {
@@ -233,7 +246,6 @@ export default function Calendario() {
 
   function seleccionarYAbir(fechaNueva: string) {
     setFecha(fechaNueva)
-    // Los invitados pueden abrir el modal, pero en modo solo lectura
     setModalAbierto(true)
   }
 
@@ -270,6 +282,7 @@ export default function Calendario() {
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
 
       <div className="grid-tarjetas">
+        {/* Turnos Mes */}
         <div className="card" style={{ textAlign: 'center' }}>
           <h4
             style={{
@@ -338,90 +351,166 @@ export default function Calendario() {
           </div>
         </div>
 
+        {/* Vacaciones y Asuntos Propios */}
         <div className="card">
           <h4
             style={{
               color: 'var(--texto-suave)',
               fontSize: 10,
-              marginBottom: 8,
+              marginBottom: 10,
               textTransform: 'uppercase',
               letterSpacing: 0.6,
               fontWeight: 700,
               textAlign: 'center',
             }}
           >
-            Vacaciones
+            Vacaciones y Asuntos Propios
           </h4>
 
-          <div
-            style={{
-              fontSize: 9,
-              color: 'var(--texto-suave)',
-              marginBottom: 4,
-              textTransform: 'uppercase',
-              fontWeight: 600,
-              textAlign: 'center',
-            }}
-          >
-            Año {vacaciones?.anio_actual ?? new Date().getFullYear()}
-          </div>
+          {/* Bloque Vacaciones */}
+          <div style={{ marginBottom: 12 }}>
+            <div
+              style={{
+                fontSize: 9,
+                color: 'var(--acento)',
+                marginBottom: 4,
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                letterSpacing: 0.4,
+              }}
+            >
+              🏖️ Vacaciones · Año{' '}
+              {vacaciones?.anio_actual ?? new Date().getFullYear()}
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <FilaResumen
-              etiqueta="Total"
-              valor={vacaciones?.total_actual ?? 0}
-            />
-            <FilaResumen
-              etiqueta="Disfrutadas"
-              valor={vacaciones?.disfrutadas_actual ?? 0}
-            />
-            <FilaResumen
-              etiqueta="Disponibles"
-              valor={vacaciones?.disponibles_actual ?? 0}
-              destacado
-            />
-          </div>
-
-          {(vacaciones?.total_anterior ?? 0) > 0 && (
-            <>
-              <hr
-                style={{
-                  border: 'none',
-                  borderTop: '1px solid var(--borde)',
-                  margin: '8px 0',
-                }}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FilaResumen
+                etiqueta="Total"
+                valor={vacaciones?.total_actual ?? 0}
               />
-              <div
-                style={{
-                  fontSize: 9,
-                  color: 'var(--texto-suave)',
-                  marginBottom: 4,
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}
-              >
-                Arrastre {vacaciones?.anio_anterior}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <FilaResumen
-                  etiqueta="Totales"
-                  valor={vacaciones?.total_anterior ?? 0}
-                />
-                <FilaResumen
-                  etiqueta="Disfrutados"
-                  valor={vacaciones?.disfrutadas_anterior ?? 0}
-                />
-                <FilaResumen
-                  etiqueta="Disponibles"
-                  valor={vacaciones?.disponibles_anterior ?? 0}
-                  destacado
-                />
-              </div>
-            </>
-          )}
+              <FilaResumen
+                etiqueta="Disfrutadas"
+                valor={vacaciones?.disfrutadas_actual ?? 0}
+              />
+              <FilaResumen
+                etiqueta="Disponibles"
+                valor={vacaciones?.disponibles_actual ?? 0}
+                destacado
+              />
+            </div>
+
+            {(vacaciones?.total_anterior ?? 0) > 0 && (
+              <>
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--texto-suave)',
+                    marginTop: 6,
+                    marginBottom: 3,
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                  }}
+                >
+                  Arrastre {vacaciones?.anio_anterior}
+                </div>
+                <div
+                  style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                >
+                  <FilaResumen
+                    etiqueta="Totales"
+                    valor={vacaciones?.total_anterior ?? 0}
+                  />
+                  <FilaResumen
+                    etiqueta="Disfrutados"
+                    valor={vacaciones?.disfrutadas_anterior ?? 0}
+                  />
+                  <FilaResumen
+                    etiqueta="Disponibles"
+                    valor={vacaciones?.disponibles_anterior ?? 0}
+                    destacado
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          <hr
+            style={{
+              border: 'none',
+              borderTop: '1px solid var(--borde)',
+              margin: '10px 0',
+            }}
+          />
+
+          {/* Bloque Asuntos Propios */}
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                color: 'var(--acento)',
+                marginBottom: 4,
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                letterSpacing: 0.4,
+              }}
+            >
+              📋 Asuntos Propios · Año{' '}
+              {asuntos?.anio_actual ?? new Date().getFullYear()}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FilaResumen
+                etiqueta="Total"
+                valor={asuntos?.total_actual ?? 0}
+              />
+              <FilaResumen
+                etiqueta="Disfrutados"
+                valor={asuntos?.disfrutados_actual ?? 0}
+              />
+              <FilaResumen
+                etiqueta="Disponibles"
+                valor={asuntos?.disponibles_actual ?? 0}
+                destacado
+              />
+            </div>
+
+            {(asuntos?.total_anterior ?? 0) > 0 && (
+              <>
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--texto-suave)',
+                    marginTop: 6,
+                    marginBottom: 3,
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                  }}
+                >
+                  Arrastre {asuntos?.anio_anterior}
+                </div>
+                <div
+                  style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                >
+                  <FilaResumen
+                    etiqueta="Totales"
+                    valor={asuntos?.total_anterior ?? 0}
+                  />
+                  <FilaResumen
+                    etiqueta="Disfrutados"
+                    valor={asuntos?.disfrutados_anterior ?? 0}
+                  />
+                  <FilaResumen
+                    etiqueta="Disponibles"
+                    valor={asuntos?.disponibles_anterior ?? 0}
+                    destacado
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
+        {/* DAS */}
         <div
           className="card"
           onClick={() => setModalInformeAbierto(true)}
@@ -523,6 +612,7 @@ export default function Calendario() {
         </div>
       </div>
 
+      {/* Selector de vista */}
       <div
         style={{
           display: 'flex',
@@ -829,7 +919,7 @@ function FilaResumen({
       <span
         style={{
           fontWeight: 800,
-          fontSize: destacado ? 16 : 13,
+          fontSize: destacado ? 15 : 13,
           color: destacado ? 'var(--acento)' : 'var(--texto)',
         }}
       >
