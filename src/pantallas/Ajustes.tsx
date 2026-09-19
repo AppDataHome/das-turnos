@@ -33,7 +33,6 @@ export default function Ajustes() {
 
   return (
     <div className="container">
-      {/* Selector de subpestañas */}
       <div className="subpestanas">
         <button
           className={pestana === 'perfil' ? 'activa' : ''}
@@ -443,7 +442,7 @@ function PestanaPerfil() {
 }
 
 // ═══════════════════════════════════════════════════
-// CONFIGURACIÓN (solo propietarios)
+// CONFIGURACIÓN
 // ═══════════════════════════════════════════════════
 
 function PestanaConfiguracion() {
@@ -451,6 +450,7 @@ function PestanaConfiguracion() {
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
+  // Vacaciones
   const [diasAnuales, setDiasAnuales] = useState<number>(
     usuario?.dias_vacaciones_anuales ?? 22
   )
@@ -460,6 +460,19 @@ function PestanaConfiguracion() {
   const [anioArrastre, setAnioArrastre] = useState<number>(
     usuario?.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
   )
+
+  // Asuntos propios
+  const [apAnuales, setApAnuales] = useState<number>(
+    usuario?.dias_asuntos_propios_anuales ?? 6
+  )
+  const [apArrastrados, setApArrastrados] = useState<number>(
+    usuario?.dias_asuntos_propios_arrastrados ?? 0
+  )
+  const [apAnioArrastre, setApAnioArrastre] = useState<number>(
+    usuario?.anio_asuntos_propios_arrastrados ??
+      new Date().getFullYear() - 1
+  )
+
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
 
@@ -469,6 +482,12 @@ function PestanaConfiguracion() {
       setDiasArrastradas(usuario.dias_vacaciones_arrastradas ?? 0)
       setAnioArrastre(
         usuario.anio_vacaciones_arrastradas ??
+          new Date().getFullYear() - 1
+      )
+      setApAnuales(usuario.dias_asuntos_propios_anuales ?? 6)
+      setApArrastrados(usuario.dias_asuntos_propios_arrastrados ?? 0)
+      setApAnioArrastre(
+        usuario.anio_asuntos_propios_arrastrados ??
           new Date().getFullYear() - 1
       )
     }
@@ -523,10 +542,58 @@ function PestanaConfiguracion() {
     }
   }
 
+  async function guardarAsuntosPropios(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setGuardando(true)
+
+    try {
+      await actualizarPerfil({
+        dias_asuntos_propios_anuales: Number(apAnuales) || 0,
+        dias_asuntos_propios_arrastrados: Number(apArrastrados) || 0,
+        anio_asuntos_propios_arrastrados: Number(apAnioArrastre) || null,
+      })
+      toast.exito('Configuración de asuntos propios guardada')
+    } catch (err: any) {
+      const msg = err?.message ?? 'Error al guardar'
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function reiniciarArrastreAP() {
+    const ok = await confirmar({
+      titulo: '¿Poner el arrastre de asuntos propios a 0?',
+      mensaje:
+        'Los días pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
+      textoConfirmar: 'Poner a 0',
+      peligro: true,
+    })
+    if (!ok) return
+
+    setError('')
+    setGuardando(true)
+
+    try {
+      setApArrastrados(0)
+      await actualizarPerfil({ dias_asuntos_propios_arrastrados: 0 })
+      toast.exito('Arrastre de AP reiniciado a 0')
+    } catch (err: any) {
+      const msg = err?.message ?? 'Error al reiniciar'
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
   return (
     <>
+      {/* Vacaciones */}
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Vacaciones</h2>
+        <h2 style={{ marginBottom: 12 }}>🏖️ Vacaciones</h2>
 
         <form onSubmit={guardarVacaciones}>
           <label className="label">Días de vacaciones anuales</label>
@@ -586,7 +653,7 @@ function PestanaConfiguracion() {
               marginBottom: 10,
             }}
           >
-            Normalmente el año pasado (por ejemplo, 2025 si estás en 2026).
+            Normalmente el año pasado.
           </p>
 
           <div
@@ -613,6 +680,95 @@ function PestanaConfiguracion() {
         </form>
       </div>
 
+      {/* Asuntos propios */}
+      <div className="card">
+        <h2 style={{ marginBottom: 12 }}>📋 Asuntos Propios</h2>
+
+        <form onSubmit={guardarAsuntosPropios}>
+          <label className="label">Días de asuntos propios anuales</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={60}
+            value={apAnuales}
+            onChange={(e) => setApAnuales(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 10,
+              color: 'var(--texto-suave)',
+              marginTop: -2,
+              marginBottom: 10,
+            }}
+          >
+            Días que te corresponden cada año (por defecto 6).
+          </p>
+
+          <label className="label">Días arrastrados del año anterior</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={60}
+            value={apArrastrados}
+            onChange={(e) => setApArrastrados(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 10,
+              color: 'var(--texto-suave)',
+              marginTop: -2,
+              marginBottom: 10,
+            }}
+          >
+            Días que te sobraron del año pasado y aún puedes disfrutar.
+          </p>
+
+          <label className="label">Año de los días arrastrados</label>
+          <input
+            className="input"
+            type="number"
+            min={2000}
+            max={2100}
+            value={apAnioArrastre}
+            onChange={(e) => setApAnioArrastre(Number(e.target.value))}
+          />
+          <p
+            style={{
+              fontSize: 10,
+              color: 'var(--texto-suave)',
+              marginTop: -2,
+              marginBottom: 10,
+            }}
+          >
+            Normalmente el año pasado.
+          </p>
+
+          <div
+            style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}
+          >
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={guardando}
+              style={{ flex: 1 }}
+            >
+              {guardando ? 'Guardando…' : 'Guardar asuntos propios'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={reiniciarArrastreAP}
+            >
+              Poner arrastre a 0
+            </button>
+          </div>
+
+          {error && <p className="error">{error}</p>}
+        </form>
+      </div>
+
       <SeccionDasRemanente />
 
       <div className="card">
@@ -624,7 +780,7 @@ function PestanaConfiguracion() {
 }
 
 // ═══════════════════════════════════════════════════
-// DATOS (solo propietarios)
+// DATOS
 // ═══════════════════════════════════════════════════
 
 function PestanaDatos() {
