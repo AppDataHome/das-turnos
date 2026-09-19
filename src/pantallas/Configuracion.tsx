@@ -10,14 +10,14 @@ export default function Configuracion() {
   const [seccion, setSeccion] = useState<Seccion>('departamentos')
 
   return (
-    <div className="container">
+    <>
       <div
         style={{
           display: 'flex',
           gap: 4,
           marginBottom: 10,
           padding: 3,
-          background: 'var(--fondo-tarjeta)',
+          background: 'var(--fondo-tarjeta-2)',
           border: '1px solid var(--borde)',
           borderRadius: 10,
           width: 'fit-content',
@@ -61,7 +61,7 @@ export default function Configuracion() {
 
       {seccion === 'departamentos' && <SeccionDepartamentos />}
       {seccion === 'tipos-turno' && <SeccionTiposTurno />}
-    </div>
+    </>
   )
 }
 
@@ -169,7 +169,9 @@ function SeccionDepartamentos() {
       toast.error('Error: ' + error.message)
       return
     }
-    toast.exito(d.activo ? 'Departamento desactivado' : 'Departamento activado')
+    toast.exito(
+      d.activo ? 'Departamento desactivado' : 'Departamento activado'
+    )
     cargar()
   }
 
@@ -202,8 +204,16 @@ function SeccionDepartamentos() {
 
   return (
     <>
-      <div className="card">
-        <h2 style={{ marginBottom: 10 }}>Departamentos</h2>
+      <div
+        style={{
+          background: 'var(--fondo-tarjeta-2)',
+          border: '1px solid var(--borde)',
+          borderRadius: 10,
+          padding: 12,
+          marginBottom: 10,
+        }}
+      >
+        <h3 style={{ marginBottom: 10 }}>Añadir departamento</h3>
 
         <form onSubmit={guardar}>
           <div
@@ -257,7 +267,7 @@ function SeccionDepartamentos() {
         </form>
       </div>
 
-      <div className="card">
+      <div>
         <h3 style={{ marginBottom: 10 }}>Listado ({departamentos.length})</h3>
 
         {cargando ? (
@@ -577,8 +587,16 @@ function SeccionTiposTurno() {
 
   return (
     <>
-      <div className="card">
-        <h2 style={{ marginBottom: 10 }}>Tipos de turno</h2>
+      <div
+        style={{
+          background: 'var(--fondo-tarjeta-2)',
+          border: '1px solid var(--borde)',
+          borderRadius: 10,
+          padding: 12,
+          marginBottom: 10,
+        }}
+      >
+        <h3 style={{ marginBottom: 10 }}>Añadir tipo de turno</h3>
 
         <form onSubmit={guardar}>
           <div
@@ -717,7 +735,7 @@ function SeccionTiposTurno() {
         </form>
       </div>
 
-      <div className="card">
+      <div>
         <h3 style={{ marginBottom: 10 }}>Listado ({tipos.length})</h3>
 
         {cargando ? (
