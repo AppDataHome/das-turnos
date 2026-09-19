@@ -10,14 +10,12 @@ import Escudo from './componentes/Escudo'
 import CampoPassword from './componentes/CampoPassword'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
-import Configuracion from './pantallas/Configuracion'
 import Ajustes from './pantallas/Ajustes'
 import Ayuda from './pantallas/Ayuda'
 import BarraInferior, { type Pestana } from './pantallas/BarraInferior'
 import {
   Calendar,
   CalendarDays,
-  Cog,
   Settings,
   HelpCircle,
 } from 'lucide-react'
@@ -96,13 +94,6 @@ function Aplicacion() {
             Festivos
           </a>
           <a
-            className={pestana === 'configuracion' ? 'activo' : ''}
-            onClick={() => setPestana('configuracion')}
-          >
-            <Cog size={16} />
-            Configuración
-          </a>
-          <a
             className={pestana === 'ajustes' ? 'activo' : ''}
             onClick={() => setPestana('ajustes')}
           >
@@ -133,7 +124,6 @@ function Aplicacion() {
 
         {pestana === 'calendario' && <Calendario />}
         {pestana === 'festivos' && <Festivos />}
-        {pestana === 'configuracion' && <Configuracion />}
         {pestana === 'ajustes' && <Ajustes />}
         {pestana === 'ayuda' && <Ayuda />}
       </div>
