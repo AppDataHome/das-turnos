@@ -4,6 +4,7 @@ import { useUsuario } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import { X } from 'lucide-react'
+import { iconoTurno } from '../utilidades/turnos'
 import type { Turno, Departamento, TipoTurno } from '../tipos'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
   turnosDelDia: Turno[]
   onCerrar: () => void
   onCambio: () => void
+  soloLectura?: boolean
 }
 
 type Modo = 'un-dia' | 'varios-dias'
@@ -20,6 +22,7 @@ export default function ModalDia({
   turnosDelDia,
   onCerrar,
   onCambio,
+  soloLectura = false,
 }: Props) {
   const { usuario } = useUsuario()
   const toast = useToast()
@@ -48,8 +51,10 @@ export default function ModalDia({
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    cargarCatalogos()
-  }, [])
+    if (!soloLectura) {
+      cargarCatalogos()
+    }
+  }, [soloLectura])
 
   async function cargarCatalogos() {
     const [depRes, tipRes] = await Promise.all([
@@ -75,7 +80,7 @@ export default function ModalDia({
 
   async function guardarTurno(e: React.FormEvent) {
     e.preventDefault()
-    if (!usuario) return
+    if (!usuario || soloLectura) return
     setError('')
     setGuardando(true)
 
@@ -138,7 +143,7 @@ export default function ModalDia({
 
   async function crearBloque(e: React.FormEvent) {
     e.preventDefault()
-    if (!usuario) return
+    if (!usuario || soloLectura) return
     setError('')
     setGuardando(true)
 
@@ -171,6 +176,7 @@ export default function ModalDia({
   }
 
   function empezarEdicion(t: Turno) {
+    if (soloLectura) return
     setModo('un-dia')
     setIdEditando(t.id)
     setCodigoTurno(t.codigo_turno ?? '')
@@ -186,6 +192,7 @@ export default function ModalDia({
   }
 
   async function borrarTurno(id: string) {
+    if (soloLectura) return
     const ok = await confirmar({
       titulo: '¿Borrar este turno?',
       mensaje: 'Esta acción no se puede deshacer.',
@@ -234,6 +241,26 @@ export default function ModalDia({
           </button>
         </div>
 
+        {/* Aviso modo solo lectura */}
+        {soloLectura && (
+          <div
+            style={{
+              padding: 10,
+              background: 'rgba(59, 130, 246, 0.12)',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              borderRadius: 8,
+              marginBottom: 14,
+              fontSize: 11,
+              color: 'var(--texto-suave)',
+              lineHeight: 1.4,
+            }}
+          >
+            👁️ Estás viendo este calendario en modo <strong>solo lectura</strong>.
+            No puedes añadir, editar ni borrar turnos.
+          </div>
+        )}
+
+        {/* Turnos ya asignados */}
         <div className="modal-seccion">
           <div className="modal-seccion-titulo">
             Turnos asignados ({turnosDelDia.length})
@@ -265,254 +292,295 @@ export default function ModalDia({
                 >
                   {(t.nombre_turno ?? '').toUpperCase()}
                 </span>
-                <div className="detalle">
-                  <div style={{ fontSize: 11 }}>{t.departamento}</div>
-                  {t.notas && <div className="notas">📝 {t.notas}</div>}
+
+                <div
+                  className="detalle"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    minWidth: 0,
+                  }}
+                >
+                  <span style={{ fontSize: 16 }}>
+                    {iconoTurno(t)}
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 11 }}>
+                      {t.departamento}
+                    </div>
+                    {t.notas && (
+                      <div className="notas">📝 {t.notas}</div>
+                    )}
+                  </div>
                 </div>
-                <button
-                  className="btn-mini"
-                  style={{ background: 'var(--acento)', color: '#0b0e13' }}
-                  onClick={() => empezarEdicion(t)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="btn-mini btn-mini-peligro"
-                  onClick={() => borrarTurno(t.id)}
-                >
-                  Borrar
-                </button>
+
+                {!soloLectura && (
+                  <>
+                    <button
+                      className="btn-mini"
+                      style={{
+                        background: 'var(--acento)',
+                        color: '#0b0e13',
+                      }}
+                      onClick={() => empezarEdicion(t)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="btn-mini btn-mini-peligro"
+                      onClick={() => borrarTurno(t.id)}
+                    >
+                      Borrar
+                    </button>
+                  </>
+                )}
               </div>
             ))
           )}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 4,
-            marginBottom: 10,
-            padding: 3,
-            background: 'var(--fondo-tarjeta-2)',
-            borderRadius: 8,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setModo('un-dia')}
-            style={{
-              flex: 1,
-              padding: '6px 10px',
-              fontSize: 11,
-              fontWeight: 600,
-              borderRadius: 6,
-              border: 'none',
-              cursor: 'pointer',
-              background: modo === 'un-dia' ? 'var(--acento)' : 'transparent',
-              color: modo === 'un-dia' ? '#0b0e13' : 'var(--texto-suave)',
-            }}
-          >
-            Un día
-          </button>
-          <button
-            type="button"
-            onClick={() => setModo('varios-dias')}
-            style={{
-              flex: 1,
-              padding: '6px 10px',
-              fontSize: 11,
-              fontWeight: 600,
-              borderRadius: 6,
-              border: 'none',
-              cursor: 'pointer',
-              background:
-                modo === 'varios-dias' ? 'var(--acento)' : 'transparent',
-              color:
-                modo === 'varios-dias' ? '#0b0e13' : 'var(--texto-suave)',
-            }}
-          >
-            Varios días
-          </button>
-        </div>
-
-        {modo === 'un-dia' && (
-          <div className="modal-seccion">
-            <div className="modal-seccion-titulo">
-              {idEditando ? 'Editar turno' : 'Añadir turno'}
-            </div>
-
-            <form onSubmit={guardarTurno}>
-              <div className="fila-form">
-                <div>
-                  <label className="label">Tipo de turno</label>
-                  <select
-                    className="input"
-                    value={codigoTurno}
-                    onChange={(e) => setCodigoTurno(e.target.value)}
-                  >
-                    {tiposTurno.map((t) => (
-                      <option key={t.codigo} value={t.codigo}>
-                        {t.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="label">Departamento</label>
-                  <select
-                    className="input"
-                    value={idDepartamento}
-                    onChange={(e) => setIdDepartamento(e.target.value)}
-                  >
-                    {departamentos.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <label className="label">Notas (opcional)</label>
-              <input
-                className="input"
-                type="text"
-                value={notas}
-                onChange={(e) => setNotas(e.target.value)}
-                placeholder="Apoyo a unidad canina"
-              />
-
-              {error && <p className="error">{error}</p>}
-
-              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={guardando}
-                  style={{ flex: 1 }}
-                >
-                  {guardando
-                    ? 'Guardando…'
-                    : idEditando
-                    ? 'Guardar cambios'
-                    : 'Añadir turno'}
-                </button>
-                {idEditando && (
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    onClick={cancelarEdicion}
-                  >
-                    Cancelar
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        )}
-
-        {modo === 'varios-dias' && (
-          <div className="modal-seccion">
-            <div className="modal-seccion-titulo">
-              Añadir varios días seguidos
-            </div>
-
-            <form onSubmit={crearBloque}>
-              <div className="fila-form">
-                <div>
-                  <label className="label">Desde</label>
-                  <input
-                    className="input"
-                    type="date"
-                    value={fechaInicio}
-                    onChange={(e) => setFechaInicio(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label">Hasta</label>
-                  <input
-                    className="input"
-                    type="date"
-                    value={fechaFin}
-                    onChange={(e) => setFechaFin(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="fila-form">
-                <div>
-                  <label className="label">Tipo de turno</label>
-                  <select
-                    className="input"
-                    value={codigoTurnoBloque}
-                    onChange={(e) => setCodigoTurnoBloque(e.target.value)}
-                  >
-                    {tiposTurno.map((t) => (
-                      <option key={t.codigo} value={t.codigo}>
-                        {t.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="label">Departamento</label>
-                  <select
-                    className="input"
-                    value={idDepartamentoBloque}
-                    onChange={(e) => setIdDepartamentoBloque(e.target.value)}
-                  >
-                    {departamentos.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {mostrarSelectorAnio && (
-                <div>
-                  <label className="label">Año de origen</label>
-                  <select
-                    className="input"
-                    value={anioOrigen}
-                    onChange={(e) => setAnioOrigen(Number(e.target.value))}
-                  >
-                    <option value={anioActual}>
-                      {anioActual} (año actual)
-                    </option>
-                    <option value={anioAnterior}>
-                      {anioAnterior} (arrastre)
-                    </option>
-                  </select>
-                </div>
-              )}
-
-              <label className="label">Notas (opcional)</label>
-              <input
-                className="input"
-                type="text"
-                value={notasBloque}
-                onChange={(e) => setNotasBloque(e.target.value)}
-                placeholder="Vacaciones de verano"
-              />
-
-              {error && <p className="error">{error}</p>}
-
+        {/* Modo de edición: solo para propietarios */}
+        {!soloLectura && (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                gap: 4,
+                marginBottom: 10,
+                padding: 3,
+                background: 'var(--fondo-tarjeta-2)',
+                borderRadius: 8,
+              }}
+            >
               <button
-                className="btn btn-primary"
-                type="submit"
-                disabled={guardando}
-                style={{ width: '100%', marginTop: 6 }}
+                type="button"
+                onClick={() => setModo('un-dia')}
+                style={{
+                  flex: 1,
+                  padding: '6px 10px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  borderRadius: 6,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background:
+                    modo === 'un-dia' ? 'var(--acento)' : 'transparent',
+                  color:
+                    modo === 'un-dia' ? '#0b0e13' : 'var(--texto-suave)',
+                }}
               >
-                {guardando ? 'Creando…' : 'Crear en bloque'}
+                Un día
               </button>
-            </form>
-          </div>
+              <button
+                type="button"
+                onClick={() => setModo('varios-dias')}
+                style={{
+                  flex: 1,
+                  padding: '6px 10px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  borderRadius: 6,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background:
+                    modo === 'varios-dias' ? 'var(--acento)' : 'transparent',
+                  color:
+                    modo === 'varios-dias'
+                      ? '#0b0e13'
+                      : 'var(--texto-suave)',
+                }}
+              >
+                Varios días
+              </button>
+            </div>
+
+            {modo === 'un-dia' && (
+              <div className="modal-seccion">
+                <div className="modal-seccion-titulo">
+                  {idEditando ? 'Editar turno' : 'Añadir turno'}
+                </div>
+
+                <form onSubmit={guardarTurno}>
+                  <div className="fila-form">
+                    <div>
+                      <label className="label">Tipo de turno</label>
+                      <select
+                        className="input"
+                        value={codigoTurno}
+                        onChange={(e) => setCodigoTurno(e.target.value)}
+                      >
+                        {tiposTurno.map((t) => (
+                          <option key={t.codigo} value={t.codigo}>
+                            {t.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="label">Departamento</label>
+                      <select
+                        className="input"
+                        value={idDepartamento}
+                        onChange={(e) => setIdDepartamento(e.target.value)}
+                      >
+                        {departamentos.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <label className="label">Notas (opcional)</label>
+                  <input
+                    className="input"
+                    type="text"
+                    value={notas}
+                    onChange={(e) => setNotas(e.target.value)}
+                    placeholder="Apoyo a unidad canina"
+                  />
+
+                  {error && <p className="error">{error}</p>}
+
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                    <button
+                      className="btn btn-primary"
+                      type="submit"
+                      disabled={guardando}
+                      style={{ flex: 1 }}
+                    >
+                      {guardando
+                        ? 'Guardando…'
+                        : idEditando
+                        ? 'Guardar cambios'
+                        : 'Añadir turno'}
+                    </button>
+                    {idEditando && (
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        onClick={cancelarEdicion}
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {modo === 'varios-dias' && (
+              <div className="modal-seccion">
+                <div className="modal-seccion-titulo">
+                  Añadir varios días seguidos
+                </div>
+
+                <form onSubmit={crearBloque}>
+                  <div className="fila-form">
+                    <div>
+                      <label className="label">Desde</label>
+                      <input
+                        className="input"
+                        type="date"
+                        value={fechaInicio}
+                        onChange={(e) => setFechaInicio(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Hasta</label>
+                      <input
+                        className="input"
+                        type="date"
+                        value={fechaFin}
+                        onChange={(e) => setFechaFin(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fila-form">
+                    <div>
+                      <label className="label">Tipo de turno</label>
+                      <select
+                        className="input"
+                        value={codigoTurnoBloque}
+                        onChange={(e) =>
+                          setCodigoTurnoBloque(e.target.value)
+                        }
+                      >
+                        {tiposTurno.map((t) => (
+                          <option key={t.codigo} value={t.codigo}>
+                            {t.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="label">Departamento</label>
+                      <select
+                        className="input"
+                        value={idDepartamentoBloque}
+                        onChange={(e) =>
+                          setIdDepartamentoBloque(e.target.value)
+                        }
+                      >
+                        {departamentos.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {mostrarSelectorAnio && (
+                    <div>
+                      <label className="label">Año de origen</label>
+                      <select
+                        className="input"
+                        value={anioOrigen}
+                        onChange={(e) =>
+                          setAnioOrigen(Number(e.target.value))
+                        }
+                      >
+                        <option value={anioActual}>
+                          {anioActual} (año actual)
+                        </option>
+                        <option value={anioAnterior}>
+                          {anioAnterior} (arrastre)
+                        </option>
+                      </select>
+                    </div>
+                  )}
+
+                  <label className="label">Notas (opcional)</label>
+                  <input
+                    className="input"
+                    type="text"
+                    value={notasBloque}
+                    onChange={(e) => setNotasBloque(e.target.value)}
+                    placeholder="Vacaciones de verano"
+                  />
+
+                  {error && <p className="error">{error}</p>}
+
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={guardando}
+                    style={{ width: '100%', marginTop: 6 }}
+                  >
+                    {guardando ? 'Creando…' : 'Crear en bloque'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </>
         )}
 
         <button
