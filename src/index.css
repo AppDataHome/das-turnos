@@ -1238,4 +1238,60 @@ nav a.activo { color: var(--acento); background: var(--acento-suave); }
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   BOTONES DE CERRAR SESIÓN
+   ═══════════════════════════════════════════════════ */
+
+/* Botón del nav (escritorio) */
+.btn-salir {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--borde-fuerte);
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-salir:hover {
+  color: var(--peligro);
+  border-color: var(--peligro);
+  background: var(--peligro-suave);
+}
+
+/* Botón de la cabecera (móvil) - oculto por defecto en escritorio */
+.btn-salir-movil {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .btn-salir-movil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--fondo-tarjeta-2);
+    border: 1px solid var(--borde);
+    color: var(--texto-suave);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+    padding: 0;
+  }
+
+  .btn-salir-movil:hover,
+  .btn-salir-movil:active {
+    color: var(--peligro);
+    border-color: var(--peligro);
+  }
+}
 
