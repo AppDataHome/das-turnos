@@ -7,6 +7,7 @@ interface Props {
   festivos: string[]
   fechaSeleccionada: string
   onSeleccionarFecha: (fecha: string) => void
+  onCambioSemana?: (fechaInicio: Date) => void
 }
 
 const DIAS_SEMANA = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
@@ -58,6 +59,7 @@ export default function VistaSemanal({
   festivos,
   fechaSeleccionada,
   onSeleccionarFecha,
+  onCambioSemana,
 }: Props) {
   const hoy = new Date()
 
@@ -68,6 +70,11 @@ export default function VistaSemanal({
   useEffect(() => {
     setSemanaInicio(inicioSemana(new Date(fechaSeleccionada + 'T00:00:00')))
   }, [fechaSeleccionada])
+
+  // Avisamos al padre de la semana visible
+  useEffect(() => {
+    onCambioSemana?.(semanaInicio)
+  }, [semanaInicio])
 
   const festivosSet = useMemo(() => new Set(festivos), [festivos])
 
