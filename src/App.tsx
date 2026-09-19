@@ -40,7 +40,7 @@ export default function App() {
 }
 
 function Aplicacion() {
-  const { usuario, cargando } = useUsuario()
+  const { usuario, cargando, esInvitado } = useUsuario()
   const { confirmar } = useConfirmacion()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [comprobandoSesion, setComprobandoSesion] = useState(true)
@@ -60,6 +60,13 @@ function Aplicacion() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Si el usuario es invitado y estaba en Festivos, le movemos a Calendario
+  useEffect(() => {
+    if (esInvitado && pestana === 'festivos') {
+      setPestana('calendario')
+    }
+  }, [esInvitado, pestana])
 
   async function cerrarSesion() {
     const ok = await confirmar({
@@ -105,13 +112,17 @@ function Aplicacion() {
             <Calendar size={16} />
             Calendario
           </a>
-          <a
-            className={pestana === 'festivos' ? 'activo' : ''}
-            onClick={() => setPestana('festivos')}
-          >
-            <CalendarDays size={16} />
-            Festivos
-          </a>
+
+          {!esInvitado && (
+            <a
+              className={pestana === 'festivos' ? 'activo' : ''}
+              onClick={() => setPestana('festivos')}
+            >
+              <CalendarDays size={16} />
+              Festivos
+            </a>
+          )}
+
           <a
             className={pestana === 'ajustes' ? 'activo' : ''}
             onClick={() => setPestana('ajustes')}
@@ -153,12 +164,16 @@ function Aplicacion() {
         <Cabecera />
 
         {pestana === 'calendario' && <Calendario />}
-        {pestana === 'festivos' && <Festivos />}
+        {pestana === 'festivos' && !esInvitado && <Festivos />}
         {pestana === 'ajustes' && <Ajustes />}
         {pestana === 'ayuda' && <Ayuda />}
       </div>
 
-      <BarraInferior pestana={pestana} onCambiar={setPestana} />
+      <BarraInferior
+        pestana={pestana}
+        onCambiar={setPestana}
+        esInvitado={esInvitado}
+      />
       <ContenedorToasts />
       <ContenedorConfirmacion />
     </>
@@ -346,11 +361,7 @@ function Login() {
             }}
           >
             <div
-              style={{
-                flex: 1,
-                height: 1,
-                background: 'var(--borde)',
-              }}
+              style={{ flex: 1, height: 1, background: 'var(--borde)' }}
             />
             <span
               style={{
@@ -363,11 +374,7 @@ function Login() {
               o
             </span>
             <div
-              style={{
-                flex: 1,
-                height: 1,
-                background: 'var(--borde)',
-              }}
+              style={{ flex: 1, height: 1, background: 'var(--borde)' }}
             />
           </div>
 
