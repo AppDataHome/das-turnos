@@ -14,6 +14,9 @@ export interface Usuario {
   dias_vacaciones_anuales: number
   dias_vacaciones_arrastradas: number
   anio_vacaciones_arrastradas: number | null
+  dias_asuntos_propios_anuales: number
+  dias_asuntos_propios_arrastrados: number
+  anio_asuntos_propios_arrastrados: number | null
   avatar_url: string | null
   invitado_de: string | null
   codigo_invitacion: string | null
@@ -45,7 +48,6 @@ export interface Turno {
   fecha: string
   id_tipo_turno: string
   notas: string | null
-  // Campos calculados para la vista
   codigo_turno?: string
   nombre_turno?: string
   color?: string
