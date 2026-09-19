@@ -7,6 +7,7 @@ import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import VistaAnual from './VistaAnual'
 import ModalDia from './ModalDia'
+import ModalInformeDas from './ModalInformeDas'
 import AvisosBanner from './AvisosBanner'
 import {
   SkeletonTarjetas,
@@ -19,6 +20,7 @@ import {
   muestraDepartamento,
   etiquetaSinDepartamento,
 } from '../utilidades/turnos'
+import { FileText } from 'lucide-react'
 
 interface ResumenVacaciones {
   anio_actual: number
@@ -49,9 +51,9 @@ export default function Calendario() {
   const [festivos, setFestivos] = useState<string[]>([])
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
+  const [modalInformeAbierto, setModalInformeAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
 
-  // Mes visible en el calendario (por defecto, mes actual)
   const [mesVisible, setMesVisible] = useState<Date>(() => {
     const hoy = new Date()
     return new Date(hoy.getFullYear(), hoy.getMonth(), 1)
@@ -179,7 +181,6 @@ export default function Calendario() {
   const hoy = new Date()
   const hoyTexto = hoy.toISOString().split('T')[0]
 
-  // ─────────── MÉTRICAS DEL MES VISIBLE ───────────
   const anioVisible = mesVisible.getFullYear()
   const mesVisibleNum = mesVisible.getMonth()
 
@@ -195,16 +196,12 @@ export default function Calendario() {
       codigosTrabajo.includes(t.codigo_turno ?? '')
   )
 
-  // "Realizados": del mes visible, los que ya han pasado (<= hoy)
-  // Si el mes visible es futuro, todos son "restantes".
-  // Si el mes visible es pasado, todos son "realizados".
   const realizados = turnosMes.filter((t) => t.fecha <= hoyTexto).length
   const totalMes = turnosMes.length
   const restantes = totalMes - realizados
   const progreso =
     totalMes === 0 ? 0 : Math.round((realizados / totalMes) * 100)
 
-  // Nombre del mes visible para el título de la tarjeta
   const tituloMesVisible = `${NOMBRES_MESES[mesVisibleNum]} ${anioVisible}`
   const esMesActual =
     anioVisible === hoy.getFullYear() && mesVisibleNum === hoy.getMonth()
@@ -238,7 +235,6 @@ export default function Calendario() {
     setVista('mensual')
   }
 
-  // Avisos que recibe de las vistas
   function alCambiarMesVistaMensual(f: Date) {
     setMesVisible(new Date(f.getFullYear(), f.getMonth(), 1))
   }
@@ -247,7 +243,6 @@ export default function Calendario() {
     setMesVisible(new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1))
   }
 
-  // ─────────── SKELETON MIENTRAS CARGA ───────────
   if (cargando) {
     return (
       <>
@@ -258,7 +253,6 @@ export default function Calendario() {
     )
   }
 
-  // ─────────── CONTENIDO REAL ───────────
   return (
     <>
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
@@ -416,20 +410,36 @@ export default function Calendario() {
           )}
         </div>
 
-        <div className="card">
-          <h4
+        {/* Tarjeta DAS clicable */}
+        <div
+          className="card"
+          onClick={() => setModalInformeAbierto(true)}
+          style={{ cursor: 'pointer', position: 'relative' }}
+          title="Pulsa para ver el informe DAS"
+        >
+          <div
             style={{
-              color: 'var(--texto-suave)',
-              fontSize: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
               marginBottom: 8,
-              textTransform: 'uppercase',
-              letterSpacing: 0.6,
-              fontWeight: 700,
-              textAlign: 'center',
             }}
           >
-            DAS
-          </h4>
+            <h4
+              style={{
+                color: 'var(--texto-suave)',
+                fontSize: 10,
+                margin: 0,
+                textTransform: 'uppercase',
+                letterSpacing: 0.6,
+                fontWeight: 700,
+              }}
+            >
+              DAS
+            </h4>
+            <FileText size={12} color="var(--acento)" />
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <FilaResumen
@@ -484,6 +494,20 @@ export default function Calendario() {
               — {nochesTotales} / {nochesDAS} DAS / {nochesResiduo}{' '}
               {nochesResiduo === 1 ? 'Residuo' : 'Residuos'}
             </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              paddingTop: 8,
+              borderTop: '1px dashed var(--borde)',
+              fontSize: 10,
+              color: 'var(--acento)',
+              textAlign: 'center',
+              fontWeight: 600,
+            }}
+          >
+            📄 Ver informe completo
           </div>
         </div>
       </div>
@@ -731,6 +755,10 @@ export default function Calendario() {
           onCerrar={() => setModalAbierto(false)}
           onCambio={cargarTodo}
         />
+      )}
+
+      {modalInformeAbierto && (
+        <ModalInformeDas onCerrar={() => setModalInformeAbierto(false)} />
       )}
     </>
   )
