@@ -8,18 +8,14 @@ import {
 import { supabase } from '../supabase'
 import type { Usuario, Tema } from '../tipos'
 
-// ─────────── Forma del contexto ───────────
 interface UsuarioContextoValor {
   usuario: Usuario | null
   cargando: boolean
-  // Helpers de rol
   esInvitado: boolean
-  puedeEditar: boolean // true si NO es invitado
-  // Funciones
+  puedeEditar: boolean
   recargar: () => Promise<void>
   actualizarPerfil: (cambios: Partial<Usuario>) => Promise<void>
   cambiarTema: (tema: Tema) => Promise<void>
-  // Invitaciones
   generarCodigoInvitacion: () => Promise<string>
   revocarCodigoInvitacion: () => Promise<void>
   vincularComoInvitado: (
@@ -34,7 +30,6 @@ interface UsuarioContextoValor {
 
 const UsuarioContexto = createContext<UsuarioContextoValor | null>(null)
 
-// ─────────── Proveedor ───────────
 export function UsuarioProveedor({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [cargando, setCargando] = useState(true)
@@ -51,47 +46,50 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       return
     }
 
-    const { data, error } = await supabase
+    // Primero intentamos leer la fila de `usuario`.
+    // Da igual si es anónimo o no: si tiene fila, se usa.
+    const { data } = await supabase
       .from('usuario')
       .select('*')
       .eq('id', authUser.id)
       .maybeSingle()
 
-    // Los usuarios anónimos (invitados) no deben auto-crear perfil aquí.
-    // El canje de invitación ya les ha creado su fila en `usuario`.
+    if (data) {
+      setUsuario(data as Usuario)
+      setCargando(false)
+      return
+    }
+
+    // No hay fila. Si es anónimo, no creamos perfil (lo hace el canje).
     if (authUser.is_anonymous) {
       setUsuario(null)
       setCargando(false)
       return
     }
-    
-    if (error || !data) {
-      const nuevo: Partial<Usuario> = {
-        id: authUser.id,
-        email: authUser.email ?? '',
-        nombre: authUser.email?.split('@')[0] ?? 'Usuario',
-        rol: 'usuario',
-        tema: 'negro',
-        activo: true,
-        numero_empleado: null,
-      }
 
-      const { data: creado, error: errInsert } = await supabase
-        .from('usuario')
-        .insert(nuevo)
-        .select('*')
-        .single()
-
-      if (errInsert) {
-        console.error('Error creando usuario:', errInsert)
-        setUsuario(null)
-      } else {
-        setUsuario(creado as Usuario)
-      }
-    } else {
-      setUsuario(data as Usuario)
+    // Usuario normal sin fila: la creamos
+    const nuevo: Partial<Usuario> = {
+      id: authUser.id,
+      email: authUser.email ?? '',
+      nombre: authUser.email?.split('@')[0] ?? 'Usuario',
+      rol: 'usuario',
+      tema: 'negro',
+      activo: true,
+      numero_empleado: null,
     }
 
+    const { data: creado, error: errInsert } = await supabase
+      .from('usuario')
+      .insert(nuevo)
+      .select('*')
+      .single()
+
+    if (errInsert) {
+      console.error('Error creando usuario:', errInsert)
+      setUsuario(null)
+    } else {
+      setUsuario(creado as Usuario)
+    }
     setCargando(false)
   }
 
@@ -114,8 +112,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
   async function cambiarTema(tema: Tema) {
     await actualizarPerfil({ tema })
   }
-
-  // ─────────── Invitaciones ───────────
 
   async function generarCodigoInvitacion(): Promise<string> {
     const { data, error } = await supabase.rpc('generar_codigo_invitacion')
@@ -168,8 +164,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     if (error) throw error
   }
 
-  // ─────────── Efectos ───────────
-
   useEffect(() => {
     cargar()
 
@@ -213,7 +207,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
   )
 }
 
-// ─────────── Hook ───────────
 export function useUsuario() {
   const ctx = useContext(UsuarioContexto)
   if (!ctx) throw new Error('useUsuario debe usarse dentro de UsuarioProveedor')
