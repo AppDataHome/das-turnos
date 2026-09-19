@@ -3,14 +3,81 @@ import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
-import SeccionDatos from './SeccionDatos'
-import SeccionDasRemanente from './SeccionDasRemanente'
 import Avatar from '../componentes/Avatar'
 import CampoPassword from '../componentes/CampoPassword'
+import Configuracion from './Configuracion'
+import SeccionDatos from './SeccionDatos'
+import SeccionDasRemanente from './SeccionDasRemanente'
 import type { Tema } from '../tipos'
+import {
+  User,
+  Settings as SettingsIcon,
+  Database,
+  Palette,
+  LogOut,
+} from 'lucide-react'
+
+type Pestana = 'perfil' | 'configuracion' | 'datos' | 'preferencias' | 'sesion'
 
 export default function Ajustes() {
-  const { usuario, actualizarPerfil, cambiarTema, recargar } = useUsuario()
+  const [pestana, setPestana] = useState<Pestana>('perfil')
+
+  return (
+    <div className="container">
+      {/* Selector de subpestañas */}
+      <div className="subpestanas">
+        <button
+          className={pestana === 'perfil' ? 'activa' : ''}
+          onClick={() => setPestana('perfil')}
+        >
+          <User size={14} />
+          Perfil
+        </button>
+        <button
+          className={pestana === 'configuracion' ? 'activa' : ''}
+          onClick={() => setPestana('configuracion')}
+        >
+          <SettingsIcon size={14} />
+          Configuración
+        </button>
+        <button
+          className={pestana === 'datos' ? 'activa' : ''}
+          onClick={() => setPestana('datos')}
+        >
+          <Database size={14} />
+          Datos
+        </button>
+        <button
+          className={pestana === 'preferencias' ? 'activa' : ''}
+          onClick={() => setPestana('preferencias')}
+        >
+          <Palette size={14} />
+          Preferencias
+        </button>
+        <button
+          className={pestana === 'sesion' ? 'activa' : ''}
+          onClick={() => setPestana('sesion')}
+        >
+          <LogOut size={14} />
+          Sesión
+        </button>
+      </div>
+
+      {pestana === 'perfil' && <PestanaPerfil />}
+      {pestana === 'configuracion' && <PestanaConfiguracion />}
+      {pestana === 'datos' && <PestanaDatos />}
+      {pestana === 'preferencias' && <PestanaPreferencias />}
+      {pestana === 'sesion' && <PestanaSesion />}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════
+// PERFIL
+// ═══════════════════════════════════════════════════
+
+function PestanaPerfil() {
+  const { usuario, actualizarPerfil, recargar } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
@@ -18,20 +85,8 @@ export default function Ajustes() {
   const [numeroEmpleado, setNumeroEmpleado] = useState(
     usuario?.numero_empleado ?? ''
   )
-
-  const [diasAnuales, setDiasAnuales] = useState<number>(
-    usuario?.dias_vacaciones_anuales ?? 22
-  )
-  const [diasArrastradas, setDiasArrastradas] = useState<number>(
-    usuario?.dias_vacaciones_arrastradas ?? 0
-  )
-  const [anioArrastre, setAnioArrastre] = useState<number>(
-    usuario?.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
-  )
-
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
-
   const [subiendoAvatar, setSubiendoAvatar] = useState(false)
 
   const [passActual, setPassActual] = useState('')
@@ -44,18 +99,11 @@ export default function Ajustes() {
     if (usuario) {
       setNombre(usuario.nombre ?? '')
       setNumeroEmpleado(usuario.numero_empleado ?? '')
-      setDiasAnuales(usuario.dias_vacaciones_anuales ?? 22)
-      setDiasArrastradas(usuario.dias_vacaciones_arrastradas ?? 0)
-      setAnioArrastre(
-        usuario.anio_vacaciones_arrastradas ??
-          new Date().getFullYear() - 1
-      )
     }
   }, [usuario?.id])
 
   if (!usuario) return null
 
-  // ─────────── Subir avatar ───────────
   async function manejarArchivoAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0]
     if (!archivo) return
@@ -137,7 +185,6 @@ export default function Ajustes() {
     }
   }
 
-  // ─────────── Guardar perfil ───────────
   async function guardarPerfil(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -151,54 +198,6 @@ export default function Ajustes() {
       toast.exito('Datos guardados correctamente')
     } catch (err: any) {
       const msg = err?.message ?? 'Error al guardar'
-      setError(msg)
-      toast.error(msg)
-    } finally {
-      setGuardando(false)
-    }
-  }
-
-  // ─────────── Guardar vacaciones ───────────
-  async function guardarVacaciones(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setGuardando(true)
-
-    try {
-      await actualizarPerfil({
-        dias_vacaciones_anuales: Number(diasAnuales) || 0,
-        dias_vacaciones_arrastradas: Number(diasArrastradas) || 0,
-        anio_vacaciones_arrastradas: Number(anioArrastre) || null,
-      })
-      toast.exito('Configuración de vacaciones guardada')
-    } catch (err: any) {
-      const msg = err?.message ?? 'Error al guardar'
-      setError(msg)
-      toast.error(msg)
-    } finally {
-      setGuardando(false)
-    }
-  }
-
-  async function reiniciarArrastre() {
-    const ok = await confirmar({
-      titulo: '¿Poner el arrastre a 0?',
-      mensaje:
-        'Los días de vacaciones pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
-      textoConfirmar: 'Poner a 0',
-      peligro: true,
-    })
-    if (!ok) return
-
-    setError('')
-    setGuardando(true)
-
-    try {
-      setDiasArrastradas(0)
-      await actualizarPerfil({ dias_vacaciones_arrastradas: 0 })
-      toast.exito('Arrastre reiniciado a 0')
-    } catch (err: any) {
-      const msg = err?.message ?? 'Error al reiniciar'
       setError(msg)
       toast.error(msg)
     } finally {
@@ -259,32 +258,8 @@ export default function Ajustes() {
     toast.exito('Contraseña cambiada correctamente')
   }
 
-  async function elegirTema(t: Tema) {
-    setError('')
-    try {
-      await cambiarTema(t)
-      toast.exito('Tema actualizado')
-    } catch (err: any) {
-      const msg = err?.message ?? 'Error al cambiar tema'
-      setError(msg)
-      toast.error(msg)
-    }
-  }
-
-  async function cerrarSesion() {
-    const ok = await confirmar({
-      titulo: '¿Cerrar sesión?',
-      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
-      textoConfirmar: 'Cerrar sesión',
-      peligro: true,
-    })
-    if (!ok) return
-    await supabase.auth.signOut()
-    window.location.reload()
-  }
-
   return (
-    <div className="container">
+    <>
       {/* Foto de perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Foto de perfil</h2>
@@ -398,9 +373,9 @@ export default function Ajustes() {
         </form>
       </div>
 
-      {/* Contraseña */}
+      {/* Cambiar contraseña */}
       <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Cambiar contraseña</h2>
+        <h2 style={{ marginBottom: 12 }}>Seguridad · Cambiar contraseña</h2>
 
         <form onSubmit={cambiarContrasena}>
           <label className="label">Contraseña actual</label>
@@ -441,7 +416,93 @@ export default function Ajustes() {
           </button>
         </form>
       </div>
+    </>
+  )
+}
 
+// ═══════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════
+
+function PestanaConfiguracion() {
+  const { usuario, actualizarPerfil } = useUsuario()
+  const toast = useToast()
+  const { confirmar } = useConfirmacion()
+
+  const [diasAnuales, setDiasAnuales] = useState<number>(
+    usuario?.dias_vacaciones_anuales ?? 22
+  )
+  const [diasArrastradas, setDiasArrastradas] = useState<number>(
+    usuario?.dias_vacaciones_arrastradas ?? 0
+  )
+  const [anioArrastre, setAnioArrastre] = useState<number>(
+    usuario?.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
+  )
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (usuario) {
+      setDiasAnuales(usuario.dias_vacaciones_anuales ?? 22)
+      setDiasArrastradas(usuario.dias_vacaciones_arrastradas ?? 0)
+      setAnioArrastre(
+        usuario.anio_vacaciones_arrastradas ??
+          new Date().getFullYear() - 1
+      )
+    }
+  }, [usuario?.id])
+
+  if (!usuario) return null
+
+  async function guardarVacaciones(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setGuardando(true)
+
+    try {
+      await actualizarPerfil({
+        dias_vacaciones_anuales: Number(diasAnuales) || 0,
+        dias_vacaciones_arrastradas: Number(diasArrastradas) || 0,
+        anio_vacaciones_arrastradas: Number(anioArrastre) || null,
+      })
+      toast.exito('Configuración de vacaciones guardada')
+    } catch (err: any) {
+      const msg = err?.message ?? 'Error al guardar'
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function reiniciarArrastre() {
+    const ok = await confirmar({
+      titulo: '¿Poner el arrastre a 0?',
+      mensaje:
+        'Los días de vacaciones pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
+      textoConfirmar: 'Poner a 0',
+      peligro: true,
+    })
+    if (!ok) return
+
+    setError('')
+    setGuardando(true)
+
+    try {
+      setDiasArrastradas(0)
+      await actualizarPerfil({ dias_vacaciones_arrastradas: 0 })
+      toast.exito('Arrastre reiniciado a 0')
+    } catch (err: any) {
+      const msg = err?.message ?? 'Error al reiniciar'
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <>
       {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Vacaciones</h2>
@@ -526,60 +587,130 @@ export default function Ajustes() {
               Poner arrastre a 0
             </button>
           </div>
+
+          {error && <p className="error">{error}</p>}
         </form>
       </div>
 
+      {/* DAS remanentes */}
       <SeccionDasRemanente />
 
-      <SeccionDatos />
-
-      {/* Tema */}
+      {/* Departamentos y tipos de turno */}
       <div className="card">
-        <h2 style={{ marginBottom: 10 }}>Tema de la aplicación</h2>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            className="btn"
-            onClick={() => elegirTema('negro')}
-            style={{
-              background: '#0e1116',
-              color: 'white',
-              outline:
-                usuario.tema === 'negro' ? '2px solid var(--acento)' : 'none',
-            }}
-          >
-            Negro
-          </button>
-          <button
-            className="btn"
-            onClick={() => elegirTema('verde')}
-            style={{
-              background: '#0a1a10',
-              color: 'white',
-              outline:
-                usuario.tema === 'verde' ? '2px solid var(--acento)' : 'none',
-            }}
-          >
-            Verde Guardia Civil
-          </button>
-        </div>
+        <h2 style={{ marginBottom: 12 }}>Departamentos y tipos de turno</h2>
+        <Configuracion />
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════
+// DATOS
+// ═══════════════════════════════════════════════════
+
+function PestanaDatos() {
+  return (
+    <>
+      <div className="card">
+        <h2 style={{ marginBottom: 8 }}>Datos</h2>
+        <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+          Exporta tus datos a CSV (se abre en Excel) o impórtalos. La
+          importación no borra nada: los duplicados se ignoran.
+        </p>
       </div>
 
-      {/* Sesión */}
-      <div className="card">
-        <h2 style={{ marginBottom: 10 }}>Sesión</h2>
-        <p
+      <SeccionDatos />
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════
+// PREFERENCIAS
+// ═══════════════════════════════════════════════════
+
+function PestanaPreferencias() {
+  const { usuario, cambiarTema } = useUsuario()
+  const toast = useToast()
+
+  if (!usuario) return null
+
+  async function elegirTema(t: Tema) {
+    try {
+      await cambiarTema(t)
+      toast.exito('Tema actualizado')
+    } catch (err: any) {
+      toast.error('Error al cambiar tema: ' + (err?.message ?? ''))
+    }
+  }
+
+  return (
+    <div className="card">
+      <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button
+          className="btn"
+          onClick={() => elegirTema('negro')}
           style={{
-            fontSize: 11,
-            color: 'var(--texto-suave)',
-            marginBottom: 10,
+            background: '#0e1116',
+            color: 'white',
+            outline:
+              usuario.tema === 'negro' ? '2px solid var(--acento)' : 'none',
           }}
         >
-          Cerrar sesión hará que vuelvas a la pantalla de acceso.
-        </p>
-        <button className="btn btn-danger" onClick={cerrarSesion}>
-          Cerrar sesión
+          Negro
+        </button>
+        <button
+          className="btn"
+          onClick={() => elegirTema('verde')}
+          style={{
+            background: '#0a1a10',
+            color: 'white',
+            outline:
+              usuario.tema === 'verde' ? '2px solid var(--acento)' : 'none',
+          }}
+        >
+          Verde Guardia Civil
         </button>
       </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════
+// SESIÓN
+// ═══════════════════════════════════════════════════
+
+function PestanaSesion() {
+  const { confirmar } = useConfirmacion()
+
+  async function cerrarSesion() {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      textoConfirmar: 'Cerrar sesión',
+      peligro: true,
+    })
+    if (!ok) return
+    await supabase.auth.signOut()
+    window.location.reload()
+  }
+
+  return (
+    <div className="card">
+      <h2 style={{ marginBottom: 10 }}>Cerrar sesión</h2>
+      <p
+        style={{
+          fontSize: 11,
+          color: 'var(--texto-suave)',
+          marginBottom: 12,
+        }}
+      >
+        Al cerrar sesión, volverás a la pantalla de acceso y tendrás que meter
+        tu correo y contraseña de nuevo. Tus datos se conservan.
+      </p>
+      <button className="btn btn-danger" onClick={cerrarSesion}>
+        Cerrar sesión
+      </button>
     </div>
   )
 }
