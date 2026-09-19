@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function AccesoInvitacion({ onVolver }: Props) {
-  const [email, setEmail] = useState('')
+  const [nombre, setNombre] = useState('')
   const [codigo, setCodigo] = useState('')
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
@@ -19,15 +19,15 @@ export default function AccesoInvitacion({ onVolver }: Props) {
     setCargando(true)
 
     const codigoLimpio = codigo.trim().toUpperCase()
-    const emailLimpio = email.trim().toLowerCase()
+    const nombreLimpio = nombre.trim()
 
-    if (!codigoLimpio || !emailLimpio) {
-      setError('Debes rellenar el correo y el código')
+    if (!codigoLimpio) {
+      setError('Debes introducir el código de invitación')
       setCargando(false)
       return
     }
 
-    // 1. Validar el código antes de crear la sesión anónima
+    // 1. Validar el código
     const { data: valData, error: valErr } = await supabase.rpc(
       'validar_invitacion',
       { p_codigo: codigoLimpio }
@@ -50,19 +50,16 @@ export default function AccesoInvitacion({ onVolver }: Props) {
     const { error: errAnon } = await supabase.auth.signInAnonymously()
     if (errAnon) {
       setCargando(false)
-      setError(
-        'Error al crear la sesión de invitado: ' + errAnon.message
-      )
+      setError('Error al crear la sesión de invitado: ' + errAnon.message)
       return
     }
 
-    // 3. Canjear la invitación (crea el perfil de usuario)
+    // 3. Canjear la invitación
     const { data: canData, error: canErr } = await supabase.rpc(
       'canjear_invitacion',
       {
         p_codigo: codigoLimpio,
-        p_email: emailLimpio,
-        p_nombre: null,
+        p_nombre: nombreLimpio || null,
       }
     )
 
@@ -81,7 +78,7 @@ export default function AccesoInvitacion({ onVolver }: Props) {
       return
     }
 
-    // 4. Recargar para que el contexto detecte al nuevo usuario invitado
+    // 4. Recargar para que el contexto detecte al invitado
     window.location.reload()
   }
 
@@ -122,21 +119,20 @@ export default function AccesoInvitacion({ onVolver }: Props) {
             lineHeight: 1.5,
           }}
         >
-          Introduce tu correo y el código que te ha compartido el propietario
-          del calendario. Podrás verlo en modo solo lectura sin necesidad de
-          crear una cuenta.
+          Introduce el código que te ha compartido el propietario. Podrás ver
+          su calendario en modo solo lectura sin necesidad de crear una cuenta.
         </p>
 
         <form onSubmit={acceder} style={{ textAlign: 'left' }}>
-          <label className="label">Tu correo electrónico</label>
+          <label className="label">Tu nombre (opcional)</label>
           <input
             className="input"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@correo.com"
-            required
-            autoComplete="email"
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Cómo quieres aparecer"
+            maxLength={40}
+            autoComplete="off"
           />
 
           <label className="label">Código de invitación</label>
