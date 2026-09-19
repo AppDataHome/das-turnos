@@ -22,12 +22,10 @@ export interface Invitacion {
 export interface InvitadoVinculado {
   id: string
   nombre: string
-  email: string
   avatar_url: string | null
-  invitado_de: string | null
+  creado_en: string
 }
 
-// ─────────── Forma del contexto ───────────
 interface UsuarioContextoValor {
   usuario: Usuario | null
   cargando: boolean
@@ -36,7 +34,6 @@ interface UsuarioContextoValor {
   recargar: () => Promise<void>
   actualizarPerfil: (cambios: Partial<Usuario>) => Promise<void>
   cambiarTema: (tema: Tema) => Promise<void>
-  // Invitaciones (nuevo sistema)
   crearInvitacion: (
     nombreInvitado: string
   ) => Promise<{ ok: boolean; mensaje: string; codigo?: string }>
@@ -45,7 +42,6 @@ interface UsuarioContextoValor {
   listarInvitaciones: () => Promise<Invitacion[]>
   listarVinculados: () => Promise<InvitadoVinculado[]>
   expulsarInvitado: (id: string) => Promise<void>
-  // Salir del modo invitado
   desvincularme: () => Promise<void>
 }
 
@@ -130,10 +126,8 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     await actualizarPerfil({ tema })
   }
 
-  // ─────────── Invitaciones (nuevo sistema) ───────────
-
   function generarCodigo(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sin caracteres confusos
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
     let c1 = ''
     let c2 = ''
     for (let i = 0; i < 4; i++) {
@@ -192,29 +186,25 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     if (!usuario) return []
     const { data, error } = await supabase
       .from('usuario')
-      .select('id, nombre, email, avatar_url, invitado_de')
+      .select('id, nombre, avatar_url, creado_en')
       .eq('invitado_de', usuario.id)
-      .order('nombre')
+      .order('creado_en', { ascending: false })
 
     if (error) return []
     return (data ?? []) as InvitadoVinculado[]
   }
 
   async function expulsarInvitado(id: string) {
-    // Desvincula al invitado: borra la fila de usuario (ya que era solo invitado)
     const { error } = await supabase.from('usuario').delete().eq('id', id)
     if (error) throw error
   }
 
   async function desvincularme() {
     if (!usuario) return
-    // El invitado se "auto-elimina" su fila de usuario y cierra sesión
     await supabase.from('usuario').delete().eq('id', usuario.id)
     await supabase.auth.signOut()
     window.location.reload()
   }
-
-  // ─────────── Efectos ───────────
 
   useEffect(() => {
     cargar()
