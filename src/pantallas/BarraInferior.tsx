@@ -10,19 +10,34 @@ export type Pestana = 'calendario' | 'festivos' | 'ajustes' | 'ayuda'
 interface Props {
   pestana: Pestana
   onCambiar: (p: Pestana) => void
+  esInvitado: boolean
 }
 
-const OPCIONES: { id: Pestana; etiqueta: string; Icono: any }[] = [
-  { id: 'calendario', etiqueta: 'Calendario', Icono: Calendar },
-  { id: 'festivos', etiqueta: 'Festivos', Icono: CalendarDays },
-  { id: 'ajustes', etiqueta: 'Ajustes', Icono: Settings },
-  { id: 'ayuda', etiqueta: 'Ayuda', Icono: HelpCircle },
-]
+export default function BarraInferior({
+  pestana,
+  onCambiar,
+  esInvitado,
+}: Props) {
+  const opciones: { id: Pestana; etiqueta: string; Icono: any }[] = [
+    { id: 'calendario', etiqueta: 'Calendario', Icono: Calendar },
+  ]
 
-export default function BarraInferior({ pestana, onCambiar }: Props) {
+  if (!esInvitado) {
+    opciones.push({
+      id: 'festivos',
+      etiqueta: 'Festivos',
+      Icono: CalendarDays,
+    })
+  }
+
+  opciones.push(
+    { id: 'ajustes', etiqueta: 'Ajustes', Icono: Settings },
+    { id: 'ayuda', etiqueta: 'Ayuda', Icono: HelpCircle }
+  )
+
   return (
     <div className="barra-inferior">
-      {OPCIONES.map(({ id, etiqueta, Icono }) => (
+      {opciones.map(({ id, etiqueta, Icono }) => (
         <a
           key={id}
           className={pestana === id ? 'activo' : ''}
