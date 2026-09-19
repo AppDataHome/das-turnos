@@ -23,12 +23,12 @@ export default function Ayuda() {
       contenido: (
         <>
           <p>
-              <strong>DAS · Distribución y Asignación de Servicios</strong> es
-  una aplicación para llevar el calendario de turnos del personal
-  y calcular automáticamente los <strong>días DAS</strong>{' '}
-  generados por servicios festivos y nocturnos, según la normativa
-  de la Guardia Civil.
-</p>
+            <strong>DAS · Distribución y Asignación de Servicios</strong> es
+            una aplicación para llevar el calendario de turnos del personal y
+            calcular automáticamente los <strong>días DAS</strong> generados
+            por servicios festivos y nocturnos, según la normativa de la
+            Guardia Civil.
+          </p>
           <p>
             Toda la información se guarda en la nube y solo tú puedes ver y
             modificar tus turnos. Los cambios se sincronizan al instante entre
@@ -42,12 +42,16 @@ export default function Ayuda() {
               Teoría, Prácticas, Vacaciones, DAS, Asuntos Propios…).
             </li>
             <li>
-              Ver el calendario en vista <strong>mensual</strong> o{' '}
-              <strong>semanal</strong>.
+              Ver el calendario en <strong>4 vistas</strong>: Mensual,
+              Semanal, Anual y Gestión.
             </li>
             <li>
               Consultar el saldo de <strong>DAS</strong>,{' '}
               <strong>vacaciones</strong> y <strong>turnos del mes</strong>.
+            </li>
+            <li>
+              Generar un <strong>informe DAS imprimible</strong> por rango de
+              fechas, listo para guardar como PDF.
             </li>
             <li>
               Marcar festivos del calendario (nacionales, autonómicos y
@@ -72,21 +76,27 @@ export default function Ayuda() {
         <>
           <h4>1. Registro</h4>
           <p>
-            Entra en la aplicación y pulsa <strong>¿No tienes cuenta?
-            Regístrate</strong>. Introduce tu correo y una contraseña (mínimo 6
-            caracteres). Recibirás un correo de Supabase para confirmar la
-            cuenta.
+            Entra en la aplicación y pulsa{' '}
+            <strong>¿No tienes cuenta? Regístrate</strong>. Introduce tu correo
+            y una contraseña (mínimo 6 caracteres). Recibirás un correo para
+            confirmar la cuenta.
+          </p>
+          <p>
+            💡 En los campos de contraseña tienes un <strong>icono de ojo</strong>{' '}
+            👁️ para mostrar u ocultar lo que escribes y comprobar que no te
+            equivocas.
           </p>
 
           <h4>2. Rellena tu perfil</h4>
           <p>
-            Ve a la pestaña <strong>Ajustes → Mi perfil</strong> y completa tu
-            nombre y tu número de empleado. Aparecerán en la cabecera.
+            Ve a <strong>Ajustes → Perfil</strong> y completa tu nombre y tu
+            número de empleado. También puedes subir una <strong>foto de
+            perfil</strong> que aparecerá en la cabecera.
           </p>
 
           <h4>3. Configura tus vacaciones</h4>
           <p>
-            En <strong>Ajustes → Vacaciones</strong> indica los días que te
+            En <strong>Ajustes → Configuración</strong> indica los días que te
             corresponden al año (por defecto 22) y, si procede, los días
             arrastrados del año anterior.
           </p>
@@ -94,15 +104,15 @@ export default function Ayuda() {
           <h4>4. Mete los festivos</h4>
           <p>
             Ve a la pestaña <strong>Festivos</strong> y pulsa{' '}
-            <strong>Importar nacionales de {new Date().getFullYear()}</strong>.
-            Los autonómicos y locales los añades a mano.
+            <strong>Importar nacionales del año</strong>. Los autonómicos y
+            locales los añades a mano.
           </p>
 
           <h4>5. Empieza a meter turnos</h4>
           <p>
             Vuelve al <strong>Calendario</strong> y pulsa cualquier día para
-            abrir la ventana de edición. Ahí puedes añadir el turno o los
-            turnos de ese día.
+            abrir la ventana de edición. O usa la vista{' '}
+            <strong>Gestión</strong> para meterlos en lista.
           </p>
         </>
       ),
@@ -111,26 +121,34 @@ export default function Ayuda() {
     // ─────────────────────────────────────────
     {
       id: 'calendario',
-      titulo: 'Calendario · Vistas',
+      titulo: 'Calendario · Vistas y tarjetas',
       icono: '📅',
       contenido: (
         <>
           <p>
             La pestaña <strong>Calendario</strong> es la pantalla principal.
-            Arriba del todo verás tres tarjetas con los datos del mes:
+            Arriba del todo verás tres tarjetas con los datos del mes, y
+            debajo el calendario con 4 vistas.
           </p>
 
           <h4>Tarjeta "Turnos Mes"</h4>
           <ul>
             <li>
-              <strong>Realizados</strong>: turnos de trabajo (Mañana, Tarde,
-              Noche) que ya has hecho este mes.
+              Muestra los datos del <strong>mes que estás viendo</strong> en el
+              calendario, no solo del mes actual.
             </li>
             <li>
-              <strong>Restantes</strong>: turnos de trabajo pendientes este
-              mes.
+              <strong>Realizados</strong>: turnos de trabajo (Mañana, Tarde,
+              Noche) que ya has hecho ese mes.
             </li>
-            <li>La barra central muestra el progreso.</li>
+            <li>
+              <strong>Restantes</strong>: turnos pendientes ese mes.
+            </li>
+            <li>El arco central muestra el porcentaje de realización.</li>
+            <li>
+              Si estás en el mes actual, aparece la etiqueta{' '}
+              <strong>"· actual"</strong> en dorado.
+            </li>
           </ul>
 
           <h4>Tarjeta "Vacaciones"</h4>
@@ -145,15 +163,16 @@ export default function Ayuda() {
               <strong>Disponibles</strong>: los que te quedan.
             </li>
             <li>
-              Si tienes arrastre del año anterior, verás un bloque adicional.
+              Si tienes arrastre del año anterior, verás un bloque adicional
+              con su propio desglose.
             </li>
           </ul>
 
           <h4>Tarjeta "DAS"</h4>
           <ul>
             <li>
-              <strong>Generados / Disfrutados / Disponibles</strong>: saldo de
-              DAS.
+              <strong>Generados / Disfrutados / Disponibles</strong>: saldo
+              actual de DAS.
             </li>
             <li>
               <strong>Festivos / Fines de semana trabajados</strong>: cuántos
@@ -163,31 +182,43 @@ export default function Ayuda() {
               <strong>Noches entre semana trabajadas</strong>: lo mismo con las
               noches.
             </li>
+            <li>
+              <strong>Pulsable</strong>: al hacer clic se abre el{' '}
+              <strong>Informe de DAS</strong> (ver más abajo).
+            </li>
           </ul>
 
-          <h4>Selector de vista</h4>
+          <h4>Las 4 vistas del calendario</h4>
           <p>
-            Justo debajo de las tarjetas tienes dos botones:{' '}
-            <strong>Mensual</strong> y <strong>Semanal</strong>.
+            Justo debajo de las tarjetas tienes las pestañas{' '}
+            <strong>Mensual</strong>, <strong>Semanal</strong>,{' '}
+            <strong>Anual</strong> y <strong>⚙ Gestión</strong>:
           </p>
           <ul>
             <li>
-              <strong>Mensual</strong>: rejilla clásica de mes. Los sábados,
+              <strong>Mensual</strong>: rejilla clásica del mes. Los sábados,
               domingos y festivos llevan fondo rojo suave o marcado.
             </li>
             <li>
               <strong>Semanal</strong>: columnas con el detalle de cada día.
             </li>
+            <li>
+              <strong>Anual</strong>: los 12 meses del año en tarjetas, con
+              puntitos de colores y un resumen por mes.
+            </li>
+            <li>
+              <strong>Gestión</strong>: listado completo de turnos con
+              filtros, añadir y editar.
+            </li>
           </ul>
-          <p>
-            La vista elegida se recuerda aunque cierres la app.
-          </p>
+          <p>La vista elegida se recuerda aunque cierres la app.</p>
 
           <h4>Panel del día seleccionado</h4>
           <p>
             Debajo del calendario aparece siempre el detalle del día
-            seleccionado: cada turno con su icono, horario, departamento, notas
-            y los puntitos indicadores (amarillo = festivo, azul = nocturno).
+            seleccionado: cada turno con su icono, horario, departamento,
+            notas y los puntitos indicadores (amarillo = festivo, azul =
+            nocturno).
           </p>
         </>
       ),
@@ -202,8 +233,8 @@ export default function Ayuda() {
         <>
           <h4>Cómo abrir la ventana de un día</h4>
           <p>
-            Pulsa cualquier día en el calendario (mensual o semanal) o el botón{' '}
-            <strong>Editar día</strong> en el panel inferior.
+            Pulsa cualquier día en el calendario (mensual o semanal) o el
+            botón <strong>Editar día</strong> en el panel inferior.
           </p>
 
           <h4>Modo "Un día"</h4>
@@ -247,8 +278,8 @@ export default function Ayuda() {
               rango (no aplica si es VAC, DAS o similar).
             </li>
             <li>
-              <strong>Año de origen</strong>: solo aparece si el tipo es
-              VAC. Sirve para elegir si son días del año actual o del anterior.
+              <strong>Año de origen</strong>: solo aparece si el tipo es VAC.
+              Sirve para elegir si son días del año actual o del anterior.
             </li>
             <li>
               <strong>Notas</strong>: opcionales, se aplican a todo el rango.
@@ -257,6 +288,65 @@ export default function Ayuda() {
           <p>
             Al pulsar <strong>Crear en bloque</strong> la app te dirá cuántos
             días ha creado y cuántos ha ignorado porque ya existían.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
+      id: 'gestion',
+      titulo: 'Gestión de turnos (listado rápido)',
+      icono: '⚙️',
+      contenido: (
+        <>
+          <p>
+            La vista <strong>⚙ Gestión</strong> es ideal para revisar, editar
+            y añadir turnos en lista sin tener que ir día por día en el
+            calendario.
+          </p>
+
+          <h4>Qué muestra</h4>
+          <ul>
+            <li>
+              Listado completo de todos tus turnos, <strong>agrupados por
+              mes</strong>.
+            </li>
+            <li>
+              Cada turno con: fecha, chip del tipo, departamento y notas.
+            </li>
+            <li>
+              <strong>Botones de acción</strong> en cada fila:
+              <ul>
+                <li>
+                  <strong>✏️ Editar</strong>: abre el modal del día para
+                  modificar ese turno en detalle.
+                </li>
+                <li>
+                  <strong>🗑️ Borrar</strong>: elimina el turno (con
+                  confirmación).
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+          <h4>Filtros de fecha</h4>
+          <p>
+            Pulsa el botón <strong>Filtros</strong> para mostrar los campos de
+            rango. También tienes botones rápidos:
+          </p>
+          <ul>
+            <li>Este mes</li>
+            <li>Mes anterior</li>
+            <li>Este año</li>
+            <li>Todo</li>
+          </ul>
+
+          <h4>Añadir turno desde Gestión</h4>
+          <p>
+            Pulsa el botón <strong>Añadir turno</strong> arriba y se
+            desplegará un mini formulario para meter un turno en una fecha
+            concreta sin salir del listado.
           </p>
         </>
       ),
@@ -319,8 +409,100 @@ export default function Ayuda() {
           <h4>DAS remanentes (cambio de destino)</h4>
           <p>
             Si vienes de otra unidad con DAS pendientes, ve a{' '}
-            <strong>Ajustes → DAS remanentes</strong> y añádelos. Se sumarán a
-            tu saldo disponible.
+            <strong>Ajustes → Configuración → DAS remanentes</strong> y
+            añádelos. Se sumarán a tu saldo disponible.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
+      id: 'informe-das',
+      titulo: 'Informe de DAS (imprimible)',
+      icono: '📄',
+      contenido: (
+        <>
+          <p>
+            El <strong>Informe de DAS</strong> es un documento con todos los
+            eventos que generan DAS en un rango de fechas, listo para imprimir
+            o guardar como PDF y justificar tus DAS ante quien lo necesite.
+          </p>
+
+          <h4>Cómo abrirlo</h4>
+          <p>
+            Pulsa la <strong>tarjeta de DAS</strong> en el calendario (la que
+            tiene el icono 📄 y el texto "Ver informe completo"). También
+            aparece el icono 📄 junto al título de la tarjeta.
+          </p>
+
+          <h4>Qué contiene</h4>
+          <ul>
+            <li>
+              <strong>Cabecera</strong>: nombre del empleado, Nº, periodo y
+              fecha de emisión.
+            </li>
+            <li>
+              <strong>Resumen</strong>: totales de festivos, noches, DAS
+              generados, DAS disfrutados y saldo neto.
+            </li>
+            <li>
+              <strong>Listado de festivos</strong> y fines de semana
+              trabajados, ordenados por fecha, con la posición en el ciclo
+              (1/3, 2/3, 3/3) y el icono 🎁 cuando genera un DAS.
+            </li>
+            <li>
+              <strong>Listado de noches</strong> entre semana, con la posición
+              en el ciclo (1/6 a 6/6) y el icono 🎁 cuando genera DAS.
+            </li>
+            <li>
+              <strong>Listado de DAS disfrutados</strong> en el mismo rango.
+            </li>
+          </ul>
+
+          <h4>Iconos de estado</h4>
+          <ul>
+            <li>
+              <strong>✅ verde</strong>: evento ya pasado (realizado).
+            </li>
+            <li>
+              <strong>⏳ gris</strong>: evento futuro (pendiente).
+            </li>
+          </ul>
+
+          <h4>Filtro de fechas</h4>
+          <p>
+            Por defecto el informe cubre el año actual completo. Puedes
+            cambiar las fechas y pulsar <strong>Generar informe</strong> para
+            recalcular.
+          </p>
+
+          <h4>Imprimir o guardar como PDF</h4>
+          <p>
+            Pulsa el botón <strong>Imprimir / PDF</strong>. Se abrirá el
+            diálogo de impresión del navegador. En el desplegable de
+            impresoras elige:
+          </p>
+          <ul>
+            <li>
+              <strong>Windows</strong>: "Microsoft Print to PDF" o "Guardar
+              como PDF".
+            </li>
+            <li>
+              <strong>Mac</strong>: "Guardar como PDF".
+            </li>
+            <li>
+              <strong>Android</strong>: "Guardar como PDF".
+            </li>
+            <li>
+              <strong>iOS</strong>: en la vista previa, pellizca hacia fuera
+              con dos dedos y aparecerá el PDF. Luego compártelo o guárdalo en
+              Archivos.
+            </li>
+          </ul>
+          <p>
+            El PDF sale en blanco y negro, con la cabecera en la primera
+            página, sin decoraciones de la app, perfecto para presentar.
           </p>
         </>
       ),
@@ -334,9 +516,7 @@ export default function Ayuda() {
       contenido: (
         <>
           <h4>Añadir vacaciones</h4>
-          <p>
-            Puedes hacerlo de dos maneras:
-          </p>
+          <p>Puedes hacerlo de dos maneras:</p>
           <ul>
             <li>
               <strong>Día a día</strong>: abre el día, elige tipo{' '}
@@ -356,17 +536,19 @@ export default function Ayuda() {
           </p>
           <ol>
             <li>
-              Ve a <strong>Ajustes → Vacaciones</strong> y anota cuántos días
-              arrastras y de qué año.
+              Ve a <strong>Ajustes → Configuración</strong> y anota cuántos
+              días arrastras y de qué año.
             </li>
             <li>
               Cuando los disfrutes, en el formulario de "Varios días" elige el
               año de origen <strong>correcto</strong> (el año anterior).
             </li>
-            <li>
-              Así los días del año actual quedan intactos.
-            </li>
+            <li>Así los días del año actual quedan intactos.</li>
           </ol>
+          <p>
+            💡 Si los días arrastrados caducan, puedes ponerlos a cero con el
+            botón <strong>"Poner arrastre a 0"</strong>.
+          </p>
 
           <h4>Otros tipos de ausencia</h4>
           <ul>
@@ -399,15 +581,16 @@ export default function Ayuda() {
 
           <h4>Importar nacionales</h4>
           <p>
-            Elige el año y pulsa <strong>Importar nacionales de XXXX</strong>.
-            La app añade los 10 festivos nacionales de ese año (incluido el
-            Viernes Santo, que cambia cada año).
+            Elige el año y pulsa{' '}
+            <strong>Importar nacionales de XXXX</strong>. La app añade los 10
+            festivos nacionales de ese año (incluido el Viernes Santo, que
+            cambia cada año).
           </p>
 
           <h4>Añadir autonómicos y locales</h4>
           <p>
-            En el formulario de arriba rellena fecha, ámbito (Autonómico o
-            Local) y descripción, y pulsa <strong>Añadir</strong>.
+            En el formulario rellena fecha, ámbito (Autonómico o Local) y
+            descripción, y pulsa <strong>Añadir</strong>.
           </p>
 
           <h4>Editar y borrar</h4>
@@ -418,9 +601,9 @@ export default function Ayuda() {
 
           <h4>Repercusión en el calendario</h4>
           <p>
-            Los festivos se muestran en el calendario con fondo rojo más
-            marcado, y el número en rojo. Además, los turnos de trabajo que
-            caigan en festivos contarán para el cálculo de DAS.
+            Los festivos se muestran con fondo rojo más marcado y el número en
+            rojo. Además, los turnos de trabajo que caigan en festivos
+            contarán para el cálculo de DAS.
           </p>
         </>
       ),
@@ -428,22 +611,92 @@ export default function Ayuda() {
 
     // ─────────────────────────────────────────
     {
+      id: 'ajustes',
+      titulo: 'Ajustes (5 subpestañas)',
+      icono: '🔧',
+      contenido: (
+        <>
+          <p>
+            La pestaña <strong>Ajustes</strong> está organizada en 5
+            subpestañas para que encuentres todo rápido:
+          </p>
+
+          <h4>👤 Perfil</h4>
+          <ul>
+            <li>
+              <strong>Foto de perfil</strong>: sube, cambia o borra tu foto.
+              Se verá en la cabecera.
+            </li>
+            <li>
+              <strong>Mi perfil</strong>: nombre, Nº de empleado y correo (no
+              editable).
+            </li>
+            <li>
+              <strong>Seguridad</strong>: cambio de contraseña. Por seguridad,
+              se exige meter la contraseña actual.
+            </li>
+          </ul>
+
+          <h4>⚙ Configuración</h4>
+          <ul>
+            <li>
+              <strong>Vacaciones</strong>: días anuales, arrastre y año del
+              arrastre. Botón para poner el arrastre a 0.
+            </li>
+            <li>
+              <strong>DAS remanentes</strong>: para cambio de destino.
+            </li>
+            <li>
+              <strong>Departamentos y tipos de turno</strong>: crear, editar,
+              activar/desactivar o borrar.
+            </li>
+          </ul>
+
+          <h4>🗄 Datos</h4>
+          <ul>
+            <li>Exportar turnos a CSV.</li>
+            <li>Importar turnos desde CSV.</li>
+            <li>Exportar festivos a CSV.</li>
+            <li>Importar festivos desde CSV.</li>
+          </ul>
+
+          <h4>🎨 Preferencias</h4>
+          <ul>
+            <li>
+              <strong>Tema</strong>: negro o verde Guardia Civil.
+            </li>
+          </ul>
+
+          <h4>🚪 Sesión</h4>
+          <ul>
+            <li>
+              <strong>Cerrar sesión</strong>. También puedes hacerlo desde el
+              botón "Salir" de la barra superior (escritorio) o desde el botón
+              redondo de la cabecera (móvil).
+            </li>
+          </ul>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
       id: 'configuracion',
-      titulo: 'Configuración (departamentos y tipos de turno)',
+      titulo: 'Departamentos y tipos de turno',
       icono: '⚙️',
       contenido: (
         <>
           <p>
-            En la pestaña <strong>Configuración</strong> se gestionan los
-            departamentos y los tipos de turno.
+            Los departamentos y tipos de turno se gestionan desde{' '}
+            <strong>Ajustes → Configuración</strong>.
           </p>
 
           <h4>Departamentos</h4>
           <p>Cada departamento tiene:</p>
           <ul>
             <li>
-              <strong>Icono</strong>: un emoji. Por ejemplo 🚔 para Patrulla, 🖥️
-              para Oficina, 🐕 para Unidad Canina.
+              <strong>Icono</strong>: un emoji. Por ejemplo 🚔 Patrulla, 🖥️
+              Oficina, 🐕 Unidad Canina.
             </li>
             <li>
               <strong>Nombre</strong>: el que se mostrará en los turnos.
@@ -455,9 +708,8 @@ export default function Ayuda() {
             </li>
           </ul>
           <p>
-            Puedes <strong>añadir</strong>, <strong>editar</strong>,{' '}
-            <strong>activar/desactivar</strong> o <strong>borrar</strong>{' '}
-            (borrar solo si no tiene turnos asociados).
+            Puedes añadir, editar, activar/desactivar o borrar (borrar solo si
+            no tiene turnos asociados).
           </p>
 
           <h4>Tipos de turno</h4>
@@ -484,47 +736,6 @@ export default function Ayuda() {
               aparecen (menor = antes).
             </li>
           </ul>
-        </>
-      ),
-    },
-
-    // ─────────────────────────────────────────
-    {
-      id: 'ajustes',
-      titulo: 'Ajustes y seguridad',
-      icono: '🔒',
-      contenido: (
-        <>
-          <h4>Mi perfil</h4>
-          <p>
-            Cambia tu nombre y número de empleado. El correo no se puede
-            cambiar.
-          </p>
-
-          <h4>Cambiar contraseña</h4>
-          <p>
-            Por seguridad, se exige introducir la <strong>contraseña
-            actual</strong> antes de poner una nueva. Así nadie que coja tu
-            dispositivo podrá cambiarla sin saberla.
-          </p>
-
-          <h4>Datos · Exportar/Importar</h4>
-          <p>
-            Puedes descargar tus turnos y los festivos en formato CSV (se abre
-            con Excel). También puedes importarlos: la importación no borra
-            nada y los duplicados se ignoran.
-          </p>
-
-          <h4>Tema</h4>
-          <p>
-            Dos temas disponibles: <strong>Negro</strong> (oscuro con acentos
-            dorados) y <strong>Verde Guardia Civil</strong>.
-          </p>
-
-          <h4>Cerrar sesión</h4>
-          <p>
-            Al cerrar sesión, tendrás que volver a meter correo y contraseña.
-          </p>
         </>
       ),
     },
@@ -559,24 +770,16 @@ export default function Ayuda() {
 
           <h4>Formato del CSV de turnos</h4>
           <p>Las columnas son (en este orden):</p>
-          <pre
-            style={{
-              background: 'var(--fondo-tarjeta-2)',
-              padding: 10,
-              borderRadius: 6,
-              fontSize: 12,
-              overflowX: 'auto',
-            }}
-          >
-fecha,tipo,departamento,notas,anio_origen
-2026-01-15,M,Patrulla,, 
-2026-01-20,VAC,,Verano,2026
+          <pre>
+{`fecha,tipo,departamento,notas,anio_origen
+2026-01-15,M,Patrulla,,
+2026-01-20,VAC,,Verano,2026`}
           </pre>
           <p>
             <strong>fecha</strong> en formato AAAA-MM-DD, <strong>tipo</strong>{' '}
             es el código (M, T, N, VAC, DAS, AP, L, TEO, PRA…),{' '}
-            <strong>departamento</strong> es el nombre exacto del departamento,
-            y <strong>anio_origen</strong> solo se usa para VAC.
+            <strong>departamento</strong> es el nombre exacto del
+            departamento, y <strong>anio_origen</strong> solo se usa para VAC.
           </p>
 
           <h4>Recomendación</h4>
@@ -639,6 +842,53 @@ fecha,tipo,departamento,notas,anio_origen
 
     // ─────────────────────────────────────────
     {
+      id: 'consejos',
+      titulo: 'Consejos y atajos',
+      icono: '💡',
+      contenido: (
+        <>
+          <h4>Ahorrar tiempo</h4>
+          <ul>
+            <li>
+              <strong>Vacaciones largas</strong>: usa el modo "Varios días"
+              del modal para meter un rango completo de golpe.
+            </li>
+            <li>
+              <strong>Revisar lo fichado</strong>: la vista Gestión es la más
+              rápida para ver todos los turnos seguidos.
+            </li>
+            <li>
+              <strong>Filtros rápidos</strong>: dentro de Gestión, pulsa
+              "Este mes" o "Mes anterior" para ver solo lo que te interesa.
+            </li>
+          </ul>
+
+          <h4>Sobre los iconos de departamento</h4>
+          <p>
+            Los emojis son ideales para distinguir departamentos de un
+            vistazo. Puedes cambiar el icono cuando quieras desde Ajustes →
+            Configuración → Departamentos.
+          </p>
+
+          <h4>Copias de seguridad</h4>
+          <p>
+            Antes de hacer cambios grandes (cambio de año, borrados masivos,
+            etc.), exporta tus turnos a CSV y guárdalos en tu ordenador o en
+            la nube.
+          </p>
+
+          <h4>En caso de problemas</h4>
+          <p>
+            Si la app va lenta, cierra y vuelve a abrirla. Si algo no se
+            actualiza, pulsa Ctrl+F5 (Windows) o Cmd+Shift+R (Mac) para forzar
+            la recarga sin caché.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
       id: 'faq',
       titulo: 'Preguntas frecuentes',
       icono: '❓',
@@ -647,7 +897,8 @@ fecha,tipo,departamento,notas,anio_origen
           <h4>¿Puedo borrar un turno equivocado?</h4>
           <p>
             Sí. Abre el día, pulsa el botón <strong>Borrar</strong> del turno
-            y confirma.
+            y confirma. También puedes hacerlo desde la vista{' '}
+            <strong>Gestión</strong>.
           </p>
 
           <h4>¿Y si me equivoco con las vacaciones de un año?</h4>
@@ -679,15 +930,29 @@ fecha,tipo,departamento,notas,anio_origen
 
           <h4>¿Qué pasa si cambio de destino?</h4>
           <p>
-            Añade en <strong>Ajustes → DAS remanentes</strong> los DAS que
-            tenías pendientes de la unidad anterior. Se sumarán a tu saldo
-            actual.
+            Añade en <strong>Ajustes → Configuración → DAS remanentes</strong>{' '}
+            los DAS que tenías pendientes de la unidad anterior. Se sumarán a
+            tu saldo actual.
           </p>
 
           <h4>¿Puedo recuperar si borro algo por error?</h4>
           <p>
             No hay papelera. Si haces exportaciones periódicas a CSV, puedes
             volver a importar los datos.
+          </p>
+
+          <h4>¿Cómo cambio la contraseña?</h4>
+          <p>
+            Ve a <strong>Ajustes → Perfil → Seguridad</strong>. Introduce la
+            contraseña actual, la nueva dos veces, y pulsa Cambiar contraseña.
+            El ojito 👁️ te ayuda a revisar lo escrito.
+          </p>
+
+          <h4>¿Por qué no veo la pestaña X?</h4>
+          <p>
+            En móvil, la navegación está en la barra inferior. En escritorio,
+            arriba. Si has instalado la app hace tiempo, desinstálala y
+            vuelve a instalarla para actualizar icono y menús.
           </p>
         </>
       ),
@@ -729,19 +994,19 @@ fecha,tipo,departamento,notas,anio_origen
     <div className="container">
       <div className="card">
         <h2 style={{ marginBottom: 4 }}>Centro de ayuda</h2>
-<p
-  style={{
-    fontSize: 11,
-    color: 'var(--texto-suave)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    fontWeight: 600,
-    marginBottom: 6,
-  }}
->
-  DAS · Distribución y Asignación de Servicios
-</p>
-        <p style={{ fontSize: 13, color: 'var(--texto-suave)' }}>
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--texto-suave)',
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            fontWeight: 600,
+            marginBottom: 6,
+          }}
+        >
+          DAS · Distribución y Asignación de Servicios
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
           Toca cualquier sección para ver su contenido. También puedes usar el
           buscador de tu navegador (Ctrl+F) para encontrar algo concreto.
         </p>
@@ -767,7 +1032,7 @@ fecha,tipo,departamento,notas,anio_origen
                 cursor: 'pointer',
                 background:
                   abierta === s.id ? 'var(--acento)' : 'var(--fondo-tarjeta-2)',
-                color: abierta === s.id ? '#0e1116' : 'var(--texto)',
+                color: abierta === s.id ? '#0b0e13' : 'var(--texto)',
                 fontWeight: 500,
               }}
             >
@@ -848,11 +1113,25 @@ fecha,tipo,departamento,notas,anio_origen
         .ayuda-contenido li {
           margin-bottom: 4px;
         }
+        .ayuda-contenido li ul {
+          margin-top: 4px;
+          margin-bottom: 4px;
+        }
         .ayuda-contenido code {
           background: var(--fondo-tarjeta-2);
           padding: 2px 6px;
           border-radius: 4px;
           font-size: 12px;
+        }
+        .ayuda-contenido pre {
+          background: var(--fondo-tarjeta-2);
+          padding: 10px;
+          border-radius: 6px;
+          font-size: 11px;
+          overflow-x: auto;
+          margin-bottom: 10px;
+          white-space: pre-wrap;
+          word-break: break-word;
         }
       `}</style>
     </div>
