@@ -2,16 +2,10 @@ import {
   Calendar,
   CalendarDays,
   Settings,
-  Cog,
   HelpCircle,
 } from 'lucide-react'
 
-export type Pestana =
-  | 'calendario'
-  | 'festivos'
-  | 'configuracion'
-  | 'ajustes'
-  | 'ayuda'
+export type Pestana = 'calendario' | 'festivos' | 'ajustes' | 'ayuda'
 
 interface Props {
   pestana: Pestana
@@ -21,7 +15,6 @@ interface Props {
 const OPCIONES: { id: Pestana; etiqueta: string; Icono: any }[] = [
   { id: 'calendario', etiqueta: 'Calendario', Icono: Calendar },
   { id: 'festivos', etiqueta: 'Festivos', Icono: CalendarDays },
-  { id: 'configuracion', etiqueta: 'Config.', Icono: Cog },
   { id: 'ajustes', etiqueta: 'Ajustes', Icono: Settings },
   { id: 'ayuda', etiqueta: 'Ayuda', Icono: HelpCircle },
 ]
