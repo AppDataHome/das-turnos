@@ -33,6 +33,11 @@ interface ResumenVacaciones {
 
 type VistaCalendario = 'mensual' | 'semanal' | 'anual'
 
+const NOMBRES_MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+
 export default function Calendario() {
   const { usuario } = useUsuario()
   const toast = useToast()
@@ -45,6 +50,12 @@ export default function Calendario() {
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
+
+  // Mes visible en el calendario (por defecto, mes actual)
+  const [mesVisible, setMesVisible] = useState<Date>(() => {
+    const hoy = new Date()
+    return new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+  })
 
   const [vista, setVista] = useState<VistaCalendario>(() => {
     const guardada = localStorage.getItem('vista_calendario')
@@ -166,25 +177,37 @@ export default function Calendario() {
     .sort((a, b) => (a.orden_turno ?? 100) - (b.orden_turno ?? 100))
 
   const hoy = new Date()
-  const anioActual = hoy.getFullYear()
-  const mesActual = hoy.getMonth()
   const hoyTexto = hoy.toISOString().split('T')[0]
 
-  function esDelMesActual(fechaTexto: string): boolean {
+  // ─────────── MÉTRICAS DEL MES VISIBLE ───────────
+  const anioVisible = mesVisible.getFullYear()
+  const mesVisibleNum = mesVisible.getMonth()
+
+  function esDelMesVisible(fechaTexto: string): boolean {
     const d = new Date(fechaTexto + 'T00:00:00')
-    return d.getFullYear() === anioActual && d.getMonth() === mesActual
+    return d.getFullYear() === anioVisible && d.getMonth() === mesVisibleNum
   }
 
   const codigosTrabajo = ['M', 'T', 'N']
   const turnosMes = turnos.filter(
     (t) =>
-      esDelMesActual(t.fecha) && codigosTrabajo.includes(t.codigo_turno ?? '')
+      esDelMesVisible(t.fecha) &&
+      codigosTrabajo.includes(t.codigo_turno ?? '')
   )
+
+  // "Realizados": del mes visible, los que ya han pasado (<= hoy)
+  // Si el mes visible es futuro, todos son "restantes".
+  // Si el mes visible es pasado, todos son "realizados".
   const realizados = turnosMes.filter((t) => t.fecha <= hoyTexto).length
   const totalMes = turnosMes.length
   const restantes = totalMes - realizados
   const progreso =
     totalMes === 0 ? 0 : Math.round((realizados / totalMes) * 100)
+
+  // Nombre del mes visible para el título de la tarjeta
+  const tituloMesVisible = `${NOMBRES_MESES[mesVisibleNum]} ${anioVisible}`
+  const esMesActual =
+    anioVisible === hoy.getFullYear() && mesVisibleNum === hoy.getMonth()
 
   function textoFechaLarga(f: string): string {
     const date = new Date(f + 'T00:00:00')
@@ -210,10 +233,18 @@ export default function Calendario() {
     setModalAbierto(true)
   }
 
-  // Cuando se pulsa un día en la vista anual, cambiamos a la vista mensual
   function seleccionarDesdeAnual(fechaNueva: string) {
     setFecha(fechaNueva)
     setVista('mensual')
+  }
+
+  // Avisos que recibe de las vistas
+  function alCambiarMesVistaMensual(f: Date) {
+    setMesVisible(new Date(f.getFullYear(), f.getMonth(), 1))
+  }
+
+  function alCambiarSemanaVistaSemanal(fechaInicio: Date) {
+    setMesVisible(new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1))
   }
 
   // ─────────── SKELETON MIENTRAS CARGA ───────────
@@ -238,7 +269,7 @@ export default function Calendario() {
             style={{
               color: 'var(--texto-suave)',
               fontSize: 10,
-              marginBottom: 8,
+              marginBottom: 4,
               textTransform: 'uppercase',
               letterSpacing: 0.6,
               fontWeight: 700,
@@ -246,6 +277,18 @@ export default function Calendario() {
           >
             Turnos Mes
           </h4>
+          <div
+            style={{
+              fontSize: 10,
+              color: esMesActual ? 'var(--acento)' : 'var(--texto-suave)',
+              textTransform: 'capitalize',
+              fontWeight: 600,
+              marginBottom: 8,
+            }}
+          >
+            {tituloMesVisible}
+            {esMesActual && ' · actual'}
+          </div>
 
           <CuentaKilometros progreso={progreso} realizados={realizados} />
 
@@ -510,6 +553,7 @@ export default function Calendario() {
           festivos={festivos}
           fechaSeleccionada={fecha}
           onSeleccionarFecha={seleccionarYAbir}
+          onCambioMes={alCambiarMesVistaMensual}
         />
       )}
 
@@ -519,6 +563,7 @@ export default function Calendario() {
           festivos={festivos}
           fechaSeleccionada={fecha}
           onSeleccionarFecha={seleccionarYAbir}
+          onCambioSemana={alCambiarSemanaVistaSemanal}
         />
       )}
 
