@@ -8,16 +8,24 @@ import CampoPassword from '../componentes/CampoPassword'
 import Configuracion from './Configuracion'
 import SeccionDatos from './SeccionDatos'
 import SeccionDasRemanente from './SeccionDasRemanente'
+import PestanaInvitados from './PestanaInvitados'
 import type { Tema } from '../tipos'
 import {
   User,
   Settings as SettingsIcon,
   Database,
   Palette,
+  Users,
   LogOut,
 } from 'lucide-react'
 
-type Pestana = 'perfil' | 'configuracion' | 'datos' | 'preferencias' | 'sesion'
+type Pestana =
+  | 'perfil'
+  | 'configuracion'
+  | 'datos'
+  | 'invitados'
+  | 'preferencias'
+  | 'sesion'
 
 export default function Ajustes() {
   const [pestana, setPestana] = useState<Pestana>('perfil')
@@ -48,6 +56,13 @@ export default function Ajustes() {
           Datos
         </button>
         <button
+          className={pestana === 'invitados' ? 'activa' : ''}
+          onClick={() => setPestana('invitados')}
+        >
+          <Users size={14} />
+          Invitados
+        </button>
+        <button
           className={pestana === 'preferencias' ? 'activa' : ''}
           onClick={() => setPestana('preferencias')}
         >
@@ -66,6 +81,7 @@ export default function Ajustes() {
       {pestana === 'perfil' && <PestanaPerfil />}
       {pestana === 'configuracion' && <PestanaConfiguracion />}
       {pestana === 'datos' && <PestanaDatos />}
+      {pestana === 'invitados' && <PestanaInvitados />}
       {pestana === 'preferencias' && <PestanaPreferencias />}
       {pestana === 'sesion' && <PestanaSesion />}
     </div>
@@ -113,7 +129,6 @@ function PestanaPerfil() {
       e.target.value = ''
       return
     }
-
     if (!archivo.type.startsWith('image/')) {
       toast.error('El archivo debe ser una imagen')
       e.target.value = ''
@@ -260,7 +275,6 @@ function PestanaPerfil() {
 
   return (
     <>
-      {/* Foto de perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Foto de perfil</h2>
 
@@ -328,7 +342,6 @@ function PestanaPerfil() {
         </div>
       </div>
 
-      {/* Mi perfil */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Mi perfil</h2>
 
@@ -373,7 +386,6 @@ function PestanaPerfil() {
         </form>
       </div>
 
-      {/* Cambiar contraseña */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Seguridad · Cambiar contraseña</h2>
 
@@ -503,7 +515,6 @@ function PestanaConfiguracion() {
 
   return (
     <>
-      {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Vacaciones</h2>
 
@@ -592,10 +603,8 @@ function PestanaConfiguracion() {
         </form>
       </div>
 
-      {/* DAS remanentes */}
       <SeccionDasRemanente />
 
-      {/* Departamentos y tipos de turno */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Departamentos y tipos de turno</h2>
         <Configuracion />
