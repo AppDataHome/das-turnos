@@ -6,6 +6,7 @@ import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import SeccionDatos from './SeccionDatos'
 import SeccionDasRemanente from './SeccionDasRemanente'
 import Avatar from '../componentes/Avatar'
+import CampoPassword from '../componentes/CampoPassword'
 import type { Tema } from '../tipos'
 
 export default function Ajustes() {
@@ -73,11 +74,9 @@ export default function Ajustes() {
 
     setSubiendoAvatar(true)
 
-    // Extensión del archivo
     const ext = archivo.name.split('.').pop()?.toLowerCase() || 'jpg'
     const ruta = `${usuario!.id}/avatar.${ext}`
 
-    // Subimos el archivo (upsert = reemplaza si ya existe)
     const { error: errSubida } = await supabase.storage
       .from('avatares')
       .upload(ruta, archivo, { upsert: true, cacheControl: '3600' })
@@ -89,7 +88,6 @@ export default function Ajustes() {
       return
     }
 
-    // Obtener la URL pública con un pequeño cache-buster para forzar recarga
     const { data: urlData } = supabase.storage
       .from('avatares')
       .getPublicUrl(ruta)
@@ -119,7 +117,6 @@ export default function Ajustes() {
 
     setSubiendoAvatar(true)
 
-    // Intentamos borrar todos los archivos de la carpeta del usuario
     const { data: listado } = await supabase.storage
       .from('avatares')
       .list(usuario!.id)
@@ -407,32 +404,26 @@ export default function Ajustes() {
 
         <form onSubmit={cambiarContrasena}>
           <label className="label">Contraseña actual</label>
-          <input
-            className="input"
-            type="password"
-            value={passActual}
-            onChange={(e) => setPassActual(e.target.value)}
+          <CampoPassword
+            valor={passActual}
+            onChange={setPassActual}
             required
             autoComplete="current-password"
           />
 
           <label className="label">Nueva contraseña</label>
-          <input
-            className="input"
-            type="password"
-            value={pass1}
-            onChange={(e) => setPass1(e.target.value)}
+          <CampoPassword
+            valor={pass1}
+            onChange={setPass1}
             minLength={6}
             required
             autoComplete="new-password"
           />
 
           <label className="label">Repetir nueva contraseña</label>
-          <input
-            className="input"
-            type="password"
-            value={pass2}
-            onChange={(e) => setPass2(e.target.value)}
+          <CampoPassword
+            valor={pass2}
+            onChange={setPass2}
             minLength={6}
             required
             autoComplete="new-password"
