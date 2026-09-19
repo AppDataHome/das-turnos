@@ -30,6 +30,9 @@ export default function Festivos() {
   const [cargando, setCargando] = useState(false)
   const [importando, setImportando] = useState(false)
 
+  // Años disponibles calculados dinámicamente a partir de los festivos guardados
+  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([])
+
   const [idEditando, setIdEditando] = useState<string | null>(null)
   const [fecha, setFecha] = useState('')
   const [ambito, setAmbito] = useState<'nacional' | 'autonomico' | 'local'>(
@@ -40,8 +43,43 @@ export default function Festivos() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    cargarAniosDisponibles()
+  }, [])
+
+  useEffect(() => {
     cargarFestivos()
   }, [anio])
+
+  // ───────────── Cargar años disponibles ─────────────
+  async function cargarAniosDisponibles() {
+    const { data, error } = await supabase
+      .from('festivo_calendario')
+      .select('fecha')
+
+    if (error || !data) {
+      // Si no se puede leer, al menos mostrar 5 años alrededor del actual
+      setAniosDisponibles(
+        Array.from({ length: 11 }, (_, i) => anioActual - 5 + i)
+      )
+      return
+    }
+
+    const anios = new Set<number>()
+    // Años de festivos existentes
+    for (const f of data) {
+      const y = parseInt((f.fecha as string).slice(0, 4), 10)
+      if (!isNaN(y)) anios.add(y)
+    }
+    // Años actual y los 5 siguientes (por si quiere planificar)
+    anios.add(anioActual)
+    for (let i = 1; i <= 5; i++) anios.add(anioActual + i)
+    // Año anterior por si acaso
+    anios.add(anioActual - 1)
+
+    // Ordenar
+    const lista = Array.from(anios).sort((a, b) => a - b)
+    setAniosDisponibles(lista)
+  }
 
   async function cargarFestivos() {
     setCargando(true)
@@ -98,6 +136,7 @@ export default function Festivos() {
           (ignorados > 0 ? ` ${ignorados} ya existían.` : '')
       )
       cargarFestivos()
+      cargarAniosDisponibles()
     }
   }
 
@@ -128,6 +167,7 @@ export default function Festivos() {
       toast.exito('Festivo actualizado')
       cancelarEdicion()
       cargarFestivos()
+      cargarAniosDisponibles()
     } else {
       const { error } = await supabase.from('festivo_calendario').insert({
         fecha,
@@ -150,6 +190,7 @@ export default function Festivos() {
       setFecha('')
       setDescripcion('')
       cargarFestivos()
+      cargarAniosDisponibles()
     }
   }
 
@@ -188,6 +229,7 @@ export default function Festivos() {
     }
     toast.exito('Festivo borrado')
     cargarFestivos()
+    cargarAniosDisponibles()
   }
 
   function textoFecha(f: string): string {
@@ -205,11 +247,6 @@ export default function Festivos() {
     if (a === 'nacional') return '#dc2626'
     if (a === 'autonomico') return '#ea580c'
     return '#7c3aed'
-  }
-
-  const añosDisponibles: number[] = []
-  for (let i = anioActual - 5; i <= anioActual + 5; i++) {
-    añosDisponibles.push(i)
   }
 
   return (
@@ -236,7 +273,7 @@ export default function Festivos() {
               onChange={(e) => setAnio(Number(e.target.value))}
               style={{ width: 'auto', marginBottom: 0 }}
             >
-              {añosDisponibles.map((a) => (
+              {aniosDisponibles.map((a) => (
                 <option key={a} value={a}>
                   {a}
                 </option>
