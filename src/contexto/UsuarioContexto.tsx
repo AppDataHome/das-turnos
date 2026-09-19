@@ -8,6 +8,26 @@ import {
 import { supabase } from '../supabase'
 import type { Usuario, Tema } from '../tipos'
 
+// ─────────── Tipos de invitación ───────────
+export interface Invitacion {
+  id: string
+  codigo: string
+  nombre_invitado: string | null
+  email_invitado: string | null
+  creada_en: string
+  revocada: boolean
+  ultimo_acceso: string | null
+}
+
+export interface InvitadoVinculado {
+  id: string
+  nombre: string
+  email: string
+  avatar_url: string | null
+  invitado_de: string | null
+}
+
+// ─────────── Forma del contexto ───────────
 interface UsuarioContextoValor {
   usuario: Usuario | null
   cargando: boolean
@@ -16,16 +36,17 @@ interface UsuarioContextoValor {
   recargar: () => Promise<void>
   actualizarPerfil: (cambios: Partial<Usuario>) => Promise<void>
   cambiarTema: (tema: Tema) => Promise<void>
-  generarCodigoInvitacion: () => Promise<string>
-  revocarCodigoInvitacion: () => Promise<void>
-  vincularComoInvitado: (
-    codigo: string
-  ) => Promise<{ ok: boolean; mensaje: string }>
-  desvincularInvitado: () => Promise<void>
-  listarMisInvitados: () => Promise<
-    { id: string; nombre: string; email: string; avatar_url: string | null }[]
-  >
+  // Invitaciones (nuevo sistema)
+  crearInvitacion: (
+    nombreInvitado: string
+  ) => Promise<{ ok: boolean; mensaje: string; codigo?: string }>
+  revocarInvitacion: (id: string) => Promise<void>
+  eliminarInvitacion: (id: string) => Promise<void>
+  listarInvitaciones: () => Promise<Invitacion[]>
+  listarVinculados: () => Promise<InvitadoVinculado[]>
   expulsarInvitado: (id: string) => Promise<void>
+  // Salir del modo invitado
+  desvincularme: () => Promise<void>
 }
 
 const UsuarioContexto = createContext<UsuarioContextoValor | null>(null)
@@ -46,8 +67,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       return
     }
 
-    // Primero intentamos leer la fila de `usuario`.
-    // Da igual si es anónimo o no: si tiene fila, se usa.
     const { data } = await supabase
       .from('usuario')
       .select('*')
@@ -60,14 +79,12 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       return
     }
 
-    // No hay fila. Si es anónimo, no creamos perfil (lo hace el canje).
     if (authUser.is_anonymous) {
       setUsuario(null)
       setCargando(false)
       return
     }
 
-    // Usuario normal sin fila: la creamos
     const nuevo: Partial<Usuario> = {
       id: authUser.id,
       email: authUser.email ?? '',
@@ -113,56 +130,91 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     await actualizarPerfil({ tema })
   }
 
-  async function generarCodigoInvitacion(): Promise<string> {
-    const { data, error } = await supabase.rpc('generar_codigo_invitacion')
-    if (error) throw error
-    await cargar()
-    return data as string
+  // ─────────── Invitaciones (nuevo sistema) ───────────
+
+  function generarCodigo(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sin caracteres confusos
+    let c1 = ''
+    let c2 = ''
+    for (let i = 0; i < 4; i++) {
+      c1 += chars[Math.floor(Math.random() * chars.length)]
+      c2 += chars[Math.floor(Math.random() * chars.length)]
+    }
+    return `DAS-${c1}-${c2}`
   }
 
-  async function revocarCodigoInvitacion() {
-    const { error } = await supabase.rpc('revocar_codigo_invitacion')
-    if (error) throw error
-    await cargar()
-  }
+  async function crearInvitacion(nombreInvitado: string) {
+    if (!usuario) return { ok: false, mensaje: 'No autenticado' }
 
-  async function vincularComoInvitado(codigo: string) {
-    const { data, error } = await supabase.rpc('vincular_como_invitado', {
-      p_codigo: codigo,
+    const codigo = generarCodigo()
+
+    const { error } = await supabase.from('invitacion').insert({
+      id_propietario: usuario.id,
+      codigo,
+      nombre_invitado: nombreInvitado.trim() || null,
     })
-    if (error) return { ok: false, mensaje: error.message }
 
-    const fila = (data as any[])?.[0]
-    if (!fila)
-      return { ok: false, mensaje: 'Respuesta inesperada del servidor' }
-
-    if (fila.ok) await cargar()
-    return { ok: fila.ok, mensaje: fila.mensaje }
+    if (error) {
+      return { ok: false, mensaje: error.message }
+    }
+    return { ok: true, mensaje: 'Invitación creada', codigo }
   }
 
-  async function desvincularInvitado() {
-    const { error } = await supabase.rpc('desvincular_invitado')
+  async function revocarInvitacion(id: string) {
+    const { error } = await supabase
+      .from('invitacion')
+      .update({ revocada: true })
+      .eq('id', id)
     if (error) throw error
-    await cargar()
   }
 
-  async function listarMisInvitados() {
-    const { data, error } = await supabase.rpc('listar_mis_invitados')
+  async function eliminarInvitacion(id: string) {
+    const { error } = await supabase
+      .from('invitacion')
+      .delete()
+      .eq('id', id)
+    if (error) throw error
+  }
+
+  async function listarInvitaciones(): Promise<Invitacion[]> {
+    if (!usuario) return []
+    const { data, error } = await supabase
+      .from('invitacion')
+      .select('*')
+      .eq('id_propietario', usuario.id)
+      .order('creada_en', { ascending: false })
+
     if (error) return []
-    return (data ?? []) as {
-      id: string
-      nombre: string
-      email: string
-      avatar_url: string | null
-    }[]
+    return (data ?? []) as Invitacion[]
+  }
+
+  async function listarVinculados(): Promise<InvitadoVinculado[]> {
+    if (!usuario) return []
+    const { data, error } = await supabase
+      .from('usuario')
+      .select('id, nombre, email, avatar_url, invitado_de')
+      .eq('invitado_de', usuario.id)
+      .order('nombre')
+
+    if (error) return []
+    return (data ?? []) as InvitadoVinculado[]
   }
 
   async function expulsarInvitado(id: string) {
-    const { error } = await supabase.rpc('expulsar_invitado', {
-      p_invitado: id,
-    })
+    // Desvincula al invitado: borra la fila de usuario (ya que era solo invitado)
+    const { error } = await supabase.from('usuario').delete().eq('id', id)
     if (error) throw error
   }
+
+  async function desvincularme() {
+    if (!usuario) return
+    // El invitado se "auto-elimina" su fila de usuario y cierra sesión
+    await supabase.from('usuario').delete().eq('id', usuario.id)
+    await supabase.auth.signOut()
+    window.location.reload()
+  }
+
+  // ─────────── Efectos ───────────
 
   useEffect(() => {
     cargar()
@@ -194,12 +246,13 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
         recargar: cargar,
         actualizarPerfil,
         cambiarTema,
-        generarCodigoInvitacion,
-        revocarCodigoInvitacion,
-        vincularComoInvitado,
-        desvincularInvitado,
-        listarMisInvitados,
+        crearInvitacion,
+        revocarInvitacion,
+        eliminarInvitacion,
+        listarInvitaciones,
+        listarVinculados,
         expulsarInvitado,
+        desvincularme,
       }}
     >
       {children}
