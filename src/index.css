@@ -1050,94 +1050,128 @@ nav a.activo { color: var(--acento); background: var(--acento-suave); }
    ═══════════════════════════════════════════════════ */
 
 @media print {
-  /* Ocultar todo lo de la app */
-  body * {
-    visibility: hidden;
-  }
-
-  /* Mostrar solo el informe */
-  .informe-print,
-  .informe-print * {
-    visibility: visible;
-  }
-
-  /* Colocar el informe arriba a la izquierda, ocupando todo el ancho */
-  .informe-print {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: none !important;
-    overflow: visible !important;
-    margin: 0 !important;
-    padding: 20px !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  }
-
-  /* Ocultar elementos marcados como no-print */
-  .no-print {
+  /* Ocultar todo excepto la cadena de ancestros del informe */
+  body :not(.informe-print):not(.informe-print *):not(:has(.informe-print)) {
     display: none !important;
   }
 
-  /* Forzar colores claros para ahorrar tinta */
+  /* Resetear modal y contenedor para que el contenido fluya normal */
+  .modal-fondo {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    background: white !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    animation: none !important;
+  }
+
+  .modal-ventana {
+    position: static !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    animation: none !important;
+  }
+
+  /* Forzar colores para impresión */
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .informe-print,
   .informe-print * {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border-color: #cccccc !important;
+    color: black !important;
     box-shadow: none !important;
     text-shadow: none !important;
   }
 
-  /* Los chips (fondo de color) mantienen algo de color */
   .informe-print .chip {
     background-color: #dddddd !important;
     color: #000000 !important;
     border: 1px solid #999999 !important;
   }
 
-  /* Elementos del informe con fondo verde (DAS generados) */
   .informe-print .informe-item {
+    background-color: #f5f5f5 !important;
     border: 1px solid #cccccc !important;
-    break-inside: avoid;
-  }
-
-  /* Evitar saltos de página dentro de las listas */
-  .informe-item,
-  .mini-resumen,
-  .informe-cabecera {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Ajustes de tipografía para impresión */
-  .informe-print {
-    font-size: 11pt !important;
+  .informe-print .informe-resumen {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #cccccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .informe-print .informe-cabecera {
+    border-bottom: 2px solid #333333 !important;
+    padding-bottom: 8px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    /* Que la cabecera solo aparezca en la primera página */
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .informe-print .informe-titulo {
     color: #000000 !important;
-    border-bottom: 2px solid #000000;
-    padding-bottom: 6px;
+  }
+
+  .informe-print .informe-subtitulo {
+    color: #666666 !important;
+  }
+
+  .informe-print .informe-pie {
+    border-top: 1px solid #cccccc !important;
+    margin-top: 24px !important;
+    padding-top: 12px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .informe-print .modal-seccion-titulo {
-    color: #000000 !important;
-    border-bottom: 1px solid #999999;
-    padding-bottom: 4px;
+    color: #333333 !important;
+    border-bottom: 1px solid #cccccc !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 8px !important;
   }
 
-  /* Ocultar decoraciones */
-  .modal-fondo {
-    position: static !important;
-    background: transparent !important;
-    padding: 0 !important;
-    backdrop-filter: none !important;
+  /* Evitar saltos de página dentro de las filas */
+  .informe-item,
+  .mini-resumen {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Los títulos de sección no se separan del contenido */
+  .informe-print .modal-seccion-titulo {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Ocultar botones y controles */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Márgenes de impresión */
+  @page {
+    margin: 15mm;
+    size: A4;
   }
 }
