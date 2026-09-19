@@ -61,6 +61,10 @@ export default function Ayuda() {
               Exportar e importar tus datos en formato Excel/CSV como copia de
               seguridad.
             </li>
+            <li>
+              Compartir tu calendario con <strong>invitados</strong> en modo
+              solo lectura (familiares, etc.).
+            </li>
             <li>Instalarla en el móvil como una app normal.</li>
           </ul>
         </>
@@ -82,16 +86,16 @@ export default function Ayuda() {
             confirmar la cuenta.
           </p>
           <p>
-            💡 En los campos de contraseña tienes un <strong>icono de ojo</strong>{' '}
-            👁️ para mostrar u ocultar lo que escribes y comprobar que no te
-            equivocas.
+            💡 En los campos de contraseña tienes un{' '}
+            <strong>icono de ojo</strong> 👁️ para mostrar u ocultar lo que
+            escribes y comprobar que no te equivocas.
           </p>
 
           <h4>2. Rellena tu perfil</h4>
           <p>
             Ve a <strong>Ajustes → Perfil</strong> y completa tu nombre y tu
-            número de empleado. También puedes subir una <strong>foto de
-            perfil</strong> que aparecerá en la cabecera.
+            número de empleado. También puedes subir una{' '}
+            <strong>foto de perfil</strong> que aparecerá en la cabecera.
           </p>
 
           <h4>3. Configura tus vacaciones</h4>
@@ -309,8 +313,8 @@ export default function Ayuda() {
           <h4>Qué muestra</h4>
           <ul>
             <li>
-              Listado completo de todos tus turnos, <strong>agrupados por
-              mes</strong>.
+              Listado completo de todos tus turnos,{' '}
+              <strong>agrupados por mes</strong>.
             </li>
             <li>
               Cada turno con: fecha, chip del tipo, departamento y notas.
@@ -348,6 +352,11 @@ export default function Ayuda() {
             desplegará un mini formulario para meter un turno en una fecha
             concreta sin salir del listado.
           </p>
+
+          <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+            ⚠️ Esta vista solo está disponible para propietarios. Los invitados
+            no la ven.
+          </p>
         </>
       ),
     },
@@ -380,7 +389,9 @@ export default function Ayuda() {
             horas caen en:
           </p>
           <ul>
-            <li>Un día festivo del calendario (nacional, autonómico o local).</li>
+            <li>
+              Un día festivo del calendario (nacional, autonómico o local).
+            </li>
             <li>Un sábado.</li>
             <li>Un domingo.</li>
           </ul>
@@ -388,9 +399,10 @@ export default function Ayuda() {
           <h4>¿Qué cuenta como noche?</h4>
           <p>
             Un turno de Noche (22:00–06:00) en el que al menos 3 horas son
-            nocturnas <strong>puras</strong>, es decir, <strong>excluyendo
-            las que ya cuentan como festivas</strong>. Por eso un turno de
-            Noche en sábado cuenta como festivo, pero no como noche.
+            nocturnas <strong>puras</strong>, es decir,{' '}
+            <strong>excluyendo las que ya cuentan como festivas</strong>. Por
+            eso un turno de Noche en sábado cuenta como festivo, pero no como
+            noche.
           </p>
 
           <h4>Caducidad</h4>
@@ -605,6 +617,131 @@ export default function Ayuda() {
             rojo. Además, los turnos de trabajo que caigan en festivos
             contarán para el cálculo de DAS.
           </p>
+
+          <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+            ⚠️ Los invitados pueden ver el listado, pero no pueden añadir,
+            editar ni borrar festivos.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
+      id: 'invitados',
+      titulo: 'Invitados (compartir el calendario)',
+      icono: '👥',
+      contenido: (
+        <>
+          <p>
+            Puedes compartir tu calendario con otras personas (familiares,
+            etc.) en <strong>modo solo lectura</strong>. Verán tus turnos,
+            vacaciones, DAS y podrán generar el informe, pero{' '}
+            <strong>no podrán modificar nada</strong>.
+          </p>
+
+          <h4>Para el propietario (tú)</h4>
+
+          <p>
+            <strong>1. Generar un código de invitación</strong>
+          </p>
+          <ul>
+            <li>
+              Ve a <strong>Ajustes → Invitados</strong>.
+            </li>
+            <li>
+              Pulsa <strong>Generar código</strong>. Aparecerá un código tipo{' '}
+              <code>DAS-XXXX-XXXX</code>.
+            </li>
+            <li>
+              Pulsa <strong>Copiar</strong> y pásaselo a la persona por
+              WhatsApp, correo o como quieras.
+            </li>
+            <li>
+              Puedes <strong>regenerar</strong> el código cuando quieras (el
+              anterior deja de funcionar) o <strong>revocarlo</strong>.
+            </li>
+          </ul>
+
+          <p>
+            <strong>2. Ver quién está vinculado</strong>
+          </p>
+          <ul>
+            <li>
+              En la misma pantalla, sección "Invitados", ves a todas las
+              personas que están viendo tu calendario.
+            </li>
+            <li>
+              Con el botón <strong>Expulsar</strong> retiras el acceso a
+              alguien (dejará de ver tus turnos).
+            </li>
+          </ul>
+
+          <h4>Para el invitado</h4>
+
+          <p>
+            <strong>1. Crear una cuenta</strong>
+          </p>
+          <ul>
+            <li>
+              Descarga el enlace de la app y regístrate con tu correo.
+            </li>
+            <li>Confirma el correo y entra.</li>
+          </ul>
+
+          <p>
+            <strong>2. Vincularse al propietario</strong>
+          </p>
+          <ul>
+            <li>
+              Ve a <strong>Ajustes → Invitados</strong>.
+            </li>
+            <li>
+              En el bloque <strong>"¿Tienes un código de invitación?"</strong>,
+              pega el código y pulsa <strong>Vincularme</strong>.
+            </li>
+            <li>
+              A partir de ese momento verás el calendario del propietario.
+            </li>
+          </ul>
+
+          <h4>Qué puede hacer el invitado</h4>
+          <ul>
+            <li>
+              ✅ Ver el calendario en sus 3 vistas (Mensual, Semanal, Anual).
+            </li>
+            <li>✅ Ver las tarjetas de Turnos Mes, Vacaciones y DAS.</li>
+            <li>✅ Generar el informe DAS del propietario.</li>
+            <li>
+              ❌ No puede añadir, editar ni borrar turnos.
+            </li>
+            <li>
+              ❌ No tiene la pestaña ⚙ Gestión.
+            </li>
+            <li>
+              ❌ No puede tocar los festivos ni la configuración.
+            </li>
+          </ul>
+
+          <h4>Desvincularse o cambiar de propietario</h4>
+          <ul>
+            <li>
+              Como invitado, ve a <strong>Ajustes → Invitados</strong> y pulsa{' '}
+              <strong>Desvincularme</strong>.
+            </li>
+            <li>
+              Si quieres vincularte a otro propietario, primero desvincúlate y
+              luego introduce el nuevo código.
+            </li>
+          </ul>
+
+          <h4>⚠️ Nota importante para el propietario</h4>
+          <p>
+            Si un día te vinculas como invitado de otro usuario,{' '}
+            <strong>dejarás de ver y gestionar tus propios turnos</strong> y
+            pasarás a ver los suyos. Es reversible: puedes desvincularte y
+            volverás a tus datos.
+          </p>
         </>
       ),
     },
@@ -612,67 +749,58 @@ export default function Ayuda() {
     // ─────────────────────────────────────────
     {
       id: 'ajustes',
-      titulo: 'Ajustes (5 subpestañas)',
+      titulo: 'Ajustes (subpestañas)',
       icono: '🔧',
       contenido: (
         <>
           <p>
-            La pestaña <strong>Ajustes</strong> está organizada en 5
-            subpestañas para que encuentres todo rápido:
+            La pestaña <strong>Ajustes</strong> está organizada en
+            subpestañas para que encuentres todo rápido. Las disponibles
+            dependen de tu rol:
           </p>
 
-          <h4>👤 Perfil</h4>
+          <h4>Disponibles para todos</h4>
           <ul>
             <li>
-              <strong>Foto de perfil</strong>: sube, cambia o borra tu foto.
-              Se verá en la cabecera.
+              <strong>👤 Perfil</strong>: foto, nombre, Nº de empleado y
+              cambio de contraseña.
             </li>
             <li>
-              <strong>Mi perfil</strong>: nombre, Nº de empleado y correo (no
-              editable).
+              <strong>👥 Invitados</strong>: generar o canjear código de
+              invitación.
             </li>
             <li>
-              <strong>Seguridad</strong>: cambio de contraseña. Por seguridad,
-              se exige meter la contraseña actual.
+              <strong>🎨 Preferencias</strong>: tema (negro o verde Guardia
+              Civil).
+            </li>
+            <li>
+              <strong>🚪 Sesión</strong>: cerrar sesión.
             </li>
           </ul>
 
-          <h4>⚙ Configuración</h4>
+          <h4>Solo para propietarios</h4>
           <ul>
             <li>
-              <strong>Vacaciones</strong>: días anuales, arrastre y año del
-              arrastre. Botón para poner el arrastre a 0.
+              <strong>⚙ Configuración</strong>: vacaciones, arrastre, DAS
+              remanentes, departamentos y tipos de turno.
             </li>
             <li>
-              <strong>DAS remanentes</strong>: para cambio de destino.
-            </li>
-            <li>
-              <strong>Departamentos y tipos de turno</strong>: crear, editar,
-              activar/desactivar o borrar.
+              <strong>🗄 Datos</strong>: exportar e importar CSV.
             </li>
           </ul>
 
-          <h4>🗄 Datos</h4>
-          <ul>
-            <li>Exportar turnos a CSV.</li>
-            <li>Importar turnos desde CSV.</li>
-            <li>Exportar festivos a CSV.</li>
-            <li>Importar festivos desde CSV.</li>
-          </ul>
-
-          <h4>🎨 Preferencias</h4>
+          <h4>Cerrar sesión rápido</h4>
+          <p>
+            Además de la subpestaña Sesión, tienes:
+          </p>
           <ul>
             <li>
-              <strong>Tema</strong>: negro o verde Guardia Civil.
+              En <strong>escritorio</strong>: botón <strong>"Salir"</strong> en
+              la barra superior, al lado de tu correo.
             </li>
-          </ul>
-
-          <h4>🚪 Sesión</h4>
-          <ul>
             <li>
-              <strong>Cerrar sesión</strong>. También puedes hacerlo desde el
-              botón "Salir" de la barra superior (escritorio) o desde el botón
-              redondo de la cabecera (móvil).
+              En <strong>móvil</strong>: botón redondo con el icono de puerta
+              en la cabecera, junto a tu foto.
             </li>
           </ul>
         </>
@@ -787,6 +915,10 @@ export default function Ayuda() {
             Haz una exportación cada cierto tiempo (o antes de grandes
             cambios) y guarda el CSV. Es tu red de seguridad.
           </p>
+
+          <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+            ⚠️ Esta sección solo está disponible para propietarios.
+          </p>
         </>
       ),
     },
@@ -860,6 +992,10 @@ export default function Ayuda() {
             <li>
               <strong>Filtros rápidos</strong>: dentro de Gestión, pulsa
               "Este mes" o "Mes anterior" para ver solo lo que te interesa.
+            </li>
+            <li>
+              <strong>Calendario con familiares</strong>: comparte un código
+              de invitación para que puedan verlo sin tocar nada.
             </li>
           </ul>
 
@@ -935,6 +1071,20 @@ export default function Ayuda() {
             tu saldo actual.
           </p>
 
+          <h4>¿Cómo comparto mi calendario con mi familia?</h4>
+          <p>
+            Ve a <strong>Ajustes → Invitados</strong>, genera un código y
+            pásaselo. Ellos se registran, introducen el código y ven tu
+            calendario en solo lectura. Puedes expulsarlos cuando quieras. Más
+            detalles en la sección <strong>👥 Invitados</strong>.
+          </p>
+
+          <h4>¿El invitado puede ver mis vacaciones o mis notas?</h4>
+          <p>
+            Sí, el invitado ve todo lo que tú ves (turnos, vacaciones, DAS,
+            notas, informes), pero no puede modificar nada.
+          </p>
+
           <h4>¿Puedo recuperar si borro algo por error?</h4>
           <p>
             No hay papelera. Si haces exportaciones periódicas a CSV, puedes
@@ -951,8 +1101,10 @@ export default function Ayuda() {
           <h4>¿Por qué no veo la pestaña X?</h4>
           <p>
             En móvil, la navegación está en la barra inferior. En escritorio,
-            arriba. Si has instalado la app hace tiempo, desinstálala y
-            vuelve a instalarla para actualizar icono y menús.
+            arriba. Si eres invitado, algunas pestañas (Configuración, Datos,
+            Gestión) no están disponibles porque no las necesitas. Si has
+            instalado la app hace tiempo, desinstálala y vuelve a instalarla
+            para actualizar icono y menús.
           </p>
         </>
       ),
@@ -1031,7 +1183,9 @@ export default function Ayuda() {
                 border: '1px solid var(--borde)',
                 cursor: 'pointer',
                 background:
-                  abierta === s.id ? 'var(--acento)' : 'var(--fondo-tarjeta-2)',
+                  abierta === s.id
+                    ? 'var(--acento)'
+                    : 'var(--fondo-tarjeta-2)',
                 color: abierta === s.id ? '#0b0e13' : 'var(--texto)',
                 fontWeight: 500,
               }}
