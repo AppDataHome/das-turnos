@@ -6,6 +6,7 @@ import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import VistaMensual from './VistaMensual'
 import VistaSemanal from './VistaSemanal'
 import VistaAnual from './VistaAnual'
+import GestionTurnos from './GestionTurnos'
 import ModalDia from './ModalDia'
 import ModalInformeDas from './ModalInformeDas'
 import AvisosBanner from './AvisosBanner'
@@ -33,7 +34,7 @@ interface ResumenVacaciones {
   disponibles_anterior: number
 }
 
-type VistaCalendario = 'mensual' | 'semanal' | 'anual'
+type VistaCalendario = 'mensual' | 'semanal' | 'anual' | 'gestion'
 
 const NOMBRES_MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -63,6 +64,7 @@ export default function Calendario() {
     const guardada = localStorage.getItem('vista_calendario')
     if (guardada === 'semanal') return 'semanal'
     if (guardada === 'anual') return 'anual'
+    if (guardada === 'gestion') return 'gestion'
     return 'mensual'
   })
 
@@ -233,6 +235,12 @@ export default function Calendario() {
   function seleccionarDesdeAnual(fechaNueva: string) {
     setFecha(fechaNueva)
     setVista('mensual')
+  }
+
+  // Cuando se pulsa "Editar" en gestión, abrimos el modal del día
+  function editarDesdeGestion(fechaNueva: string) {
+    setFecha(fechaNueva)
+    setModalAbierto(true)
   }
 
   function alCambiarMesVistaMensual(f: Date) {
@@ -522,6 +530,7 @@ export default function Calendario() {
           border: '1px solid var(--borde)',
           borderRadius: 10,
           width: 'fit-content',
+          flexWrap: 'wrap',
         }}
       >
         <button
@@ -569,6 +578,22 @@ export default function Calendario() {
         >
           Anual
         </button>
+        <button
+          onClick={() => setVista('gestion')}
+          style={{
+            padding: '6px 14px',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: 7,
+            border: '1px solid var(--borde)',
+            cursor: 'pointer',
+            background: vista === 'gestion' ? 'var(--acento)' : 'transparent',
+            color: vista === 'gestion' ? '#0b0e13' : 'var(--texto-suave)',
+            marginLeft: 4,
+          }}
+        >
+          ⚙ Gestión
+        </button>
       </div>
 
       {vista === 'mensual' && (
@@ -598,7 +623,15 @@ export default function Calendario() {
         />
       )}
 
-      {vista !== 'anual' && (
+      {vista === 'gestion' && (
+        <GestionTurnos
+          turnos={turnos}
+          onEditarFecha={editarDesdeGestion}
+          onCambio={cargarTodo}
+        />
+      )}
+
+      {vista !== 'anual' && vista !== 'gestion' && (
         <div className="card">
           <div
             style={{
