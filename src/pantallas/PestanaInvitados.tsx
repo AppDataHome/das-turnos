@@ -1,104 +1,134 @@
 import { useState, useEffect } from 'react'
-import { useUsuario } from '../contexto/UsuarioContexto'
+import { useUsuario, type Invitacion } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import {
   Copy,
   Check,
-  RefreshCw,
-  Link2,
-  Link2Off,
+  Plus,
+  Trash2,
   UserMinus,
   Users,
   KeyRound,
+  Link2Off,
+  X,
+  Clock,
 } from 'lucide-react'
 
 export default function PestanaInvitados() {
   const {
     usuario,
     esInvitado,
-    generarCodigoInvitacion,
-    revocarCodigoInvitacion,
-    vincularComoInvitado,
-    desvincularInvitado,
-    listarMisInvitados,
+    crearInvitacion,
+    revocarInvitacion,
+    eliminarInvitacion,
+    listarInvitaciones,
+    listarVinculados,
     expulsarInvitado,
+    desvincularme,
   } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
-  // Estado para propietarios
-  const [invitados, setInvitados] = useState<
+  // ─────────── Estado propietario ───────────
+  const [invitaciones, setInvitaciones] = useState<Invitacion[]>([])
+  const [vinculados, setVinculados] = useState<
     { id: string; nombre: string; email: string; avatar_url: string | null }[]
   >([])
-  const [cargandoInvitados, setCargandoInvitados] = useState(false)
-  const [generando, setGenerando] = useState(false)
-  const [copiado, setCopiado] = useState(false)
-
-  // Estado para invitados (canjear código)
-  const [codigo, setCodigo] = useState('')
-  const [vinculando, setVinculando] = useState(false)
+  const [cargando, setCargando] = useState(false)
+  const [nombreNuevo, setNombreNuevo] = useState('')
+  const [creando, setCreando] = useState(false)
+  const [codigoCopiado, setCodigoCopiado] = useState<string | null>(null)
 
   useEffect(() => {
     if (usuario && !esInvitado) {
-      cargarInvitados()
+      cargarTodo()
     }
   }, [usuario?.id, esInvitado])
 
-  async function cargarInvitados() {
-    setCargandoInvitados(true)
-    const lista = await listarMisInvitados()
-    setInvitados(lista)
-    setCargandoInvitados(false)
+  async function cargarTodo() {
+    setCargando(true)
+    const [inv, vinc] = await Promise.all([
+      listarInvitaciones(),
+      listarVinculados(),
+    ])
+    setInvitaciones(inv)
+    setVinculados(vinc)
+    setCargando(false)
   }
 
-  async function generar() {
-    setGenerando(true)
+  async function crear(e: React.FormEvent) {
+    e.preventDefault()
+    setCreando(true)
+    const res = await crearInvitacion(nombreNuevo.trim())
+    setCreando(false)
+
+    if (!res.ok) {
+      toast.error(res.mensaje)
+      return
+    }
+
+    toast.exito('Invitación creada: ' + (res.codigo ?? ''))
+    setNombreNuevo('')
+    cargarTodo()
+  }
+
+  async function copiarCodigo(codigo: string) {
     try {
-      const c = await generarCodigoInvitacion()
-      toast.exito('Código generado: ' + c)
-    } catch (err: any) {
-      toast.error('Error al generar: ' + (err?.message ?? ''))
-    } finally {
-      setGenerando(false)
+      await navigator.clipboard.writeText(codigo)
+      setCodigoCopiado(codigo)
+      toast.exito('Código copiado al portapapeles')
+      setTimeout(() => setCodigoCopiado(null), 2000)
+    } catch {
+      toast.error('No se pudo copiar. Cópialo a mano.')
     }
   }
 
-  async function revocar() {
+  async function revocar(inv: Invitacion) {
     const ok = await confirmar({
-      titulo: '¿Revocar el código de invitación?',
+      titulo: '¿Revocar esta invitación?',
       mensaje:
-        'El código actual dejará de funcionar. Los invitados ya vinculados seguirán siéndolo.',
+        'El código dejará de funcionar. Los invitados que ya lo hayan canjeado seguirán vinculados hasta que los expulses.',
       textoConfirmar: 'Revocar',
       peligro: true,
     })
     if (!ok) return
 
     try {
-      await revocarCodigoInvitacion()
-      toast.exito('Código revocado')
+      await revocarInvitacion(inv.id)
+      toast.exito('Invitación revocada')
+      cargarTodo()
     } catch (err: any) {
       toast.error('Error: ' + (err?.message ?? ''))
     }
   }
 
-  async function copiarCodigo() {
-    if (!usuario?.codigo_invitacion) return
+  async function eliminar(inv: Invitacion) {
+    const ok = await confirmar({
+      titulo: '¿Eliminar esta invitación?',
+      mensaje: 'Se borrará de la lista. Esta acción no se puede deshacer.',
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    })
+    if (!ok) return
+
     try {
-      await navigator.clipboard.writeText(usuario.codigo_invitacion)
-      setCopiado(true)
-      toast.exito('Código copiado al portapapeles')
-      setTimeout(() => setCopiado(false), 2000)
-    } catch {
-      toast.error('No se pudo copiar. Cópialo a mano.')
+      await eliminarInvitacion(inv.id)
+      toast.exito('Invitación eliminada')
+      cargarTodo()
+    } catch (err: any) {
+      toast.error('Error: ' + (err?.message ?? ''))
     }
   }
 
-  async function expulsar(id: string, nombre: string) {
+  async function expulsar(
+    id: string,
+    nombre: string
+  ) {
     const ok = await confirmar({
       titulo: `¿Expulsar a ${nombre}?`,
       mensaje:
-        'Dejará de poder ver tus turnos. Podrá volver a vincularse con un nuevo código.',
+        'Dejará de ver tu calendario inmediatamente. Podrá volver si le das un código nuevo.',
       textoConfirmar: 'Expulsar',
       peligro: true,
     })
@@ -107,40 +137,24 @@ export default function PestanaInvitados() {
     try {
       await expulsarInvitado(id)
       toast.exito('Invitado expulsado')
-      cargarInvitados()
+      cargarTodo()
     } catch (err: any) {
       toast.error('Error: ' + (err?.message ?? ''))
     }
   }
 
-  async function canjearCodigo(e: React.FormEvent) {
-    e.preventDefault()
-    setVinculando(true)
-
-    const res = await vincularComoInvitado(codigo.trim())
-    setVinculando(false)
-
-    if (!res.ok) {
-      toast.error(res.mensaje)
-      return
-    }
-
-    toast.exito('Vinculación correcta. Ya puedes ver el calendario.')
-    setCodigo('')
-  }
-
-  async function desvincular() {
+  async function salirDeInvitado() {
     const ok = await confirmar({
-      titulo: '¿Desvincularse?',
-      mensaje: 'Dejarás de ver el calendario del propietario.',
-      textoConfirmar: 'Desvincular',
+      titulo: '¿Desvincularme?',
+      mensaje:
+        'Dejarás de ver el calendario del propietario y volverás a la pantalla de inicio.',
+      textoConfirmar: 'Desvincularme',
       peligro: true,
     })
     if (!ok) return
 
     try {
-      await desvincularInvitado()
-      toast.exito('Desvinculado. Vuelves a ser usuario normal.')
+      await desvincularme()
     } catch (err: any) {
       toast.error('Error: ' + (err?.message ?? ''))
     }
@@ -149,84 +163,42 @@ export default function PestanaInvitados() {
   if (!usuario) return null
 
   // ═══════════════════════════════════════════════════
-  // VISTA PARA EL INVITADO (el que ve el calendario de otro)
+  // VISTA PARA EL INVITADO
   // ═══════════════════════════════════════════════════
 
   if (esInvitado) {
     return (
-      <>
-        <div className="card">
-          <h2 style={{ marginBottom: 12 }}>Mi vinculación</h2>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: 12,
-              background: 'var(--fondo-tarjeta-2)',
-              borderRadius: 10,
-              marginBottom: 12,
-            }}
-          >
-            <Users size={22} color="var(--acento)" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: 'var(--texto-suave)',
-                  textTransform: 'uppercase',
-                  fontWeight: 700,
-                  letterSpacing: 0.4,
-                }}
-              >
-                Estás viendo el calendario de
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>
-                Tu propietario
-              </div>
-            </div>
-          </div>
-
-          <p
-            style={{
-              fontSize: 11,
-              color: 'var(--texto-suave)',
-              marginBottom: 12,
-            }}
-          >
-            Como invitado solo tienes permisos de lectura: puedes consultar el
-            calendario en sus distintas vistas, pero no puedes añadir, editar
-            ni borrar turnos.
-          </p>
-
-          <button className="btn btn-danger" onClick={desvincular}>
-            <Link2Off size={14} />
-            Desvincularme
-          </button>
-        </div>
-      </>
-    )
-  }
-
-  // ═══════════════════════════════════════════════════
-  // VISTA PARA EL PROPIETARIO (el que invita)
-  // ═══════════════════════════════════════════════════
-
-  return (
-    <>
-      {/* Código de invitación */}
       <div className="card">
+        <h2 style={{ marginBottom: 12 }}>Mi vinculación</h2>
+
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
+            padding: 12,
+            background: 'var(--fondo-tarjeta-2)',
+            borderRadius: 10,
             marginBottom: 12,
           }}
         >
-          <KeyRound size={22} color="var(--acento)" />
-          <h2 style={{ margin: 0 }}>Código de invitación</h2>
+          <Users size={22} color="var(--acento)" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--texto-suave)',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                letterSpacing: 0.4,
+              }}
+            >
+              Estás viendo el calendario de
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>
+              {usuario.nombre}
+            </div>
+          </div>
         </div>
 
         <p
@@ -234,105 +206,29 @@ export default function PestanaInvitados() {
             fontSize: 11,
             color: 'var(--texto-suave)',
             marginBottom: 12,
+            lineHeight: 1.5,
           }}
         >
-          Comparte este código con quien quieras que vea tu calendario en modo
-          solo lectura. La persona tendrá que crear una cuenta en la app y, una
-          vez dentro, introducir el código en{' '}
-          <strong>Ajustes → Invitados</strong>.
+          Como invitado solo tienes permisos de lectura: puedes consultar el
+          calendario en sus distintas vistas, pero no puedes añadir, editar ni
+          borrar turnos.
         </p>
 
-        {usuario.codigo_invitacion ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: 12,
-              background: 'var(--fondo-tarjeta-2)',
-              border: '1px solid var(--borde-fuerte)',
-              borderRadius: 10,
-              marginBottom: 12,
-            }}
-          >
-            <code
-              style={{
-                flex: 1,
-                fontSize: 16,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: 'var(--acento)',
-                fontFamily: 'monospace',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {usuario.codigo_invitacion}
-            </code>
-
-            <button
-              className="btn-mini"
-              style={{
-                background: copiado ? 'var(--exito)' : 'var(--acento)',
-                color: '#0b0e13',
-              }}
-              onClick={copiarCodigo}
-              title="Copiar al portapapeles"
-            >
-              {copiado ? <Check size={12} /> : <Copy size={12} />}
-              {copiado ? 'Copiado' : 'Copiar'}
-            </button>
-          </div>
-        ) : (
-          <p
-            style={{
-              fontSize: 11,
-              color: 'var(--texto-suave)',
-              fontStyle: 'italic',
-              marginBottom: 12,
-            }}
-          >
-            Aún no has generado ningún código.
-          </p>
-        )}
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            className="btn btn-primary"
-            onClick={generar}
-            disabled={generando}
-          >
-            <RefreshCw size={14} />
-            {generando
-              ? 'Generando…'
-              : usuario.codigo_invitacion
-              ? 'Regenerar código'
-              : 'Generar código'}
-          </button>
-
-          {usuario.codigo_invitacion && (
-            <button className="btn btn-secondary" onClick={revocar}>
-              <Link2Off size={14} />
-              Revocar código
-            </button>
-          )}
-        </div>
-
-        <p
-          style={{
-            fontSize: 10,
-            color: 'var(--texto-suave)',
-            marginTop: 10,
-            lineHeight: 1.4,
-          }}
-        >
-          ⚠️ Si regeneras el código, el anterior dejará de funcionar. Los
-          invitados ya vinculados seguirán viendo tu calendario.
-        </p>
+        <button className="btn btn-danger" onClick={salirDeInvitado}>
+          <Link2Off size={14} />
+          Desvincularme
+        </button>
       </div>
+    )
+  }
 
-      {/* Lista de invitados */}
+  // ═══════════════════════════════════════════════════
+  // VISTA PARA EL PROPIETARIO
+  // ═══════════════════════════════════════════════════
+
+  return (
+    <>
+      {/* Crear invitación */}
       <div className="card">
         <div
           style={{
@@ -342,9 +238,232 @@ export default function PestanaInvitados() {
             marginBottom: 12,
           }}
         >
-          <Users size={22} color="var(--acento)" />
+          <Plus size={20} color="var(--acento)" />
+          <h2 style={{ margin: 0 }}>Crear invitación</h2>
+        </div>
+
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--texto-suave)',
+            marginBottom: 12,
+            lineHeight: 1.5,
+          }}
+        >
+          Crea un código y compártelo con quien quieras que vea tu calendario
+          en solo lectura (familiares, etc.). No necesita registrarse: solo
+          introduce el código en la pantalla de inicio.
+        </p>
+
+        <form onSubmit={crear}>
+          <label className="label">
+            Nombre del invitado (para identificarlo)
+          </label>
+          <input
+            className="input"
+            type="text"
+            value={nombreNuevo}
+            onChange={(e) => setNombreNuevo(e.target.value)}
+            placeholder="Por ejemplo: María (madre)"
+            maxLength={60}
+          />
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={creando}
+            style={{ width: '100%', marginTop: 4 }}
+          >
+            <Plus size={14} />
+            {creando ? 'Creando…' : 'Crear invitación'}
+          </button>
+        </form>
+      </div>
+
+      {/* Lista de invitaciones */}
+      <div className="card">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <KeyRound size={20} color="var(--acento)" />
           <h2 style={{ margin: 0 }}>
-            Invitados ({invitados.length})
+            Códigos generados ({invitaciones.length})
+          </h2>
+        </div>
+
+        {cargando ? (
+          <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+            Cargando…
+          </p>
+        ) : invitaciones.length === 0 ? (
+          <p
+            style={{
+              fontSize: 12,
+              color: 'var(--texto-suave)',
+              textAlign: 'center',
+              padding: 12,
+              fontStyle: 'italic',
+            }}
+          >
+            Aún no has creado ninguna invitación.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {invitaciones.map((inv) => (
+              <div
+                key={inv.id}
+                style={{
+                  padding: 10,
+                  background: 'var(--fondo-tarjeta-2)',
+                  borderRadius: 8,
+                  border: inv.revocada
+                    ? '1px solid rgba(220, 38, 38, 0.4)'
+                    : '1px solid transparent',
+                  opacity: inv.revocada ? 0.6 : 1,
+                  minWidth: 0,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    marginBottom: 6,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <code
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      letterSpacing: 1.5,
+                      color: inv.revocada
+                        ? 'var(--texto-suave)'
+                        : 'var(--acento)',
+                      fontFamily: 'monospace',
+                      textDecoration: inv.revocada
+                        ? 'line-through'
+                        : 'none',
+                    }}
+                  >
+                    {inv.codigo}
+                  </code>
+
+                  {inv.revocada && (
+                    <span
+                      className="chip"
+                      style={{
+                        background: '#dc2626',
+                        color: 'white',
+                      }}
+                    >
+                      REVOCADO
+                    </span>
+                  )}
+
+                  {inv.ultimo_acceso && !inv.revocada && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        fontSize: 10,
+                        color: 'var(--exito)',
+                      }}
+                    >
+                      <Check size={10} />
+                      Canjeado
+                    </span>
+                  )}
+                </div>
+
+                {inv.nombre_invitado && (
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--texto)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    👤 {inv.nombre_invitado}
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 6,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {!inv.revocada && (
+                    <button
+                      className="btn-mini"
+                      style={{
+                        background:
+                          codigoCopiado === inv.codigo
+                            ? 'var(--exito)'
+                            : 'var(--acento)',
+                        color: '#0b0e13',
+                      }}
+                      onClick={() => copiarCodigo(inv.codigo)}
+                    >
+                      {codigoCopiado === inv.codigo ? (
+                        <>
+                          <Check size={11} /> Copiado
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={11} /> Copiar
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {!inv.revocada && (
+                    <button
+                      className="btn-mini"
+                      style={{
+                        background: 'var(--fondo-tarjeta-3)',
+                        color: 'var(--texto)',
+                      }}
+                      onClick={() => revocar(inv)}
+                    >
+                      <X size={11} /> Revocar
+                    </button>
+                  )}
+
+                  <button
+                    className="btn-mini btn-mini-peligro"
+                    onClick={() => eliminar(inv)}
+                  >
+                    <Trash2 size={11} /> Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Invitados vinculados */}
+      <div className="card">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <Users size={20} color="var(--acento)" />
+          <h2 style={{ margin: 0 }}>
+            Invitados vinculados ({vinculados.length})
           </h2>
         </div>
 
@@ -355,14 +474,15 @@ export default function PestanaInvitados() {
             marginBottom: 12,
           }}
         >
-          Personas que están viendo tu calendario en modo solo lectura.
+          Personas que ya han canjeado un código y están viendo tu calendario
+          ahora mismo.
         </p>
 
-        {cargandoInvitados ? (
+        {cargando ? (
           <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
             Cargando…
           </p>
-        ) : invitados.length === 0 ? (
+        ) : vinculados.length === 0 ? (
           <p
             style={{
               fontSize: 12,
@@ -372,13 +492,13 @@ export default function PestanaInvitados() {
               fontStyle: 'italic',
             }}
           >
-            Aún no tienes invitados vinculados.
+            Aún no hay nadie viendo tu calendario.
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {invitados.map((inv) => (
+            {vinculados.map((v) => (
               <div
-                key={inv.id}
+                key={v.id}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -404,7 +524,7 @@ export default function PestanaInvitados() {
                     flexShrink: 0,
                   }}
                 >
-                  {(inv.nombre?.[0] ?? '?').toUpperCase()}
+                  {(v.nombre?.[0] ?? '?').toUpperCase()}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -417,7 +537,7 @@ export default function PestanaInvitados() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {inv.nombre}
+                    {v.nombre}
                   </div>
                   <div
                     style={{
@@ -428,81 +548,24 @@ export default function PestanaInvitados() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {inv.email}
+                    Desde {new Date(
+                      v.id ? Date.now() : Date.now()
+                    ).toLocaleDateString('es-ES')}
                   </div>
                 </div>
 
                 <button
                   className="btn-mini btn-mini-peligro"
-                  onClick={() => expulsar(inv.id, inv.nombre)}
+                  onClick={() => expulsar(v.id, v.nombre)}
                   title="Expulsar"
                 >
-                  <UserMinus size={12} />
+                  <UserMinus size={11} />
                   Expulsar
                 </button>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      {/* Canjear código (por si el propio propietario quiere vincularse a otro) */}
-      <div className="card">
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 12,
-          }}
-        >
-          <Link2 size={22} color="var(--acento)" />
-          <h2 style={{ margin: 0 }}>¿Tienes un código de invitación?</h2>
-        </div>
-
-        <p
-          style={{
-            fontSize: 11,
-            color: 'var(--texto-suave)',
-            marginBottom: 12,
-          }}
-        >
-          Si otra persona te ha dado su código, introdúcelo aquí para ver su
-          calendario en modo solo lectura.{' '}
-          <strong>
-            Ojo: si te vinculas como invitado, dejarás de ser propietario y no
-            podrás gestionar tus propios turnos.
-          </strong>
-        </p>
-
-        <form
-          onSubmit={canjearCodigo}
-          style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}
-        >
-          <input
-            className="input"
-            type="text"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-            placeholder="DAS-XXXX-XXXX"
-            style={{
-              flex: 1,
-              minWidth: 180,
-              marginBottom: 0,
-              fontFamily: 'monospace',
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-            }}
-            required
-          />
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={vinculando || !codigo.trim()}
-          >
-            {vinculando ? 'Vinculando…' : 'Vincularme'}
-          </button>
-        </form>
       </div>
     </>
   )
