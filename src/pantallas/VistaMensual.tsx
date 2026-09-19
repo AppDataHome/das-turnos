@@ -7,6 +7,7 @@ interface Props {
   festivos: string[]
   fechaSeleccionada: string
   onSeleccionarFecha: (fecha: string) => void
+  onCambioMes?: (fecha: Date) => void
 }
 
 const DIAS_SEMANA = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
@@ -41,6 +42,7 @@ export default function VistaMensual({
   festivos,
   fechaSeleccionada,
   onSeleccionarFecha,
+  onCambioMes,
 }: Props) {
   const hoy = new Date()
   const [mesActual, setMesActual] = useState<Date>(
@@ -51,6 +53,11 @@ export default function VistaMensual({
     const f = new Date(fechaSeleccionada + 'T00:00:00')
     setMesActual(new Date(f.getFullYear(), f.getMonth(), 1))
   }, [fechaSeleccionada])
+
+  // Avisamos al padre del mes visible
+  useEffect(() => {
+    onCambioMes?.(mesActual)
+  }, [mesActual])
 
   const festivosSet = useMemo(() => new Set(festivos), [festivos])
 
