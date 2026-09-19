@@ -47,7 +47,8 @@ export default function Ayuda() {
             </li>
             <li>
               Consultar el saldo de <strong>DAS</strong>,{' '}
-              <strong>vacaciones</strong> y <strong>turnos del mes</strong>.
+              <strong>vacaciones</strong>, <strong>asuntos propios</strong> y{' '}
+              <strong>turnos del mes</strong>.
             </li>
             <li>
               Generar un <strong>informe DAS imprimible</strong> por rango de
@@ -63,7 +64,7 @@ export default function Ayuda() {
             </li>
             <li>
               Compartir tu calendario con <strong>invitados</strong> en modo
-              solo lectura (familiares, etc.).
+              solo lectura (familiares, etc.) mediante un código.
             </li>
             <li>Instalarla en el móvil como una app normal.</li>
           </ul>
@@ -98,12 +99,22 @@ export default function Ayuda() {
             <strong>foto de perfil</strong> que aparecerá en la cabecera.
           </p>
 
-          <h4>3. Configura tus vacaciones</h4>
+          <h4>3. Configura tus vacaciones y asuntos propios</h4>
           <p>
-            En <strong>Ajustes → Configuración</strong> indica los días que te
-            corresponden al año (por defecto 22) y, si procede, los días
-            arrastrados del año anterior.
+            En <strong>Ajustes → Configuración</strong> indica:
           </p>
+          <ul>
+            <li>
+              Días de <strong>vacaciones anuales</strong> (por defecto 22).
+            </li>
+            <li>
+              Días de <strong>asuntos propios anuales</strong> (por defecto 6).
+            </li>
+            <li>
+              Si procede, los días <strong>arrastrados</strong> del año
+              anterior de cada uno.
+            </li>
+          </ul>
 
           <h4>4. Mete los festivos</h4>
           <p>
@@ -155,20 +166,20 @@ export default function Ayuda() {
             </li>
           </ul>
 
-          <h4>Tarjeta "Vacaciones"</h4>
+          <h4>Tarjeta "Vacaciones y Asuntos Propios"</h4>
+          <p>Se divide en dos bloques:</p>
           <ul>
             <li>
-              <strong>Total</strong>: días anuales que tienes asignados.
+              <strong>🏖️ Vacaciones</strong>: Total, Disfrutadas,
+              Disponibles.
             </li>
             <li>
-              <strong>Disfrutadas</strong>: días de este año ya usados.
+              <strong>📋 Asuntos Propios</strong>: Total, Disfrutados,
+              Disponibles.
             </li>
             <li>
-              <strong>Disponibles</strong>: los que te quedan.
-            </li>
-            <li>
-              Si tienes arrastre del año anterior, verás un bloque adicional
-              con su propio desglose.
+              Si tienes días <strong>arrastrados</strong> del año anterior,
+              aparece un sub-bloque con su propio desglose.
             </li>
           </ul>
 
@@ -196,7 +207,8 @@ export default function Ayuda() {
           <p>
             Justo debajo de las tarjetas tienes las pestañas{' '}
             <strong>Mensual</strong>, <strong>Semanal</strong>,{' '}
-            <strong>Anual</strong> y <strong>⚙ Gestión</strong>:
+            <strong>Anual</strong> y <strong>⚙ Gestión</strong> (esta última
+            solo para propietarios):
           </p>
           <ul>
             <li>
@@ -523,25 +535,49 @@ export default function Ayuda() {
     // ─────────────────────────────────────────
     {
       id: 'vacaciones',
-      titulo: 'Vacaciones y ausencias',
+      titulo: 'Vacaciones y asuntos propios',
       icono: '🏖️',
       contenido: (
         <>
-          <h4>Añadir vacaciones</h4>
-          <p>Puedes hacerlo de dos maneras:</p>
+          <p>
+            La app controla dos cupos independientes de días:
+          </p>
           <ul>
             <li>
-              <strong>Día a día</strong>: abre el día, elige tipo{' '}
-              <em>Vacaciones</em> y guarda.
+              <strong>🏖️ Vacaciones</strong>: por defecto 22 días al año.
             </li>
             <li>
-              <strong>En bloque</strong>: abre cualquier día, ve a la pestaña{' '}
-              <strong>Varios días</strong>, elige las fechas y el tipo
-              Vacaciones. Mucho más rápido.
+              <strong>📋 Asuntos Propios</strong>: por defecto 6 días al año.
             </li>
           </ul>
 
-          <h4>Vacaciones arrastradas del año anterior</h4>
+          <h4>Configurar los días</h4>
+          <p>
+            Ve a <strong>Ajustes → Configuración</strong>. Encontrarás dos
+            bloques independientes (uno para vacaciones y otro para asuntos
+            propios) donde ajustar:
+          </p>
+          <ul>
+            <li>Días anuales.</li>
+            <li>Días arrastrados del año anterior.</li>
+            <li>Año de los días arrastrados.</li>
+          </ul>
+
+          <h4>Añadir días disfrutados</h4>
+          <p>Puedes hacerlo de dos maneras:</p>
+          <ul>
+            <li>
+              <strong>Día a día</strong>: abre el día, elige el tipo
+              (Vacaciones o Asuntos Propios) y guarda.
+            </li>
+            <li>
+              <strong>En bloque</strong>: abre cualquier día, ve a la pestaña{' '}
+              <strong>Varios días</strong>, elige el rango y el tipo. Mucho
+              más rápido.
+            </li>
+          </ul>
+
+          <h4>Arrastre de un año a otro</h4>
           <p>
             Cuando cambias de año, es posible que te sobren días del año
             anterior. Para que no se mezclen con los del año nuevo:
@@ -559,14 +595,11 @@ export default function Ayuda() {
           </ol>
           <p>
             💡 Si los días arrastrados caducan, puedes ponerlos a cero con el
-            botón <strong>"Poner arrastre a 0"</strong>.
+            botón <strong>"Poner arrastre a 0"</strong> de cada bloque.
           </p>
 
           <h4>Otros tipos de ausencia</h4>
           <ul>
-            <li>
-              <strong>Asuntos propios</strong>: días de libre disposición.
-            </li>
             <li>
               <strong>Día DAS</strong>: cuando disfrutas de un DAS generado.
               Descuenta automáticamente del saldo.
@@ -575,6 +608,14 @@ export default function Ayuda() {
               <strong>Libre</strong>: día de descanso normal.
             </li>
           </ul>
+
+          <h4>¿Cómo se descuentan?</h4>
+          <p>
+            Cuando marcas un día como <strong>VAC</strong> en el calendario, se
+            descuenta del cupo de <strong>vacaciones</strong>. Cuando marcas un
+            día como <strong>AP</strong>, se descuenta del cupo de{' '}
+            <strong>asuntos propios</strong>. Cada uno en su propio contador.
+          </p>
         </>
       ),
     },
@@ -611,6 +652,14 @@ export default function Ayuda() {
             <strong>Borrar</strong> en la lista.
           </p>
 
+          <h4>Selector de años</h4>
+          <p>
+            El desplegable de años se ajusta automáticamente: aparece el año
+            actual, los 5 siguientes, el anterior y cualquier año que ya tenga
+            festivos guardados. Así, si añades un festivo para 2040, 2040
+            aparece solo en el selector.
+          </p>
+
           <h4>Repercusión en el calendario</h4>
           <p>
             Los festivos se muestran con fondo rojo más marcado y el número en
@@ -619,8 +668,8 @@ export default function Ayuda() {
           </p>
 
           <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
-            ⚠️ Los invitados pueden ver el listado, pero no pueden añadir,
-            editar ni borrar festivos.
+            ⚠️ Los invitados no tienen acceso a esta pestaña: es solo para
+            propietarios.
           </p>
         </>
       ),
@@ -629,118 +678,228 @@ export default function Ayuda() {
     // ─────────────────────────────────────────
     {
       id: 'invitados',
-      titulo: 'Invitados (compartir el calendario)',
+      titulo: 'Invitados · Compartir el calendario',
       icono: '👥',
       contenido: (
         <>
           <p>
             Puedes compartir tu calendario con otras personas (familiares,
             etc.) en <strong>modo solo lectura</strong>. Verán tus turnos,
-            vacaciones, DAS y podrán generar el informe, pero{' '}
-            <strong>no podrán modificar nada</strong>.
+            vacaciones, asuntos propios y DAS, y podrán generar el informe,
+            pero <strong>no podrán modificar nada</strong>.
+          </p>
+          <p>
+            El invitado <strong>no necesita registrarse</strong> ni crear una
+            cuenta. Solo introduce el código que tú le des en la pantalla de
+            inicio.
           </p>
 
-          <h4>Para el propietario (tú)</h4>
+          {/* ─── PROPIETARIO ─── */}
+          <h4>🟢 Para el propietario (tú)</h4>
 
           <p>
-            <strong>1. Generar un código de invitación</strong>
+            <strong>1. Crear una invitación</strong>
           </p>
-          <ul>
+          <ol>
             <li>
               Ve a <strong>Ajustes → Invitados</strong>.
             </li>
             <li>
-              Pulsa <strong>Generar código</strong>. Aparecerá un código tipo{' '}
-              <code>DAS-XXXX-XXXX</code>.
+              En el bloque <strong>"Crear invitación"</strong>, escribe un
+              nombre para identificarlo (por ejemplo "María (madre)"). Es
+              opcional pero muy útil si vas a tener varios invitados.
             </li>
+            <li>
+              Pulsa <strong>Crear invitación</strong>.
+            </li>
+            <li>
+              Aparecerá un código tipo <code>DAS-A7K9-P2M4</code>.
+            </li>
+          </ol>
+
+          <p>
+            <strong>2. Compartir el código</strong>
+          </p>
+          <ul>
             <li>
               Pulsa <strong>Copiar</strong> y pásaselo a la persona por
-              WhatsApp, correo o como quieras.
+              WhatsApp, SMS, correo o como quieras.
             </li>
             <li>
-              Puedes <strong>regenerar</strong> el código cuando quieras (el
-              anterior deja de funcionar) o <strong>revocarlo</strong>.
+              El código se puede usar <strong>una sola vez</strong>: cuando el
+              invitado lo canjea, queda marcado como "Canjeado" y ya no sirve
+              para otra persona.
+            </li>
+            <li>
+              Si quieres invitar a otra persona, crea un <strong>código
+              nuevo</strong>.
             </li>
           </ul>
 
           <p>
-            <strong>2. Ver quién está vinculado</strong>
+            <strong>3. Ver quién está vinculado</strong>
           </p>
           <ul>
             <li>
-              En la misma pantalla, sección "Invitados", ves a todas las
+              En la misma pantalla, sección{' '}
+              <strong>"Invitados vinculados"</strong>, ves a todas las
               personas que están viendo tu calendario.
             </li>
             <li>
-              Con el botón <strong>Expulsar</strong> retiras el acceso a
-              alguien (dejará de ver tus turnos).
+              Cada una muestra su nombre y la fecha en la que se vinculó.
             </li>
-          </ul>
-
-          <h4>Para el invitado</h4>
-
-          <p>
-            <strong>1. Crear una cuenta</strong>
-          </p>
-          <ul>
-            <li>
-              Descarga el enlace de la app y regístrate con tu correo.
-            </li>
-            <li>Confirma el correo y entra.</li>
           </ul>
 
           <p>
-            <strong>2. Vincularse al propietario</strong>
+            <strong>4. Expulsar a un invitado</strong>
           </p>
           <ul>
             <li>
-              Ve a <strong>Ajustes → Invitados</strong>.
+              Pulsa el botón <strong>Expulsar</strong> que hay junto a su
+              nombre.
             </li>
             <li>
-              En el bloque <strong>"¿Tienes un código de invitación?"</strong>,
-              pega el código y pulsa <strong>Vincularme</strong>.
-            </li>
-            <li>
-              A partir de ese momento verás el calendario del propietario.
+              Dejará de ver tu calendario <strong>al instante</strong>. Si
+              quiere volver, necesitará un código nuevo.
             </li>
           </ul>
 
-          <h4>Qué puede hacer el invitado</h4>
+          <p>
+            <strong>5. Gestionar los códigos</strong>
+          </p>
           <ul>
             <li>
-              ✅ Ver el calendario en sus 3 vistas (Mensual, Semanal, Anual).
-            </li>
-            <li>✅ Ver las tarjetas de Turnos Mes, Vacaciones y DAS.</li>
-            <li>✅ Generar el informe DAS del propietario.</li>
-            <li>
-              ❌ No puede añadir, editar ni borrar turnos.
+              <strong>Copiar</strong>: vuelve a copiar el código al
+              portapapeles.
             </li>
             <li>
-              ❌ No tiene la pestaña ⚙ Gestión.
+              <strong>Revocar</strong>: invalida el código sin eliminarlo. Si
+              alguien lo intenta usar después, verá "Este código ha sido
+              revocado".
             </li>
             <li>
-              ❌ No puede tocar los festivos ni la configuración.
+              <strong>Eliminar</strong>: borra el registro del código de la
+              lista (útil para limpiar códigos antiguos).
             </li>
           </ul>
 
-          <h4>Desvincularse o cambiar de propietario</h4>
+          {/* ─── INVITADO ─── */}
+          <h4>🔵 Para el invitado</h4>
+
+          <p>
+            <strong>1. Abrir la app</strong>
+          </p>
           <ul>
             <li>
-              Como invitado, ve a <strong>Ajustes → Invitados</strong> y pulsa{' '}
+              Abre la URL de la app en cualquier navegador.
+            </li>
+            <li>
+              No necesitas registrarte ni descargar nada.
+            </li>
+          </ul>
+
+          <p>
+            <strong>2. Acceder con el código</strong>
+          </p>
+          <ol>
+            <li>
+              En la pantalla de inicio, pulsa{' '}
+              <strong>"Acceder con invitación"</strong>.
+            </li>
+            <li>
+              Escribe tu nombre (opcional, para que el propietario te
+              identifique).
+            </li>
+            <li>
+              Introduce el código que te han dado.
+            </li>
+            <li>
+              Pulsa <strong>Acceder</strong>.
+            </li>
+          </ol>
+
+          <p>
+            <strong>3. Uso</strong>
+          </p>
+          <ul>
+            <li>
+              Verás el calendario del propietario en modo{' '}
+              <strong>solo lectura</strong>.
+            </li>
+            <li>
+              Puedes ver las vistas <strong>Mensual, Semanal y Anual</strong>{' '}
+              (no la de Gestión).
+            </li>
+            <li>
+              Puedes consultar el <strong>Informe de DAS</strong> y exportarlo
+              a PDF.
+            </li>
+            <li>
+              En <strong>Ajustes</strong> solo ves: Perfil, Invitados,
+              Preferencias y Sesión.
+            </li>
+          </ul>
+
+          <p>
+            <strong>4. Desvincularse</strong>
+          </p>
+          <ul>
+            <li>
+              Ve a <strong>Ajustes → Invitados</strong> y pulsa{' '}
               <strong>Desvincularme</strong>.
             </li>
             <li>
-              Si quieres vincularte a otro propietario, primero desvincúlate y
-              luego introduce el nuevo código.
+              Volverás a la pantalla de inicio. Si quieres volver a acceder,
+              necesitarás un código nuevo.
             </li>
           </ul>
 
-          <h4>⚠️ Nota importante para el propietario</h4>
+          <h4>Preguntas frecuentes sobre invitados</h4>
+
           <p>
-            Si un día te vinculas como invitado de otro usuario,{' '}
-            <strong>dejarás de ver y gestionar tus propios turnos</strong> y
-            pasarás a ver los suyos. Es reversible: puedes desvincularte y
-            volverás a tus datos.
+            <strong>¿Caduca el acceso del invitado?</strong>
+          </p>
+          <p>
+            No. El acceso dura hasta que tú lo expulsas o él se desvincula.
+          </p>
+
+          <p>
+            <strong>¿Puedo tener varios invitados a la vez?</strong>
+          </p>
+          <p>
+            Sí, tantos como quieras. Cada uno necesita su propio código (un
+            código se usa solo una vez).
+          </p>
+
+          <p>
+            <strong>¿El invitado ve las notas de mis turnos?</strong>
+          </p>
+          <p>
+            Sí, ve todo lo mismo que ves tú, pero sin poder modificar nada.
+          </p>
+
+          <p>
+            <strong>¿El invitado puede ver mis datos personales?</strong>
+          </p>
+          <p>
+            Ve tu nombre y tu Nº de empleado (que aparecen en la cabecera).
+            Nada más.
+          </p>
+
+          <p>
+            <strong>¿Puedo ser propietario e invitado a la vez?</strong>
+          </p>
+          <p>
+            No. Si te vinculas como invitado, dejarás de gestionar tus propios
+            turnos hasta que te desvincules.
+          </p>
+
+          <p>
+            <strong>He perdido el código, ¿qué hago?</strong>
+          </p>
+          <p>
+            Ve a Ajustes → Invitados y crea uno nuevo. El anterior, si nadie lo
+            ha usado, lo puedes eliminar.
           </p>
         </>
       ),
@@ -755,8 +914,7 @@ export default function Ayuda() {
         <>
           <p>
             La pestaña <strong>Ajustes</strong> está organizada en
-            subpestañas para que encuentres todo rápido. Las disponibles
-            dependen de tu rol:
+            subpestañas. Las que ves dependen de tu rol:
           </p>
 
           <h4>Disponibles para todos</h4>
@@ -766,8 +924,8 @@ export default function Ayuda() {
               cambio de contraseña.
             </li>
             <li>
-              <strong>👥 Invitados</strong>: generar o canjear código de
-              invitación.
+              <strong>👥 Invitados</strong>: crear/revocar códigos (si eres
+              propietario) o desvincularte (si eres invitado).
             </li>
             <li>
               <strong>🎨 Preferencias</strong>: tema (negro o verde Guardia
@@ -781,8 +939,8 @@ export default function Ayuda() {
           <h4>Solo para propietarios</h4>
           <ul>
             <li>
-              <strong>⚙ Configuración</strong>: vacaciones, arrastre, DAS
-              remanentes, departamentos y tipos de turno.
+              <strong>⚙ Configuración</strong>: vacaciones, asuntos propios,
+              DAS remanentes, departamentos y tipos de turno.
             </li>
             <li>
               <strong>🗄 Datos</strong>: exportar e importar CSV.
@@ -790,9 +948,6 @@ export default function Ayuda() {
           </ul>
 
           <h4>Cerrar sesión rápido</h4>
-          <p>
-            Además de la subpestaña Sesión, tienes:
-          </p>
           <ul>
             <li>
               En <strong>escritorio</strong>: botón <strong>"Salir"</strong> en
@@ -982,8 +1137,8 @@ export default function Ayuda() {
           <h4>Ahorrar tiempo</h4>
           <ul>
             <li>
-              <strong>Vacaciones largas</strong>: usa el modo "Varios días"
-              del modal para meter un rango completo de golpe.
+              <strong>Vacaciones o AP largos</strong>: usa el modo "Varios
+              días" del modal para meter un rango completo de golpe.
             </li>
             <li>
               <strong>Revisar lo fichado</strong>: la vista Gestión es la más
@@ -1037,18 +1192,18 @@ export default function Ayuda() {
             <strong>Gestión</strong>.
           </p>
 
-          <h4>¿Y si me equivoco con las vacaciones de un año?</h4>
+          <h4>¿Y si me equivoco con las vacaciones o asuntos propios de un año?</h4>
           <p>
-            Abre el modal del día, borra el turno de tipo VAC y vuelve a
-            crearlo con el año de origen correcto.
+            Abre el modal del día, borra el turno de tipo VAC (o AP) y vuelve
+            a crearlo con el año de origen correcto.
           </p>
 
           <h4>¿Por qué mi saldo de DAS no sube?</h4>
           <p>
             Repasa: los festivos y las noches generan DAS solo si el turno es
-            de categoría Trabajo (M, T, N). Los tipos Libre, Vacaciones, DAS,
-            Asuntos propios, Teoría y Prácticas <strong>no</strong> generan
-            DAS.
+            de categoría Trabajo (M, T, N). Los tipos Libre, Vacaciones,
+            Asuntos Propios, DAS, Teoría y Prácticas <strong>no</strong>{' '}
+            generan DAS.
           </p>
 
           <h4>¿Caducan los DAS?</h4>
@@ -1073,16 +1228,16 @@ export default function Ayuda() {
 
           <h4>¿Cómo comparto mi calendario con mi familia?</h4>
           <p>
-            Ve a <strong>Ajustes → Invitados</strong>, genera un código y
-            pásaselo. Ellos se registran, introducen el código y ven tu
-            calendario en solo lectura. Puedes expulsarlos cuando quieras. Más
+            Ve a <strong>Ajustes → Invitados</strong>, crea un código y
+            pásaselo. Ellos abren la app, pulsan "Acceder con invitación" e
+            introducen el código. Puedes expulsarlos cuando quieras. Más
             detalles en la sección <strong>👥 Invitados</strong>.
           </p>
 
           <h4>¿El invitado puede ver mis vacaciones o mis notas?</h4>
           <p>
-            Sí, el invitado ve todo lo que tú ves (turnos, vacaciones, DAS,
-            notas, informes), pero no puede modificar nada.
+            Sí, el invitado ve todo lo que tú ves (turnos, vacaciones, asuntos
+            propios, DAS, notas, informes), pero no puede modificar nada.
           </p>
 
           <h4>¿Puedo recuperar si borro algo por error?</h4>
@@ -1101,10 +1256,10 @@ export default function Ayuda() {
           <h4>¿Por qué no veo la pestaña X?</h4>
           <p>
             En móvil, la navegación está en la barra inferior. En escritorio,
-            arriba. Si eres invitado, algunas pestañas (Configuración, Datos,
-            Gestión) no están disponibles porque no las necesitas. Si has
-            instalado la app hace tiempo, desinstálala y vuelve a instalarla
-            para actualizar icono y menús.
+            arriba. Si eres invitado, algunas pestañas (Festivos, Gestión,
+            Configuración, Datos) no están disponibles porque no las necesitas.
+            Si has instalado la app hace tiempo, desinstálala y vuelve a
+            instalarla para actualizar icono y menús.
           </p>
         </>
       ),
@@ -1163,7 +1318,6 @@ export default function Ayuda() {
           buscador de tu navegador (Ctrl+F) para encontrar algo concreto.
         </p>
 
-        {/* Índice */}
         <div
           style={{
             display: 'flex',
@@ -1196,7 +1350,6 @@ export default function Ayuda() {
         </div>
       </div>
 
-      {/* Secciones */}
       {secciones.map((s) => {
         const estaAbierta = abierta === s.id
         return (
@@ -1243,7 +1396,6 @@ export default function Ayuda() {
         )
       })}
 
-      {/* Estilos internos para el contenido de ayuda */}
       <style>{`
         .ayuda-contenido h4 {
           margin-top: 18px;
