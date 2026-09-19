@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
-import { X, FileText, Gift, CheckCircle2, Clock } from 'lucide-react'
+import { X, FileText, Gift, CheckCircle2, Clock, Printer } from 'lucide-react'
 import { iconoTurno } from '../utilidades/turnos'
 
 interface Props {
@@ -59,12 +59,14 @@ export default function ModalInformeDas({ onCerrar }: Props) {
     setGenerado(true)
   }
 
-  // Separamos por categoría
+  function imprimir() {
+    window.print()
+  }
+
   const festivos = eventos.filter((e) => e.categoria === 'festivo')
   const noches = eventos.filter((e) => e.categoria === 'nocturno')
   const dasDisfrutados = eventos.filter((e) => e.categoria === 'das')
 
-  // Cálculo de DAS generados
   const dasPorFestivos = Math.floor(festivos.length / 3)
   const dasPorNoches = Math.floor(noches.length / 6)
   const dasGenerados = dasPorFestivos + dasPorNoches
@@ -84,14 +86,25 @@ export default function ModalInformeDas({ onCerrar }: Props) {
     return txt.charAt(0).toUpperCase() + txt.slice(1)
   }
 
+  function textoFechaLarga(f: string): string {
+    const date = new Date(f + 'T00:00:00')
+    const opciones: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }
+    return date.toLocaleDateString('es-ES', opciones)
+  }
+
   return (
     <div className="modal-fondo" onClick={onCerrar}>
       <div
-        className="modal-ventana"
+        className="modal-ventana informe-print"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: 720 }}
       >
-        <div className="modal-cabecera">
+        {/* Cabecera de la app (no se imprime) */}
+        <div className="modal-cabecera no-print">
           <div
             style={{
               display: 'flex',
@@ -112,8 +125,36 @@ export default function ModalInformeDas({ onCerrar }: Props) {
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="modal-seccion">
+        {/* Cabecera del informe (se imprime) */}
+        {generado && (
+          <div className="informe-cabecera">
+            <div className="informe-titulo">
+              DAS · Distribución y Asignación de Servicios
+            </div>
+            <div className="informe-subtitulo">Informe de generación de DAS</div>
+            <div className="informe-datos">
+              <div>
+                <strong>Empleado:</strong> {usuario.nombre}
+                {usuario.numero_empleado && ` · Nº ${usuario.numero_empleado}`}
+              </div>
+              <div>
+                <strong>Periodo:</strong> {textoFechaLarga(fechaInicio)} —{' '}
+                {textoFechaLarga(fechaFin)}
+              </div>
+              <div>
+                <strong>Fecha de emisión:</strong>{' '}
+                {new Date().toLocaleDateString('es-ES', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filtros (no se imprimen) */}
+        <div className="modal-seccion no-print">
           <div className="fila-form">
             <div>
               <label className="label">Desde</label>
@@ -135,14 +176,26 @@ export default function ModalInformeDas({ onCerrar }: Props) {
             </div>
           </div>
 
-          <button
-            className="btn btn-primary"
-            onClick={generar}
-            disabled={cargando}
-            style={{ width: '100%', marginTop: 4 }}
-          >
-            {cargando ? 'Generando…' : 'Generar informe'}
-          </button>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button
+              className="btn btn-primary"
+              onClick={generar}
+              disabled={cargando}
+              style={{ flex: 1 }}
+            >
+              {cargando ? 'Generando…' : 'Generar informe'}
+            </button>
+            {generado && (
+              <button
+                className="btn btn-secondary"
+                onClick={imprimir}
+                title="Imprimir o guardar como PDF"
+              >
+                <Printer size={14} />
+                Imprimir / PDF
+              </button>
+            )}
+          </div>
 
           {error && <p className="error">{error}</p>}
         </div>
@@ -150,16 +203,15 @@ export default function ModalInformeDas({ onCerrar }: Props) {
         {/* Resultado */}
         {generado && (
           <>
-            {/* Resumen */}
             <div
-              className="modal-seccion"
+              className="modal-seccion informe-resumen"
               style={{
                 background: 'var(--fondo-tarjeta-2)',
                 padding: 12,
                 borderRadius: 10,
               }}
             >
-              <div className="modal-seccion-titulo">Resumen del rango</div>
+              <div className="modal-seccion-titulo">Resumen del periodo</div>
 
               <div
                 style={{
@@ -238,7 +290,6 @@ export default function ModalInformeDas({ onCerrar }: Props) {
               </p>
             </div>
 
-            {/* Festivos */}
             {festivos.length > 0 && (
               <div className="modal-seccion">
                 <div className="modal-seccion-titulo">
@@ -252,7 +303,6 @@ export default function ModalInformeDas({ onCerrar }: Props) {
               </div>
             )}
 
-            {/* Noches */}
             {noches.length > 0 && (
               <div className="modal-seccion">
                 <div className="modal-seccion-titulo">
@@ -266,7 +316,6 @@ export default function ModalInformeDas({ onCerrar }: Props) {
               </div>
             )}
 
-            {/* DAS disfrutados */}
             {dasDisfrutados.length > 0 && (
               <div className="modal-seccion">
                 <div className="modal-seccion-titulo">
@@ -275,6 +324,7 @@ export default function ModalInformeDas({ onCerrar }: Props) {
                 {dasDisfrutados.map((e, i) => (
                   <div
                     key={i}
+                    className="informe-item"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -286,7 +336,15 @@ export default function ModalInformeDas({ onCerrar }: Props) {
                       fontSize: 11,
                     }}
                   >
-                    <Gift size={16} color="var(--acento)" />
+                    {/* Icono según pasado/futuro */}
+                    <div style={{ flexShrink: 0 }}>
+                      {e.es_pasado ? (
+                        <CheckCircle2 size={16} color="var(--exito)" />
+                      ) : (
+                        <Clock size={16} color="var(--texto-suave)" />
+                      )}
+                    </div>
+
                     <span
                       style={{
                         fontWeight: 600,
@@ -296,6 +354,9 @@ export default function ModalInformeDas({ onCerrar }: Props) {
                     >
                       {textoFecha(e.fecha)}
                     </span>
+
+                    <Gift size={14} color="var(--acento)" />
+
                     <span
                       style={{
                         color: 'var(--texto-suave)',
@@ -308,15 +369,11 @@ export default function ModalInformeDas({ onCerrar }: Props) {
                     >
                       {e.notas ?? 'Día DAS disfrutado'}
                     </span>
-                    {!e.es_pasado && (
-                      <Clock size={14} color="var(--texto-suave)" />
-                    )}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Sin eventos */}
             {eventos.length === 0 && (
               <div className="modal-seccion">
                 <p
@@ -331,11 +388,23 @@ export default function ModalInformeDas({ onCerrar }: Props) {
                 </p>
               </div>
             )}
+
+            {/* Pie del informe (se imprime) */}
+            <div className="informe-pie">
+              <div>
+                Documento generado automáticamente por DAS · Distribución y
+                Asignación de Servicios.
+              </div>
+              <div style={{ marginTop: 4, fontSize: 9, opacity: 0.7 }}>
+                Este informe es orientativo. La validez oficial la determina la
+                unidad correspondiente.
+              </div>
+            </div>
           </>
         )}
 
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary no-print"
           onClick={onCerrar}
           style={{ width: '100%' }}
         >
@@ -426,6 +495,7 @@ function TablaEventos({
         return (
           <div
             key={i}
+            className="informe-item"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -443,7 +513,7 @@ function TablaEventos({
               minWidth: 0,
             }}
           >
-            {/* Indicador pasado / futuro */}
+            {/* Icono pasado / futuro */}
             <div style={{ flexShrink: 0 }}>
               {e.es_pasado ? (
                 <CheckCircle2 size={16} color="var(--exito)" />
@@ -452,7 +522,6 @@ function TablaEventos({
               )}
             </div>
 
-            {/* Fecha */}
             <span
               style={{
                 fontWeight: 600,
@@ -464,7 +533,6 @@ function TablaEventos({
               {textoFecha(e.fecha)}
             </span>
 
-            {/* Chip del turno */}
             <span
               className="chip"
               style={{
@@ -477,7 +545,6 @@ function TablaEventos({
               {e.codigo_turno}
             </span>
 
-            {/* Departamento */}
             <span
               style={{
                 color: 'var(--texto-suave)',
@@ -491,7 +558,6 @@ function TablaEventos({
               {e.icono_departamento} {e.nombre_departamento}
             </span>
 
-            {/* Posición en ciclo */}
             <span
               style={{
                 fontSize: 10,
@@ -503,7 +569,6 @@ function TablaEventos({
               {posicion}/{tamanoCiclo}
             </span>
 
-            {/* Regalo si genera DAS */}
             {generaDas && (
               <span
                 style={{ display: 'flex', flexShrink: 0 }}
