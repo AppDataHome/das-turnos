@@ -57,6 +57,14 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       .eq('id', authUser.id)
       .maybeSingle()
 
+    // Los usuarios anónimos (invitados) no deben auto-crear perfil aquí.
+    // El canje de invitación ya les ha creado su fila en `usuario`.
+    if (authUser.is_anonymous) {
+      setUsuario(null)
+      setCargando(false)
+      return
+    }
+    
     if (error || !data) {
       const nuevo: Partial<Usuario> = {
         id: authUser.id,
