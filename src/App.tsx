@@ -7,6 +7,7 @@ import ContenedorToasts from './componentes/ContenedorToasts'
 import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
 import Avatar from './componentes/Avatar'
 import Escudo from './componentes/Escudo'
+import CampoPassword from './componentes/CampoPassword'
 import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Configuracion from './pantallas/Configuracion'
@@ -245,13 +246,12 @@ function Login() {
             required
           />
           <label className="label">Contraseña</label>
-          <input
-            className="input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <CampoPassword
+            valor={password}
+            onChange={setPassword}
             required
             minLength={6}
+            autoComplete={registro ? 'new-password' : 'current-password'}
           />
           {error && <p className="error">{error}</p>}
           {mensaje && <p className="success">{mensaje}</p>}
