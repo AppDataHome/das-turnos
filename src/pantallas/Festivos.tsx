@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
+import { useUsuario } from '../contexto/UsuarioContexto'
 
 interface Festivo {
   id: string
@@ -18,6 +19,7 @@ const AMBITOS = [
 ] as const
 
 export default function Festivos() {
+  const { puedeEditar } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
@@ -212,13 +214,14 @@ export default function Festivos() {
 
   return (
     <>
+      {/* Cabecera: año + importar nacionales (solo propietarios) */}
       <div className="card">
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            marginBottom: 10,
+            marginBottom: puedeEditar ? 10 : 0,
             flexWrap: 'wrap',
           }}
         >
@@ -242,116 +245,124 @@ export default function Festivos() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            flexWrap: 'wrap',
-          }}
-        >
-          <button
-            className="btn btn-primary"
-            onClick={importarNacionales}
-            disabled={importando}
-          >
-            {importando
-              ? 'Importando…'
-              : `Importar nacionales de ${anio}`}
-          </button>
-          <p
+        {puedeEditar && (
+          <div
             style={{
-              fontSize: 10,
-              color: 'var(--texto-suave)',
-              margin: 0,
-              flex: 1,
-              minWidth: 0,
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              flexWrap: 'wrap',
             }}
           >
-            Añade los 10 festivos nacionales (incluido el Viernes Santo).
-          </p>
-        </div>
+            <button
+              className="btn btn-primary"
+              onClick={importarNacionales}
+              disabled={importando}
+            >
+              {importando
+                ? 'Importando…'
+                : `Importar nacionales de ${anio}`}
+            </button>
+            <p
+              style={{
+                fontSize: 10,
+                color: 'var(--texto-suave)',
+                margin: 0,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              Añade los 10 festivos nacionales (incluido el Viernes Santo).
+            </p>
+          </div>
+        )}
 
         {error && <p className="error">{error}</p>}
       </div>
 
-      <div className="card">
-        <h3 style={{ marginBottom: 10 }}>
-          {idEditando ? 'Editar festivo' : 'Añadir festivo'}
-        </h3>
-        <form onSubmit={guardarFestivo}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 2fr auto',
-              gap: 6,
-              alignItems: 'end',
-            }}
-            className="form-festivo"
-          >
-            <div>
-              <label className="label">Fecha</label>
-              <input
-                className="input"
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Ámbito</label>
-              <select
-                className="input"
-                value={ambito}
-                onChange={(e) =>
-                  setAmbito(
-                    e.target.value as 'nacional' | 'autonomico' | 'local'
-                  )
-                }
-              >
-                {AMBITOS.map((a) => (
-                  <option key={a.valor} value={a.valor}>
-                    {a.etiqueta}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Descripción</label>
-              <input
-                className="input"
-                type="text"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Año Nuevo"
-              />
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn btn-primary" type="submit">
-                {idEditando ? 'Guardar' : 'Añadir'}
-              </button>
-              {idEditando && (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={cancelarEdicion}
+      {/* Formulario: solo propietarios */}
+      {puedeEditar && (
+        <div className="card">
+          <h3 style={{ marginBottom: 10 }}>
+            {idEditando ? 'Editar festivo' : 'Añadir festivo'}
+          </h3>
+          <form onSubmit={guardarFestivo}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 2fr auto',
+                gap: 6,
+                alignItems: 'end',
+              }}
+              className="form-festivo"
+            >
+              <div>
+                <label className="label">Fecha</label>
+                <input
+                  className="input"
+                  type="date"
+                  value={fecha}
+                  onChange={(e) => setFecha(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Ámbito</label>
+                <select
+                  className="input"
+                  value={ambito}
+                  onChange={(e) =>
+                    setAmbito(
+                      e.target.value as 'nacional' | 'autonomico' | 'local'
+                    )
+                  }
                 >
-                  Cancelar
+                  {AMBITOS.map((a) => (
+                    <option key={a.valor} value={a.valor}>
+                      {a.etiqueta}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Descripción</label>
+                <input
+                  className="input"
+                  type="text"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  placeholder="Año Nuevo"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button className="btn btn-primary" type="submit">
+                  {idEditando ? 'Guardar' : 'Añadir'}
                 </button>
-              )}
+                {idEditando && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={cancelarEdicion}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
 
+      {/* Listado */}
       <div className="card">
         <h3 style={{ marginBottom: 10 }}>
           Festivos de {anio} ({festivos.length})
         </h3>
 
         {cargando ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>Cargando…</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
+            Cargando…
+          </p>
         ) : festivos.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 11 }}>
             No hay festivos registrados para {anio}.
@@ -396,21 +407,26 @@ export default function Festivos() {
                       {f.descripcion}
                     </div>
                   )}
-                  <div className="acciones-item">
-                    <button
-                      className="btn-mini"
-                      style={{ background: 'var(--acento)', color: '#0b0e13' }}
-                      onClick={() => empezarEdicion(f)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="btn-mini btn-mini-peligro"
-                      onClick={() => borrarFestivo(f.id)}
-                    >
-                      Borrar
-                    </button>
-                  </div>
+                  {puedeEditar && (
+                    <div className="acciones-item">
+                      <button
+                        className="btn-mini"
+                        style={{
+                          background: 'var(--acento)',
+                          color: '#0b0e13',
+                        }}
+                        onClick={() => empezarEdicion(f)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn-mini btn-mini-peligro"
+                        onClick={() => borrarFestivo(f.id)}
+                      >
+                        Borrar
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -422,7 +438,7 @@ export default function Festivos() {
                     <th>Fecha</th>
                     <th>Ámbito</th>
                     <th>Descripción</th>
-                    <th></th>
+                    {puedeEditar && <th></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -443,25 +459,32 @@ export default function Festivos() {
                         </span>
                       </td>
                       <td>{f.descripcion ?? '—'}</td>
-                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <button
-                          className="btn-mini"
+                      {puedeEditar && (
+                        <td
                           style={{
-                            background: 'var(--acento)',
-                            color: '#0b0e13',
-                            marginRight: 4,
+                            textAlign: 'right',
+                            whiteSpace: 'nowrap',
                           }}
-                          onClick={() => empezarEdicion(f)}
                         >
-                          Editar
-                        </button>
-                        <button
-                          className="btn-mini btn-mini-peligro"
-                          onClick={() => borrarFestivo(f.id)}
-                        >
-                          Borrar
-                        </button>
-                      </td>
+                          <button
+                            className="btn-mini"
+                            style={{
+                              background: 'var(--acento)',
+                              color: '#0b0e13',
+                              marginRight: 4,
+                            }}
+                            onClick={() => empezarEdicion(f)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="btn-mini btn-mini-peligro"
+                            onClick={() => borrarFestivo(f.id)}
+                          >
+                            Borrar
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
