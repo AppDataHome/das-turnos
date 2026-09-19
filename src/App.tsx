@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { UsuarioProveedor, useUsuario } from './contexto/UsuarioContexto'
 import { ToastProveedor } from './contexto/ToastContexto'
-import { ConfirmacionProveedor } from './contexto/ConfirmacionContexto'
+import { ConfirmacionProveedor, useConfirmacion } from './contexto/ConfirmacionContexto'
 import ContenedorToasts from './componentes/ContenedorToasts'
 import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
 import Avatar from './componentes/Avatar'
@@ -18,6 +18,7 @@ import {
   CalendarDays,
   Settings,
   HelpCircle,
+  LogOut,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -35,6 +36,7 @@ export default function App() {
 
 function Aplicacion() {
   const { usuario, cargando } = useUsuario()
+  const { confirmar } = useConfirmacion()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [comprobandoSesion, setComprobandoSesion] = useState(true)
   const [pestana, setPestana] = useState<Pestana>('calendario')
@@ -53,6 +55,18 @@ function Aplicacion() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  async function cerrarSesion() {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      textoConfirmar: 'Cerrar sesión',
+      peligro: true,
+    })
+    if (!ok) return
+    await supabase.auth.signOut()
+    window.location.reload()
+  }
 
   if (comprobandoSesion || cargando) {
     return (
@@ -107,6 +121,7 @@ function Aplicacion() {
             <HelpCircle size={16} />
             Ayuda
           </a>
+
           <span
             style={{
               marginLeft: 'auto',
@@ -116,6 +131,16 @@ function Aplicacion() {
           >
             {usuario?.email}
           </span>
+
+          <button
+            className="btn-salir"
+            onClick={cerrarSesion}
+            title="Cerrar sesión"
+            style={{ marginLeft: 8 }}
+          >
+            <LogOut size={14} />
+            Salir
+          </button>
         </div>
       </nav>
 
@@ -137,6 +162,20 @@ function Aplicacion() {
 
 function Cabecera() {
   const { usuario } = useUsuario()
+  const { confirmar } = useConfirmacion()
+
+  async function cerrarSesion() {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      textoConfirmar: 'Cerrar sesión',
+      peligro: true,
+    })
+    if (!ok) return
+    await supabase.auth.signOut()
+    window.location.reload()
+  }
+
   if (!usuario) return null
 
   return (
@@ -148,6 +187,14 @@ function Cabecera() {
         <div className="nombre">{usuario.nombre}</div>
         <div className="sub">Nº: {usuario.numero_empleado || '—'}</div>
       </div>
+      <button
+        className="btn-salir-movil"
+        onClick={cerrarSesion}
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
+      >
+        <LogOut size={18} />
+      </button>
       <Avatar
         nombre={usuario.nombre ?? '?'}
         avatarUrl={usuario.avatar_url}
