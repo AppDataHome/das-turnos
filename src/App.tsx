@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { UsuarioProveedor, useUsuario } from './contexto/UsuarioContexto'
 import { ToastProveedor } from './contexto/ToastContexto'
-import { ConfirmacionProveedor, useConfirmacion } from './contexto/ConfirmacionContexto'
+import {
+  ConfirmacionProveedor,
+  useConfirmacion,
+} from './contexto/ConfirmacionContexto'
 import ContenedorToasts from './componentes/ContenedorToasts'
 import ContenedorConfirmacion from './componentes/ContenedorConfirmacion'
 import Avatar from './componentes/Avatar'
@@ -12,6 +15,7 @@ import Calendario from './pantallas/Calendario'
 import Festivos from './pantallas/Festivos'
 import Ajustes from './pantallas/Ajustes'
 import Ayuda from './pantallas/Ayuda'
+import AccesoInvitacion from './pantallas/AccesoInvitacion'
 import BarraInferior, { type Pestana } from './pantallas/BarraInferior'
 import {
   Calendar,
@@ -19,6 +23,7 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Users,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -59,7 +64,7 @@ function Aplicacion() {
   async function cerrarSesion() {
     const ok = await confirmar({
       titulo: '¿Cerrar sesión?',
-      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      mensaje: 'Tendrás que volver a identificarte.',
       textoConfirmar: 'Cerrar sesión',
       peligro: true,
     })
@@ -167,7 +172,7 @@ function Cabecera() {
   async function cerrarSesion() {
     const ok = await confirmar({
       titulo: '¿Cerrar sesión?',
-      mensaje: 'Tendrás que volver a meter tu correo y contraseña.',
+      mensaje: 'Tendrás que volver a identificarte.',
       textoConfirmar: 'Cerrar sesión',
       peligro: true,
     })
@@ -204,19 +209,27 @@ function Cabecera() {
   )
 }
 
+type VistaLogin = 'iniciar' | 'registrar' | 'invitacion'
+
 function Login() {
+  const [vista, setVista] = useState<VistaLogin>('iniciar')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [registro, setRegistro] = useState(false)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
+
+  if (vista === 'invitacion') {
+    return <AccesoInvitacion onVolver={() => setVista('iniciar')} />
+  }
+
+  const esRegistro = vista === 'registrar'
 
   async function manejarAuth(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setMensaje('')
 
-    if (registro) {
+    if (esRegistro) {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(traducirError(error.message))
       else
@@ -288,7 +301,7 @@ function Login() {
             onChange={setPassword}
             required
             minLength={6}
-            autoComplete={registro ? 'new-password' : 'current-password'}
+            autoComplete={esRegistro ? 'new-password' : 'current-password'}
           />
           {error && <p className="error">{error}</p>}
           {mensaje && <p className="success">{mensaje}</p>}
@@ -297,25 +310,81 @@ function Login() {
             style={{ width: '100%', marginTop: 6 }}
             type="submit"
           >
-            {registro ? 'Registrarse' : 'Iniciar sesión'}
+            {esRegistro ? 'Registrarse' : 'Iniciar sesión'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: 12, fontSize: 12 }}>
-          <a
-            href="#"
-            style={{ color: 'var(--acento)' }}
-            onClick={(e) => {
-              e.preventDefault()
-              setRegistro(!registro)
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            marginTop: 14,
+          }}
+        >
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              setVista(esRegistro ? 'iniciar' : 'registrar')
               setError('')
               setMensaje('')
             }}
+            style={{ fontSize: 12 }}
           >
-            {registro
+            {esRegistro
               ? '¿Ya tienes cuenta? Inicia sesión'
               : '¿No tienes cuenta? Regístrate'}
-          </a>
-        </p>
+          </button>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              margin: '4px 0',
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: 'var(--borde)',
+              }}
+            />
+            <span
+              style={{
+                fontSize: 10,
+                color: 'var(--texto-suave)',
+                textTransform: 'uppercase',
+                letterSpacing: 0.6,
+              }}
+            >
+              o
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: 'var(--borde)',
+              }}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              setVista('invitacion')
+              setError('')
+              setMensaje('')
+            }}
+            style={{ fontSize: 12 }}
+          >
+            <Users size={14} />
+            Acceder con invitación
+          </button>
+        </div>
       </div>
     </div>
   )
