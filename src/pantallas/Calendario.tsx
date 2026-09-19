@@ -23,6 +23,7 @@ import {
 } from '../utilidades/turnos'
 import { FileText } from 'lucide-react'
 
+// Estructura devuelta por get_resumen_vacaciones
 interface ResumenVacaciones {
   anio_actual: number
   total_actual: number
@@ -31,6 +32,18 @@ interface ResumenVacaciones {
   anio_anterior: number
   total_anterior: number
   disfrutadas_anterior: number
+  disponibles_anterior: number
+}
+
+// Estructura devuelta por get_resumen_asuntos_propios
+interface ResumenAsuntos {
+  anio_actual: number
+  total_actual: number
+  disfrutados_actual: number
+  disponibles_actual: number
+  anio_anterior: number
+  total_anterior: number
+  disfrutados_anterior: number
   disponibles_anterior: number
 }
 
@@ -49,7 +62,7 @@ export default function Calendario() {
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [dasStatus, setDasStatus] = useState<DasStatus | null>(null)
   const [vacaciones, setVacaciones] = useState<ResumenVacaciones | null>(null)
-  const [asuntos, setAsuntos] = useState<ResumenVacaciones | null>(null)
+  const [asuntos, setAsuntos] = useState<ResumenAsuntos | null>(null)
   const [festivos, setFestivos] = useState<string[]>([])
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -421,7 +434,7 @@ export default function Calendario() {
                     valor={vacaciones?.total_anterior ?? 0}
                   />
                   <FilaResumen
-                    etiqueta="Disfrutados"
+                    etiqueta="Disfrutadas"
                     valor={vacaciones?.disfrutadas_anterior ?? 0}
                   />
                   <FilaResumen
