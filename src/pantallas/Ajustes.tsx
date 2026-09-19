@@ -28,6 +28,7 @@ type Pestana =
   | 'sesion'
 
 export default function Ajustes() {
+  const { puedeEditar } = useUsuario()
   const [pestana, setPestana] = useState<Pestana>('perfil')
 
   return (
@@ -41,20 +42,27 @@ export default function Ajustes() {
           <User size={14} />
           Perfil
         </button>
-        <button
-          className={pestana === 'configuracion' ? 'activa' : ''}
-          onClick={() => setPestana('configuracion')}
-        >
-          <SettingsIcon size={14} />
-          Configuración
-        </button>
-        <button
-          className={pestana === 'datos' ? 'activa' : ''}
-          onClick={() => setPestana('datos')}
-        >
-          <Database size={14} />
-          Datos
-        </button>
+
+        {puedeEditar && (
+          <button
+            className={pestana === 'configuracion' ? 'activa' : ''}
+            onClick={() => setPestana('configuracion')}
+          >
+            <SettingsIcon size={14} />
+            Configuración
+          </button>
+        )}
+
+        {puedeEditar && (
+          <button
+            className={pestana === 'datos' ? 'activa' : ''}
+            onClick={() => setPestana('datos')}
+          >
+            <Database size={14} />
+            Datos
+          </button>
+        )}
+
         <button
           className={pestana === 'invitados' ? 'activa' : ''}
           onClick={() => setPestana('invitados')}
@@ -62,6 +70,7 @@ export default function Ajustes() {
           <Users size={14} />
           Invitados
         </button>
+
         <button
           className={pestana === 'preferencias' ? 'activa' : ''}
           onClick={() => setPestana('preferencias')}
@@ -69,6 +78,7 @@ export default function Ajustes() {
           <Palette size={14} />
           Preferencias
         </button>
+
         <button
           className={pestana === 'sesion' ? 'activa' : ''}
           onClick={() => setPestana('sesion')}
@@ -79,8 +89,8 @@ export default function Ajustes() {
       </div>
 
       {pestana === 'perfil' && <PestanaPerfil />}
-      {pestana === 'configuracion' && <PestanaConfiguracion />}
-      {pestana === 'datos' && <PestanaDatos />}
+      {pestana === 'configuracion' && puedeEditar && <PestanaConfiguracion />}
+      {pestana === 'datos' && puedeEditar && <PestanaDatos />}
       {pestana === 'invitados' && <PestanaInvitados />}
       {pestana === 'preferencias' && <PestanaPreferencias />}
       {pestana === 'sesion' && <PestanaSesion />}
@@ -433,7 +443,7 @@ function PestanaPerfil() {
 }
 
 // ═══════════════════════════════════════════════════
-// CONFIGURACIÓN
+// CONFIGURACIÓN (solo propietarios)
 // ═══════════════════════════════════════════════════
 
 function PestanaConfiguracion() {
@@ -614,7 +624,7 @@ function PestanaConfiguracion() {
 }
 
 // ═══════════════════════════════════════════════════
-// DATOS
+// DATOS (solo propietarios)
 // ═══════════════════════════════════════════════════
 
 function PestanaDatos() {
