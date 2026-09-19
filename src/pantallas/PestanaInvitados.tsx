@@ -12,7 +12,6 @@ import {
   KeyRound,
   Link2Off,
   X,
-  Clock,
 } from 'lucide-react'
 
 export default function PestanaInvitados() {
@@ -30,10 +29,9 @@ export default function PestanaInvitados() {
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
-  // ─────────── Estado propietario ───────────
   const [invitaciones, setInvitaciones] = useState<Invitacion[]>([])
   const [vinculados, setVinculados] = useState<
-    { id: string; nombre: string; email: string; avatar_url: string | null }[]
+    { id: string; nombre: string; avatar_url: string | null; creado_en: string }[]
   >([])
   const [cargando, setCargando] = useState(false)
   const [nombreNuevo, setNombreNuevo] = useState('')
@@ -121,10 +119,7 @@ export default function PestanaInvitados() {
     }
   }
 
-  async function expulsar(
-    id: string,
-    nombre: string
-  ) {
+  async function expulsar(id: string, nombre: string) {
     const ok = await confirmar({
       titulo: `¿Expulsar a ${nombre}?`,
       mensaje:
@@ -225,6 +220,16 @@ export default function PestanaInvitados() {
   // ═══════════════════════════════════════════════════
   // VISTA PARA EL PROPIETARIO
   // ═══════════════════════════════════════════════════
+
+  function textoFechaVinculacion(iso: string): string {
+    const d = new Date(iso)
+    const opciones: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }
+    return d.toLocaleDateString('es-ES', opciones)
+  }
 
   return (
     <>
@@ -346,9 +351,7 @@ export default function PestanaInvitados() {
                         ? 'var(--texto-suave)'
                         : 'var(--acento)',
                       fontFamily: 'monospace',
-                      textDecoration: inv.revocada
-                        ? 'line-through'
-                        : 'none',
+                      textDecoration: inv.revocada ? 'line-through' : 'none',
                     }}
                   >
                     {inv.codigo}
@@ -548,9 +551,7 @@ export default function PestanaInvitados() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Desde {new Date(
-                      v.id ? Date.now() : Date.now()
-                    ).toLocaleDateString('es-ES')}
+                    Vinculado el {textoFechaVinculacion(v.creado_en)}
                   </div>
                 </div>
 
