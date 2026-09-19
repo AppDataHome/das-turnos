@@ -42,7 +42,7 @@ const NOMBRES_MESES = [
 ]
 
 export default function Calendario() {
-  const { usuario } = useUsuario()
+  const { usuario, puedeEditar } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
@@ -80,6 +80,10 @@ export default function Calendario() {
     cargarFestivos()
   }, [])
 
+  // ID del propietario cuyos datos estamos viendo
+  // (el propio usuario, o el de quien nos ha invitado)
+  const idPropietario = usuario?.invitado_de ?? usuario?.id ?? ''
+
   async function cargarTodo() {
     setCargando(true)
     await Promise.all([cargarTurnos(), cargarEstadoDas(), cargarVacaciones()])
@@ -87,7 +91,7 @@ export default function Calendario() {
   }
 
   async function cargarTurnos() {
-    if (!usuario) return
+    if (!idPropietario) return
     const { data, error } = await supabase
       .from('turno')
       .select(`
@@ -100,7 +104,7 @@ export default function Calendario() {
         tipo_turno (codigo, nombre, color, orden, hora_inicio, hora_fin, categoria),
         departamento (nombre, icono)
       `)
-      .eq('id_usuario', usuario.id)
+      .eq('id_usuario', idPropietario)
       .order('fecha', { ascending: true })
 
     if (!error && data) {
@@ -127,17 +131,17 @@ export default function Calendario() {
   }
 
   async function cargarEstadoDas() {
-    if (!usuario) return
+    if (!idPropietario) return
     const { data, error } = await supabase.rpc('get_das_status', {
-      p_usuario: usuario.id,
+      p_usuario: idPropietario,
     })
     if (!error && data && data[0]) setDasStatus(data[0])
   }
 
   async function cargarVacaciones() {
-    if (!usuario) return
+    if (!idPropietario) return
     const { data, error } = await supabase.rpc('get_resumen_vacaciones', {
-      p_usuario: usuario.id,
+      p_usuario: idPropietario,
     })
     if (!error && data && data[0]) setVacaciones(data[0])
   }
@@ -229,6 +233,7 @@ export default function Calendario() {
 
   function seleccionarYAbir(fechaNueva: string) {
     setFecha(fechaNueva)
+    // Los invitados pueden abrir el modal, pero en modo solo lectura
     setModalAbierto(true)
   }
 
@@ -237,7 +242,6 @@ export default function Calendario() {
     setVista('mensual')
   }
 
-  // Cuando se pulsa "Editar" en gestión, abrimos el modal del día
   function editarDesdeGestion(fechaNueva: string) {
     setFecha(fechaNueva)
     setModalAbierto(true)
@@ -418,7 +422,6 @@ export default function Calendario() {
           )}
         </div>
 
-        {/* Tarjeta DAS clicable */}
         <div
           className="card"
           onClick={() => setModalInformeAbierto(true)}
@@ -578,22 +581,24 @@ export default function Calendario() {
         >
           Anual
         </button>
-        <button
-          onClick={() => setVista('gestion')}
-          style={{
-            padding: '6px 14px',
-            fontSize: 11,
-            fontWeight: 600,
-            borderRadius: 7,
-            border: '1px solid var(--borde)',
-            cursor: 'pointer',
-            background: vista === 'gestion' ? 'var(--acento)' : 'transparent',
-            color: vista === 'gestion' ? '#0b0e13' : 'var(--texto-suave)',
-            marginLeft: 4,
-          }}
-        >
-          ⚙ Gestión
-        </button>
+        {puedeEditar && (
+          <button
+            onClick={() => setVista('gestion')}
+            style={{
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              borderRadius: 7,
+              border: '1px solid var(--borde)',
+              cursor: 'pointer',
+              background: vista === 'gestion' ? 'var(--acento)' : 'transparent',
+              color: vista === 'gestion' ? '#0b0e13' : 'var(--texto-suave)',
+              marginLeft: 4,
+            }}
+          >
+            ⚙ Gestión
+          </button>
+        )}
       </div>
 
       {vista === 'mensual' && (
@@ -623,7 +628,7 @@ export default function Calendario() {
         />
       )}
 
-      {vista === 'gestion' && (
+      {vista === 'gestion' && puedeEditar && (
         <GestionTurnos
           turnos={turnos}
           onEditarFecha={editarDesdeGestion}
@@ -655,12 +660,14 @@ export default function Calendario() {
               {turnosDelDia.length}{' '}
               {turnosDelDia.length === 1 ? 'turno' : 'turnos'}
             </span>
-            <button
-              className="btn btn-primary"
-              onClick={() => setModalAbierto(true)}
-            >
-              Editar día
-            </button>
+            {puedeEditar && (
+              <button
+                className="btn btn-primary"
+                onClick={() => setModalAbierto(true)}
+              >
+                Editar día
+              </button>
+            )}
           </div>
 
           {turnosDelDia.length === 0 ? (
@@ -767,12 +774,14 @@ export default function Calendario() {
                       )}
                     </div>
 
-                    <button
-                      className="btn-mini btn-mini-peligro"
-                      onClick={() => borrarTurnoRapido(t.id)}
-                    >
-                      Borrar
-                    </button>
+                    {puedeEditar && (
+                      <button
+                        className="btn-mini btn-mini-peligro"
+                        onClick={() => borrarTurnoRapido(t.id)}
+                      >
+                        Borrar
+                      </button>
+                    )}
                   </div>
                 )
               })}
@@ -787,6 +796,7 @@ export default function Calendario() {
           turnosDelDia={turnosDelDia}
           onCerrar={() => setModalAbierto(false)}
           onCambio={cargarTodo}
+          soloLectura={!puedeEditar}
         />
       )}
 
