@@ -15,6 +15,8 @@ export interface Usuario {
   dias_vacaciones_arrastradas: number
   anio_vacaciones_arrastradas: number | null
   avatar_url: string | null
+  invitado_de: string | null
+  codigo_invitacion: string | null
 }
 
 export interface Departamento {
