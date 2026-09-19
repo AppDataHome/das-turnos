@@ -58,7 +58,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       .maybeSingle()
 
     if (error || !data) {
-      // Si no existe el perfil, lo creamos
       const nuevo: Partial<Usuario> = {
         id: authUser.id,
         email: authUser.email ?? '',
@@ -113,14 +112,14 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
   async function generarCodigoInvitacion(): Promise<string> {
     const { data, error } = await supabase.rpc('generar_codigo_invitacion')
     if (error) throw error
-    await recargar()
+    await cargar()
     return data as string
   }
 
   async function revocarCodigoInvitacion() {
     const { error } = await supabase.rpc('revocar_codigo_invitacion')
     if (error) throw error
-    await recargar()
+    await cargar()
   }
 
   async function vincularComoInvitado(codigo: string) {
@@ -130,16 +129,17 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     if (error) return { ok: false, mensaje: error.message }
 
     const fila = (data as any[])?.[0]
-    if (!fila) return { ok: false, mensaje: 'Respuesta inesperada del servidor' }
+    if (!fila)
+      return { ok: false, mensaje: 'Respuesta inesperada del servidor' }
 
-    if (fila.ok) await recargar()
+    if (fila.ok) await cargar()
     return { ok: fila.ok, mensaje: fila.mensaje }
   }
 
   async function desvincularInvitado() {
     const { error } = await supabase.rpc('desvincular_invitado')
     if (error) throw error
-    await recargar()
+    await cargar()
   }
 
   async function listarMisInvitados() {
