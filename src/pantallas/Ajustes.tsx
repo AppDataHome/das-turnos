@@ -17,6 +17,10 @@ import {
   Palette,
   Users,
   LogOut,
+  Sun,
+  Moon,
+  Smartphone,
+  Leaf,
 } from 'lucide-react'
 
 type Pestana =
@@ -145,7 +149,6 @@ function PestanaPerfil() {
     }
 
     setSubiendoAvatar(true)
-
     const ext = archivo.name.split('.').pop()?.toLowerCase() || 'jpg'
     const ruta = `${usuario!.id}/avatar.${ext}`
 
@@ -163,7 +166,6 @@ function PestanaPerfil() {
     const { data: urlData } = supabase.storage
       .from('avatares')
       .getPublicUrl(ruta)
-
     const urlPublica = `${urlData.publicUrl}?t=${Date.now()}`
 
     try {
@@ -188,7 +190,6 @@ function PestanaPerfil() {
     if (!ok) return
 
     setSubiendoAvatar(true)
-
     const { data: listado } = await supabase.storage
       .from('avatares')
       .list(usuario!.id)
@@ -213,7 +214,6 @@ function PestanaPerfil() {
     e.preventDefault()
     setError('')
     setGuardando(true)
-
     try {
       await actualizarPerfil({
         nombre: nombre.trim(),
@@ -233,25 +233,15 @@ function PestanaPerfil() {
     e.preventDefault()
     setErrorPass('')
 
-    if (!passActual) {
-      setErrorPass('Debes introducir tu contraseña actual')
-      return
-    }
-    if (pass1.length < 6) {
-      setErrorPass('La nueva contraseña debe tener al menos 6 caracteres')
-      return
-    }
-    if (pass1 !== pass2) {
-      setErrorPass('Las dos contraseñas nuevas no coinciden')
-      return
-    }
-    if (passActual === pass1) {
-      setErrorPass('La nueva contraseña debe ser distinta a la actual')
-      return
-    }
+    if (!passActual) return setErrorPass('Debes introducir tu contraseña actual')
+    if (pass1.length < 6)
+      return setErrorPass('La nueva contraseña debe tener al menos 6 caracteres')
+    if (pass1 !== pass2)
+      return setErrorPass('Las dos contraseñas nuevas no coinciden')
+    if (passActual === pass1)
+      return setErrorPass('La nueva contraseña debe ser distinta a la actual')
 
     setCambiandoPass(true)
-
     const { error: errVerif } = await supabase.auth.signInWithPassword({
       email: usuario!.email,
       password: passActual,
@@ -267,7 +257,6 @@ function PestanaPerfil() {
     const { error: errCambio } = await supabase.auth.updateUser({
       password: pass1,
     })
-
     setCambiandoPass(false)
 
     if (errCambio) {
@@ -450,7 +439,6 @@ function PestanaConfiguracion() {
   const toast = useToast()
   const { confirmar } = useConfirmacion()
 
-  // Vacaciones
   const [diasAnuales, setDiasAnuales] = useState<number>(
     usuario?.dias_vacaciones_anuales ?? 22
   )
@@ -461,7 +449,6 @@ function PestanaConfiguracion() {
     usuario?.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
   )
 
-  // Asuntos propios
   const [apAnuales, setApAnuales] = useState<number>(
     usuario?.dias_asuntos_propios_anuales ?? 6
   )
@@ -481,8 +468,7 @@ function PestanaConfiguracion() {
       setDiasAnuales(usuario.dias_vacaciones_anuales ?? 22)
       setDiasArrastradas(usuario.dias_vacaciones_arrastradas ?? 0)
       setAnioArrastre(
-        usuario.anio_vacaciones_arrastradas ??
-          new Date().getFullYear() - 1
+        usuario.anio_vacaciones_arrastradas ?? new Date().getFullYear() - 1
       )
       setApAnuales(usuario.dias_asuntos_propios_anuales ?? 6)
       setApArrastrados(usuario.dias_asuntos_propios_arrastrados ?? 0)
@@ -499,7 +485,6 @@ function PestanaConfiguracion() {
     e.preventDefault()
     setError('')
     setGuardando(true)
-
     try {
       await actualizarPerfil({
         dias_vacaciones_anuales: Number(diasAnuales) || 0,
@@ -520,7 +505,7 @@ function PestanaConfiguracion() {
     const ok = await confirmar({
       titulo: '¿Poner el arrastre a 0?',
       mensaje:
-        'Los días de vacaciones pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
+        'Los días de vacaciones pendientes del año anterior quedarán a 0.',
       textoConfirmar: 'Poner a 0',
       peligro: true,
     })
@@ -528,7 +513,6 @@ function PestanaConfiguracion() {
 
     setError('')
     setGuardando(true)
-
     try {
       setDiasArrastradas(0)
       await actualizarPerfil({ dias_vacaciones_arrastradas: 0 })
@@ -546,7 +530,6 @@ function PestanaConfiguracion() {
     e.preventDefault()
     setError('')
     setGuardando(true)
-
     try {
       await actualizarPerfil({
         dias_asuntos_propios_anuales: Number(apAnuales) || 0,
@@ -566,8 +549,7 @@ function PestanaConfiguracion() {
   async function reiniciarArrastreAP() {
     const ok = await confirmar({
       titulo: '¿Poner el arrastre de asuntos propios a 0?',
-      mensaje:
-        'Los días pendientes del año anterior quedarán a 0. Esta acción no se puede deshacer.',
+      mensaje: 'Los días pendientes del año anterior quedarán a 0.',
       textoConfirmar: 'Poner a 0',
       peligro: true,
     })
@@ -575,7 +557,6 @@ function PestanaConfiguracion() {
 
     setError('')
     setGuardando(true)
-
     try {
       setApArrastrados(0)
       await actualizarPerfil({ dias_asuntos_propios_arrastrados: 0 })
@@ -591,7 +572,6 @@ function PestanaConfiguracion() {
 
   return (
     <>
-      {/* Vacaciones */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>🏖️ Vacaciones</h2>
 
@@ -680,7 +660,6 @@ function PestanaConfiguracion() {
         </form>
       </div>
 
-      {/* Asuntos propios */}
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>📋 Asuntos Propios</h2>
 
@@ -818,34 +797,149 @@ function PestanaPreferencias() {
     }
   }
 
+  const opciones: {
+    valor: Tema
+    etiqueta: string
+    descripcion: string
+    Icono: any
+  }[] = [
+    {
+      valor: 'auto',
+      etiqueta: 'Automático',
+      descripcion: 'Se adapta al modo claro/oscuro de tu dispositivo',
+      Icono: Smartphone,
+    },
+    {
+      valor: 'claro',
+      etiqueta: 'Claro',
+      descripcion: 'Fondo blanco, ideal para ambientes muy iluminados',
+      Icono: Sun,
+    },
+    {
+      valor: 'negro',
+      etiqueta: 'Oscuro',
+      descripcion: 'Fondo negro con acentos dorados',
+      Icono: Moon,
+    },
+    {
+      valor: 'verde',
+      etiqueta: 'Verde Guardia Civil',
+      descripcion: 'Fondo verde oscuro con acentos verde claro',
+      Icono: Leaf,
+    },
+  ]
+
   return (
     <div className="card">
       <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button
-          className="btn"
-          onClick={() => elegirTema('negro')}
-          style={{
-            background: '#0e1116',
-            color: 'white',
-            outline:
-              usuario.tema === 'negro' ? '2px solid var(--acento)' : 'none',
-          }}
-        >
-          Negro
-        </button>
-        <button
-          className="btn"
-          onClick={() => elegirTema('verde')}
-          style={{
-            background: '#0a1a10',
-            color: 'white',
-            outline:
-              usuario.tema === 'verde' ? '2px solid var(--acento)' : 'none',
-          }}
-        >
-          Verde Guardia Civil
-        </button>
+
+      <p
+        style={{
+          fontSize: 11,
+          color: 'var(--texto-suave)',
+          marginBottom: 14,
+        }}
+      >
+        Elige el aspecto visual de la app. El modo <strong>Automático</strong>{' '}
+        cambia solo según el modo claro/oscuro de tu dispositivo.
+      </p>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        {opciones.map((op) => {
+          const activo = usuario.tema === op.valor
+          const Icono = op.Icono
+
+          return (
+            <button
+              key={op.valor}
+              onClick={() => elegirTema(op.valor)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: 12,
+                border: activo
+                  ? '2px solid var(--acento)'
+                  : '1px solid var(--borde)',
+                background: activo
+                  ? 'var(--acento-suave)'
+                  : 'var(--fondo-tarjeta-2)',
+                borderRadius: 10,
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                color: 'var(--texto)',
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: activo
+                    ? 'var(--acento)'
+                    : 'var(--fondo-tarjeta-3)',
+                  color: activo
+                    ? 'var(--acento-texto)'
+                    : 'var(--texto-suave)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Icono size={20} />
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 2,
+                  }}
+                >
+                  {op.etiqueta}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--texto-suave)',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {op.descripcion}
+                </div>
+              </div>
+
+              {activo && (
+                <div
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    background: 'var(--acento)',
+                    color: 'var(--acento-texto)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    flexShrink: 0,
+                  }}
+                >
+                  ✓
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
