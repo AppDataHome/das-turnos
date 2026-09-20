@@ -1,6 +1,6 @@
 // ─────────── Tipos de datos compartidos ───────────
 
-export type Tema = 'negro' | 'verde'
+export type Tema = 'auto' | 'claro' | 'negro' | 'verde'
 export type Rol = 'usuario' | 'invitado'
 
 export interface Usuario {
