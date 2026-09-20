@@ -16,6 +16,8 @@ import Festivos from './pantallas/Festivos'
 import Ajustes from './pantallas/Ajustes'
 import Ayuda from './pantallas/Ayuda'
 import AccesoInvitacion from './pantallas/AccesoInvitacion'
+import RecuperarPassword from './pantallas/RecuperarPassword'
+import RestablecerPassword from './pantallas/RestablecerPassword'
 import BarraInferior, { type Pestana } from './pantallas/BarraInferior'
 import {
   Calendar,
@@ -28,11 +30,37 @@ import {
 import type { User } from '@supabase/supabase-js'
 
 export default function App() {
+  // Detectar si el usuario viene del enlace de recuperación
+  const [enRecuperacion, setEnRecuperacion] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    const hash = window.location.hash
+    // Supabase añade #access_token=...&type=recovery
+    return hash.includes('type=recovery') || hash.includes('type=recovery')
+  })
+
+  function salirDeRecuperacion() {
+    // Limpiar el hash de la URL para que no vuelva a detectarse
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + window.location.search
+      )
+    }
+    setEnRecuperacion(false)
+  }
+
   return (
     <ToastProveedor>
       <ConfirmacionProveedor>
         <UsuarioProveedor>
-          <Aplicacion />
+          {enRecuperacion ? (
+            <RestablecerPassword onCompletado={salirDeRecuperacion} />
+          ) : (
+            <Aplicacion />
+          )}
+          <ContenedorToasts />
+          <ContenedorConfirmacion />
         </UsuarioProveedor>
       </ConfirmacionProveedor>
     </ToastProveedor>
@@ -61,7 +89,6 @@ function Aplicacion() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Si el usuario es invitado y estaba en Festivos, le movemos a Calendario
   useEffect(() => {
     if (esInvitado && pestana === 'festivos') {
       setPestana('calendario')
@@ -92,13 +119,7 @@ function Aplicacion() {
   }
 
   if (!authUser) {
-    return (
-      <>
-        <Login />
-        <ContenedorToasts />
-        <ContenedorConfirmacion />
-      </>
-    )
+    return <Login />
   }
 
   return (
@@ -174,8 +195,6 @@ function Aplicacion() {
         onCambiar={setPestana}
         esInvitado={esInvitado}
       />
-      <ContenedorToasts />
-      <ContenedorConfirmacion />
     </>
   )
 }
@@ -224,7 +243,7 @@ function Cabecera() {
   )
 }
 
-type VistaLogin = 'iniciar' | 'registrar' | 'invitacion'
+type VistaLogin = 'iniciar' | 'registrar' | 'invitacion' | 'recuperar'
 
 function Login() {
   const [vista, setVista] = useState<VistaLogin>('iniciar')
@@ -235,6 +254,10 @@ function Login() {
 
   if (vista === 'invitacion') {
     return <AccesoInvitacion onVolver={() => setVista('iniciar')} />
+  }
+
+  if (vista === 'recuperar') {
+    return <RecuperarPassword onVolver={() => setVista('iniciar')} />
   }
 
   const esRegistro = vista === 'registrar'
@@ -318,8 +341,35 @@ function Login() {
             minLength={6}
             autoComplete={esRegistro ? 'new-password' : 'current-password'}
           />
+
+          {!esRegistro && (
+            <div style={{ textAlign: 'right', marginTop: -2 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setVista('recuperar')
+                  setError('')
+                  setMensaje('')
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--acento)',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px 0',
+                  fontFamily: 'inherit',
+                }}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          )}
+
           {error && <p className="error">{error}</p>}
           {mensaje && <p className="success">{mensaje}</p>}
+
           <button
             className="btn btn-primary"
             style={{ width: '100%', marginTop: 6 }}
@@ -360,9 +410,7 @@ function Login() {
               margin: '4px 0',
             }}
           >
-            <div
-              style={{ flex: 1, height: 1, background: 'var(--borde)' }}
-            />
+            <div style={{ flex: 1, height: 1, background: 'var(--borde)' }} />
             <span
               style={{
                 fontSize: 10,
@@ -373,9 +421,7 @@ function Login() {
             >
               o
             </span>
-            <div
-              style={{ flex: 1, height: 1, background: 'var(--borde)' }}
-            />
+            <div style={{ flex: 1, height: 1, background: 'var(--borde)' }} />
           </div>
 
           <button
