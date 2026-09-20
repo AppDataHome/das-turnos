@@ -18,6 +18,7 @@ export interface Toast {
   tipo: TipoToast
   texto: string
   duracion: number
+  creadoEn: number
   accion?: AccionToast
 }
 
@@ -27,7 +28,6 @@ interface ToastContextoValor {
   error: (texto: string, duracion?: number) => void
   info: (texto: string, duracion?: number) => void
   aviso: (texto: string, duracion?: number) => void
-  /** Muestra un toast con un botón de acción */
   conAccion: (
     tipo: TipoToast,
     texto: string,
@@ -49,7 +49,11 @@ export function ToastProveedor({ children }: { children: ReactNode }) {
   const añadir = useCallback(
     (tipo: TipoToast, texto: string, duracion = 3500, accion?: AccionToast) => {
       const id = Math.random().toString(36).slice(2)
-      setToasts((prev) => [...prev, { id, tipo, texto, duracion, accion }])
+      const creadoEn = Date.now()
+      setToasts((prev) => [
+        ...prev,
+        { id, tipo, texto, duracion, creadoEn, accion },
+      ])
       if (duracion > 0) {
         setTimeout(() => cerrar(id), duracion)
       }
