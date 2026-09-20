@@ -1574,3 +1574,68 @@ nav a.activo { color: var(--acento); background: var(--acento-suave); }
 .toast-aviso .toast-accion:hover {
   background: rgba(0, 0, 0, 0.25);
 }  
+
+
+
+/* ═══════════════════════════════════════════════════
+   BARRA DE PROGRESO DEL TOAST
+   ═══════════════════════════════════════════════════ */
+
+/* El toast ahora tiene estructura interna en columna */
+.toast {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+.toast-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.toast-progreso {
+  height: 3px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.toast-aviso .toast-progreso {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.toast-progreso-barra {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  transition: width 0.05s linear;
+}
+
+.toast-aviso .toast-progreso-barra {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Contador de segundos dentro del botón de acción */
+.toast-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.toast-accion-tiempo {
+  font-size: 9px;
+  font-weight: 800;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.toast-aviso .toast-accion-tiempo {
+  background: rgba(0, 0, 0, 0.15);
+}
