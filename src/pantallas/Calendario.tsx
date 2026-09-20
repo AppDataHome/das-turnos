@@ -9,6 +9,7 @@ import VistaAnual from './VistaAnual'
 import GestionTurnos from './GestionTurnos'
 import ModalDia from './ModalDia'
 import ModalInformeDas from './ModalInformeDas'
+import ModalImprimirCalendario from './ModalImprimirCalendario'
 import AvisosBanner from './AvisosBanner'
 import {
   SkeletonTarjetas,
@@ -21,9 +22,8 @@ import {
   muestraDepartamento,
   etiquetaSinDepartamento,
 } from '../utilidades/turnos'
-import { FileText } from 'lucide-react'
+import { FileText, Printer } from 'lucide-react'
 
-// Estructura devuelta por get_resumen_vacaciones
 interface ResumenVacaciones {
   anio_actual: number
   total_actual: number
@@ -35,7 +35,6 @@ interface ResumenVacaciones {
   disponibles_anterior: number
 }
 
-// Estructura devuelta por get_resumen_asuntos_propios
 interface ResumenAsuntos {
   anio_actual: number
   total_actual: number
@@ -67,6 +66,7 @@ export default function Calendario() {
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [modalAbierto, setModalAbierto] = useState(false)
   const [modalInformeAbierto, setModalInformeAbierto] = useState(false)
+  const [modalImprimirAbierto, setModalImprimirAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
 
   const [mesVisible, setMesVisible] = useState<Date>(() => {
@@ -380,7 +380,6 @@ export default function Calendario() {
             Vacaciones y Asuntos Propios
           </h4>
 
-          {/* Bloque Vacaciones */}
           <div style={{ marginBottom: 12 }}>
             <div
               style={{
@@ -455,7 +454,6 @@ export default function Calendario() {
             }}
           />
 
-          {/* Bloque Asuntos Propios */}
           <div>
             <div
               style={{
@@ -637,6 +635,7 @@ export default function Calendario() {
           borderRadius: 10,
           width: 'fit-content',
           flexWrap: 'wrap',
+          alignItems: 'center',
         }}
       >
         <button
@@ -649,7 +648,7 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'mensual' ? 'var(--acento)' : 'transparent',
-            color: vista === 'mensual' ? '#0b0e13' : 'var(--texto-suave)',
+            color: vista === 'mensual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Mensual
@@ -664,7 +663,7 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'semanal' ? 'var(--acento)' : 'transparent',
-            color: vista === 'semanal' ? '#0b0e13' : 'var(--texto-suave)',
+            color: vista === 'semanal' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Semanal
@@ -679,11 +678,12 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'anual' ? 'var(--acento)' : 'transparent',
-            color: vista === 'anual' ? '#0b0e13' : 'var(--texto-suave)',
+            color: vista === 'anual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Anual
         </button>
+
         {puedeEditar && (
           <button
             onClick={() => setVista('gestion')}
@@ -695,13 +695,36 @@ export default function Calendario() {
               border: '1px solid var(--borde)',
               cursor: 'pointer',
               background: vista === 'gestion' ? 'var(--acento)' : 'transparent',
-              color: vista === 'gestion' ? '#0b0e13' : 'var(--texto-suave)',
+              color: vista === 'gestion' ? 'var(--acento-texto)' : 'var(--texto-suave)',
               marginLeft: 4,
             }}
           >
             ⚙ Gestión
           </button>
         )}
+
+        {/* Botón imprimir (a la derecha) */}
+        <button
+          onClick={() => setModalImprimirAbierto(true)}
+          title="Imprimir calendario"
+          style={{
+            padding: '6px 12px',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: 7,
+            border: '1px solid var(--borde)',
+            cursor: 'pointer',
+            background: 'transparent',
+            color: 'var(--texto-suave)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            marginLeft: 8,
+          }}
+        >
+          <Printer size={12} />
+          Imprimir
+        </button>
       </div>
 
       {vista === 'mensual' && (
@@ -905,6 +928,12 @@ export default function Calendario() {
 
       {modalInformeAbierto && (
         <ModalInformeDas onCerrar={() => setModalInformeAbierto(false)} />
+      )}
+
+      {modalImprimirAbierto && (
+        <ModalImprimirCalendario
+          onCerrar={() => setModalImprimirAbierto(false)}
+        />
       )}
     </>
   )
