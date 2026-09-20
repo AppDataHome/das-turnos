@@ -186,22 +186,54 @@ export default function Calendario() {
     if (!error && data) setFestivos(data.map((f: any) => f.fecha))
   }
 
-  async function borrarTurnoRapido(id: string) {
+  // ─────────── BORRAR con deshacer ───────────
+  async function borrarTurnoRapido(turno: Turno) {
     const ok = await confirmar({
       titulo: '¿Borrar este turno?',
-      mensaje: 'Esta acción no se puede deshacer.',
+      mensaje: 'Podrás deshacerlo unos segundos si te arrepientes.',
       textoConfirmar: 'Borrar',
       peligro: true,
     })
     if (!ok) return
 
-    const { error } = await supabase.from('turno').delete().eq('id', id)
+    // Guardamos copia completa del turno para poder restaurarlo
+    const copia = {
+      id_usuario: turno.id_usuario,
+      id_departamento: turno.id_departamento,
+      id_tipo_turno: turno.id_tipo_turno,
+      fecha: turno.fecha,
+      notas: turno.notas,
+    }
+
+    const { error } = await supabase.from('turno').delete().eq('id', turno.id)
     if (error) {
       toast.error('Error al borrar: ' + error.message)
       return
     }
-    toast.exito('Turno borrado')
+
     cargarTodo()
+
+    // Toast con acción "Deshacer"
+    toast.conAccion(
+      'info',
+      'Turno borrado',
+      {
+        etiqueta: 'Deshacer',
+        onClick: async () => {
+          const { error: errRestaurar } = await supabase
+            .from('turno')
+            .insert(copia)
+
+          if (errRestaurar) {
+            toast.error('No se pudo deshacer: ' + errRestaurar.message)
+            return
+          }
+          toast.exito('Turno restaurado')
+          cargarTodo()
+        },
+      },
+      7000
+    )
   }
 
   if (!usuario) return null
@@ -295,7 +327,6 @@ export default function Calendario() {
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
 
       <div className="grid-tarjetas">
-        {/* Turnos Mes */}
         <div className="card" style={{ textAlign: 'center' }}>
           <h4
             style={{
@@ -364,7 +395,6 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* Vacaciones y Asuntos Propios */}
         <div className="card">
           <h4
             style={{
@@ -521,7 +551,6 @@ export default function Calendario() {
           </div>
         </div>
 
-        {/* DAS */}
         <div
           className="card"
           onClick={() => setModalInformeAbierto(true)}
@@ -623,7 +652,6 @@ export default function Calendario() {
         </div>
       </div>
 
-      {/* Selector de vista */}
       <div
         style={{
           display: 'flex',
@@ -648,7 +676,8 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'mensual' ? 'var(--acento)' : 'transparent',
-            color: vista === 'mensual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
+            color:
+              vista === 'mensual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Mensual
@@ -663,7 +692,8 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'semanal' ? 'var(--acento)' : 'transparent',
-            color: vista === 'semanal' ? 'var(--acento-texto)' : 'var(--texto-suave)',
+            color:
+              vista === 'semanal' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Semanal
@@ -678,7 +708,8 @@ export default function Calendario() {
             border: 'none',
             cursor: 'pointer',
             background: vista === 'anual' ? 'var(--acento)' : 'transparent',
-            color: vista === 'anual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
+            color:
+              vista === 'anual' ? 'var(--acento-texto)' : 'var(--texto-suave)',
           }}
         >
           Anual
@@ -695,7 +726,10 @@ export default function Calendario() {
               border: '1px solid var(--borde)',
               cursor: 'pointer',
               background: vista === 'gestion' ? 'var(--acento)' : 'transparent',
-              color: vista === 'gestion' ? 'var(--acento-texto)' : 'var(--texto-suave)',
+              color:
+                vista === 'gestion'
+                  ? 'var(--acento-texto)'
+                  : 'var(--texto-suave)',
               marginLeft: 4,
             }}
           >
@@ -703,7 +737,6 @@ export default function Calendario() {
           </button>
         )}
 
-        {/* Botón imprimir (a la derecha) */}
         <button
           onClick={() => setModalImprimirAbierto(true)}
           title="Imprimir calendario"
@@ -903,7 +936,7 @@ export default function Calendario() {
                     {puedeEditar && (
                       <button
                         className="btn-mini btn-mini-peligro"
-                        onClick={() => borrarTurnoRapido(t.id)}
+                        onClick={() => borrarTurnoRapido(t)}
                       >
                         Borrar
                       </button>
