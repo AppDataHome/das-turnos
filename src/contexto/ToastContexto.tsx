@@ -8,11 +8,17 @@ import {
 
 export type TipoToast = 'exito' | 'error' | 'info' | 'aviso'
 
+export interface AccionToast {
+  etiqueta: string
+  onClick: () => void
+}
+
 export interface Toast {
   id: string
   tipo: TipoToast
   texto: string
   duracion: number
+  accion?: AccionToast
 }
 
 interface ToastContextoValor {
@@ -21,6 +27,13 @@ interface ToastContextoValor {
   error: (texto: string, duracion?: number) => void
   info: (texto: string, duracion?: number) => void
   aviso: (texto: string, duracion?: number) => void
+  /** Muestra un toast con un botón de acción */
+  conAccion: (
+    tipo: TipoToast,
+    texto: string,
+    accion: AccionToast,
+    duracion?: number
+  ) => void
   cerrar: (id: string) => void
 }
 
@@ -34,9 +47,9 @@ export function ToastProveedor({ children }: { children: ReactNode }) {
   }, [])
 
   const añadir = useCallback(
-    (tipo: TipoToast, texto: string, duracion = 3500) => {
+    (tipo: TipoToast, texto: string, duracion = 3500, accion?: AccionToast) => {
       const id = Math.random().toString(36).slice(2)
-      setToasts((prev) => [...prev, { id, tipo, texto, duracion }])
+      setToasts((prev) => [...prev, { id, tipo, texto, duracion, accion }])
       if (duracion > 0) {
         setTimeout(() => cerrar(id), duracion)
       }
@@ -61,9 +74,19 @@ export function ToastProveedor({ children }: { children: ReactNode }) {
     [añadir]
   )
 
+  const conAccion = useCallback(
+    (
+      tipo: TipoToast,
+      texto: string,
+      accion: AccionToast,
+      duracion = 6000
+    ) => añadir(tipo, texto, duracion, accion),
+    [añadir]
+  )
+
   return (
     <ToastContexto.Provider
-      value={{ toasts, exito, error, info, aviso, cerrar }}
+      value={{ toasts, exito, error, info, aviso, conAccion, cerrar }}
     >
       {children}
     </ToastContexto.Provider>
