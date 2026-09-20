@@ -8,7 +8,6 @@ import {
 import { supabase } from '../supabase'
 import type { Usuario, Tema } from '../tipos'
 
-// ─────────── Tipos de invitación ───────────
 export interface Invitacion {
   id: string
   codigo: string
@@ -50,6 +49,20 @@ const UsuarioContexto = createContext<UsuarioContextoValor | null>(null)
 export function UsuarioProveedor({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [cargando, setCargando] = useState(true)
+  const [prefiereClaro, setPrefiereClaro] = useState<boolean>(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-color-scheme: light)').matches
+      : false
+  )
+
+  // Escuchamos cambios en vivo del sistema
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const handler = (e: MediaQueryListEvent) => setPrefiereClaro(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   async function cargar() {
     setCargando(true)
@@ -86,7 +99,7 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       email: authUser.email ?? '',
       nombre: authUser.email?.split('@')[0] ?? 'Usuario',
       rol: 'usuario',
-      tema: 'negro',
+      tema: 'auto',
       activo: true,
       numero_empleado: null,
     }
@@ -139,7 +152,6 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
 
   async function crearInvitacion(nombreInvitado: string) {
     if (!usuario) return { ok: false, mensaje: 'No autenticado' }
-
     const codigo = generarCodigo()
 
     const { error } = await supabase.from('invitacion').insert({
@@ -148,9 +160,7 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
       nombre_invitado: nombreInvitado.trim() || null,
     })
 
-    if (error) {
-      return { ok: false, mensaje: error.message }
-    }
+    if (error) return { ok: false, mensaje: error.message }
     return { ok: true, mensaje: 'Invitación creada', codigo }
   }
 
@@ -163,10 +173,7 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
   }
 
   async function eliminarInvitacion(id: string) {
-    const { error } = await supabase
-      .from('invitacion')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('invitacion').delete().eq('id', id)
     if (error) throw error
   }
 
@@ -218,10 +225,19 @@ export function UsuarioProveedor({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Aplicar el tema al documento
   useEffect(() => {
-    const tema = usuario?.tema ?? 'negro'
-    document.documentElement.setAttribute('data-tema', tema)
-  }, [usuario?.tema])
+    const temaUsuario = usuario?.tema ?? 'auto'
+    let temaAplicar: string
+
+    if (temaUsuario === 'auto') {
+      temaAplicar = prefiereClaro ? 'claro' : 'negro'
+    } else {
+      temaAplicar = temaUsuario
+    }
+
+    document.documentElement.setAttribute('data-tema', temaAplicar)
+  }, [usuario?.tema, prefiereClaro])
 
   const esInvitado = usuario?.rol === 'invitado' && !!usuario?.invitado_de
   const puedeEditar = !esInvitado
