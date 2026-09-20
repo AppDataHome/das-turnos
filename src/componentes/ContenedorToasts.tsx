@@ -16,7 +16,21 @@ export default function ContenedorToasts() {
             {t.tipo === 'info' && <Info size={16} />}
             {t.tipo === 'aviso' && <AlertTriangle size={16} />}
           </div>
+
           <div className="toast-texto">{t.texto}</div>
+
+          {t.accion && (
+            <button
+              className="toast-accion"
+              onClick={() => {
+                t.accion!.onClick()
+                cerrar(t.id)
+              }}
+            >
+              {t.accion.etiqueta}
+            </button>
+          )}
+
           <button
             className="toast-cerrar"
             onClick={() => cerrar(t.id)}
