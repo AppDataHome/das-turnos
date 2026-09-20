@@ -51,9 +51,7 @@ export default function ModalDia({
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    if (!soloLectura) {
-      cargarCatalogos()
-    }
+    if (!soloLectura) cargarCatalogos()
   }, [soloLectura])
 
   async function cargarCatalogos() {
@@ -72,9 +70,7 @@ export default function ModalDia({
 
     if (tipRes.data) {
       setTiposTurno(tipRes.data as TipoTurno[])
-      if (tipRes.data[0] && !codigoTurno) {
-        setCodigoTurno(tipRes.data[0].codigo)
-      }
+      if (tipRes.data[0] && !codigoTurno) setCodigoTurno(tipRes.data[0].codigo)
     }
   }
 
@@ -191,24 +187,55 @@ export default function ModalDia({
     setError('')
   }
 
-  async function borrarTurno(id: string) {
+  // ─────────── BORRAR con deshacer ───────────
+  async function borrarTurno(turno: Turno) {
     if (soloLectura) return
+
     const ok = await confirmar({
       titulo: '¿Borrar este turno?',
-      mensaje: 'Esta acción no se puede deshacer.',
+      mensaje: 'Podrás deshacerlo unos segundos si te arrepientes.',
       textoConfirmar: 'Borrar',
       peligro: true,
     })
     if (!ok) return
 
-    const { error } = await supabase.from('turno').delete().eq('id', id)
+    const copia = {
+      id_usuario: turno.id_usuario,
+      id_departamento: turno.id_departamento,
+      id_tipo_turno: turno.id_tipo_turno,
+      fecha: turno.fecha,
+      notas: turno.notas,
+    }
+
+    const { error } = await supabase.from('turno').delete().eq('id', turno.id)
     if (error) {
       toast.error('Error al borrar: ' + error.message)
       return
     }
-    toast.exito('Turno borrado')
-    if (idEditando === id) cancelarEdicion()
+
+    if (idEditando === turno.id) cancelarEdicion()
     onCambio()
+
+    toast.conAccion(
+      'info',
+      'Turno borrado',
+      {
+        etiqueta: 'Deshacer',
+        onClick: async () => {
+          const { error: errRestaurar } = await supabase
+            .from('turno')
+            .insert(copia)
+
+          if (errRestaurar) {
+            toast.error('No se pudo deshacer: ' + errRestaurar.message)
+            return
+          }
+          toast.exito('Turno restaurado')
+          onCambio()
+        },
+      },
+      7000
+    )
   }
 
   function textoFechaLarga(f: string): string {
@@ -241,7 +268,6 @@ export default function ModalDia({
           </button>
         </div>
 
-        {/* Aviso modo solo lectura */}
         {soloLectura && (
           <div
             style={{
@@ -255,12 +281,12 @@ export default function ModalDia({
               lineHeight: 1.4,
             }}
           >
-            👁️ Estás viendo este calendario en modo <strong>solo lectura</strong>.
-            No puedes añadir, editar ni borrar turnos.
+            👁️ Estás viendo este calendario en modo{' '}
+            <strong>solo lectura</strong>. No puedes añadir, editar ni borrar
+            turnos.
           </div>
         )}
 
-        {/* Turnos ya asignados */}
         <div className="modal-seccion">
           <div className="modal-seccion-titulo">
             Turnos asignados ({turnosDelDia.length})
@@ -302,16 +328,10 @@ export default function ModalDia({
                     minWidth: 0,
                   }}
                 >
-                  <span style={{ fontSize: 16 }}>
-                    {iconoTurno(t)}
-                  </span>
+                  <span style={{ fontSize: 16 }}>{iconoTurno(t)}</span>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 11 }}>
-                      {t.departamento}
-                    </div>
-                    {t.notas && (
-                      <div className="notas">📝 {t.notas}</div>
-                    )}
+                    <div style={{ fontSize: 11 }}>{t.departamento}</div>
+                    {t.notas && <div className="notas">📝 {t.notas}</div>}
                   </div>
                 </div>
 
@@ -321,7 +341,7 @@ export default function ModalDia({
                       className="btn-mini"
                       style={{
                         background: 'var(--acento)',
-                        color: '#0b0e13',
+                        color: 'var(--acento-texto)',
                       }}
                       onClick={() => empezarEdicion(t)}
                     >
@@ -329,7 +349,7 @@ export default function ModalDia({
                     </button>
                     <button
                       className="btn-mini btn-mini-peligro"
-                      onClick={() => borrarTurno(t.id)}
+                      onClick={() => borrarTurno(t)}
                     >
                       Borrar
                     </button>
@@ -340,7 +360,6 @@ export default function ModalDia({
           )}
         </div>
 
-        {/* Modo de edición: solo para propietarios */}
         {!soloLectura && (
           <>
             <div
@@ -367,7 +386,9 @@ export default function ModalDia({
                   background:
                     modo === 'un-dia' ? 'var(--acento)' : 'transparent',
                   color:
-                    modo === 'un-dia' ? '#0b0e13' : 'var(--texto-suave)',
+                    modo === 'un-dia'
+                      ? 'var(--acento-texto)'
+                      : 'var(--texto-suave)',
                 }}
               >
                 Un día
@@ -387,7 +408,7 @@ export default function ModalDia({
                     modo === 'varios-dias' ? 'var(--acento)' : 'transparent',
                   color:
                     modo === 'varios-dias'
-                      ? '#0b0e13'
+                      ? 'var(--acento-texto)'
                       : 'var(--texto-suave)',
                 }}
               >
