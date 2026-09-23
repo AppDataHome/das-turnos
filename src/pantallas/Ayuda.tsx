@@ -1129,7 +1129,7 @@ export default function Ayuda() {
             </li>
           </ul>
 
-          <h4>Solo para propietarios</h4>
+                    <h4>Solo para propietarios</h4>
           <ul>
             <li>
               <strong>⚙ Configuración</strong>: vacaciones, asuntos propios,
@@ -1139,6 +1139,36 @@ export default function Ayuda() {
               <strong>🗄 Datos</strong>: exportar e importar CSV.
             </li>
           </ul>
+
+          <h4>Tarjetas tipo acordeón</h4>
+          <p>
+            Dentro de Ajustes, cada bloque de información está en una{' '}
+            <strong>tarjeta plegable</strong> (acordeón):
+          </p>
+          <ul>
+            <li>
+              Pulsa sobre el <strong>título</strong> para abrir o cerrar el
+              contenido.
+            </li>
+            <li>
+              La <strong>flecha</strong> a la derecha rota y se pone en dorado
+              cuando está abierto.
+            </li>
+            <li>
+              Puedes tener <strong>varios abiertos a la vez</strong> en la
+              misma pestaña.
+            </li>
+            <li>
+              Al cambiar de subpestaña, los acordeones vuelven a su estado
+              inicial.
+            </li>
+          </ul>
+          <p>
+            💡 Esto hace que Ajustes sea más limpio y rápido de navegar, sobre
+            todo en el móvil.
+          </p>
+
+          <h4>Cerrar sesión rápido</h4>
 
           <h4>Cerrar sesión rápido</h4>
           <ul>
