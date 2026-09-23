@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { supabase } from '../supabase'
 import { useUsuario } from '../contexto/UsuarioContexto'
 import { useToast } from '../contexto/ToastContexto'
-import {
-  generarCSV,
-  descargarCSV,
-  parsearCSV,
-} from '../utilidades/csv'
+import { generarCSV, descargarCSV, parsearCSV } from '../utilidades/csv'
 
-export default function SeccionDatos() {
+interface Props {
+  sinCard?: boolean
+}
+
+export default function SeccionDatos({ sinCard = false }: Props) {
   const { usuario } = useUsuario()
   const toast = useToast()
 
@@ -268,15 +268,15 @@ export default function SeccionDatos() {
     e.target.value = ''
   }
 
-  return (
+  const contenido = (
     <>
-      <div className="card">
-        <h2 style={{ marginBottom: 8 }}>Datos · Turnos</h2>
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ marginBottom: 6, fontSize: 13 }}>Turnos</h3>
         <p
           style={{
             fontSize: 11,
             color: 'var(--texto-suave)',
-            marginBottom: 12,
+            marginBottom: 10,
           }}
         >
           Exporta tus turnos a un CSV (se abre en Excel) o impórtalos. La
@@ -311,13 +311,18 @@ export default function SeccionDatos() {
         </div>
       </div>
 
-      <div className="card">
-        <h2 style={{ marginBottom: 8 }}>Datos · Festivos</h2>
+      <div
+        style={{
+          borderTop: '1px solid var(--borde)',
+          paddingTop: 16,
+        }}
+      >
+        <h3 style={{ marginBottom: 6, fontSize: 13 }}>Festivos</h3>
         <p
           style={{
             fontSize: 11,
             color: 'var(--texto-suave)',
-            marginBottom: 12,
+            marginBottom: 10,
           }}
         >
           Exporta o importa el calendario de festivos.
@@ -352,10 +357,27 @@ export default function SeccionDatos() {
       </div>
 
       {error && (
-        <div className="card">
-          <p className="error">{error}</p>
-        </div>
+        <p className="error" style={{ marginTop: 12 }}>
+          {error}
+        </p>
       )}
+    </>
+  )
+
+  if (sinCard) {
+    return contenido
+  }
+
+  return (
+    <>
+      <div className="card">
+        <h2 style={{ marginBottom: 8 }}>Datos</h2>
+        <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
+          Exporta tus datos a CSV (se abre en Excel) o impórtalos. La
+          importación no borra nada: los duplicados se ignoran.
+        </p>
+      </div>
+      <div className="card">{contenido}</div>
     </>
   )
 }
