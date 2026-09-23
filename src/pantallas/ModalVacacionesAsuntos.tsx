@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { X, Palmtree, ClipboardList } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { Turno } from '../tipos'
 
 interface Props {
@@ -22,7 +22,6 @@ export default function ModalVacacionesAsuntos({
 }: Props) {
   const [pestana, setPestana] = useState<Pestana>('vacaciones')
 
-  // Filtrar por tipo, ordenar por fecha descendente (más reciente primero)
   const vacaciones = useMemo(() => {
     return turnos
       .filter((t) => t.codigo_turno === 'VAC')
@@ -37,7 +36,6 @@ export default function ModalVacacionesAsuntos({
 
   const listaActual = pestana === 'vacaciones' ? vacaciones : asuntos
 
-  // Agrupar por año
   const porAnio = useMemo(() => {
     const mapa = new Map<number, Turno[]>()
     for (const t of listaActual) {
@@ -48,7 +46,11 @@ export default function ModalVacacionesAsuntos({
     return Array.from(mapa.entries()).sort((a, b) => b[0] - a[0])
   }, [listaActual])
 
-  function textoFechaCorta(f: string): { dia: string; num: number; mes: string } {
+  function textoFechaCorta(f: string): {
+    dia: string
+    num: number
+    mes: string
+  } {
     const d = new Date(f + 'T00:00:00')
     return {
       dia: DIAS_SEMANA_CORTOS[d.getDay()],
@@ -72,19 +74,8 @@ export default function ModalVacacionesAsuntos({
         style={{ maxWidth: 520 }}
       >
         <div className="modal-cabecera">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              minWidth: 0,
-            }}
-          >
-            <div className="modal-titulo">
-              {pestana === 'vacaciones'
-                ? 'Vacaciones'
-                : 'Asuntos Propios'}
-            </div>
+          <div className="modal-titulo">
+            {pestana === 'vacaciones' ? 'Vacaciones' : 'Asuntos Propios'}
           </div>
           <button
             className="modal-cerrar"
@@ -129,8 +120,7 @@ export default function ModalVacacionesAsuntos({
                   : 'var(--texto-suave)',
             }}
           >
-            <Palmtree size={14} />
-            Vacaciones ({vacaciones.length})
+            🏖️ Vacaciones ({vacaciones.length})
           </button>
           <button
             type="button"
@@ -155,8 +145,7 @@ export default function ModalVacacionesAsuntos({
                   : 'var(--texto-suave)',
             }}
           >
-            <ClipboardList size={14} />
-            Asuntos ({asuntos.length})
+            📋 Asuntos ({asuntos.length})
           </button>
         </div>
 
@@ -170,19 +159,14 @@ export default function ModalVacacionesAsuntos({
               fontSize: 12,
             }}
           >
-            {pestana === 'vacaciones' ? (
-              <Palmtree
-                size={40}
-                style={{ opacity: 0.4, marginBottom: 8 }}
-              />
-            ) : (
-              <ClipboardList
-                size={40}
-                style={{ opacity: 0.4, marginBottom: 8 }}
-              />
-            )}
+            <div style={{ fontSize: 40, opacity: 0.4, marginBottom: 8 }}>
+              {pestana === 'vacaciones' ? '🏖️' : '📋'}
+            </div>
             <p>
-              No hay {pestana === 'vacaciones' ? 'vacaciones' : 'asuntos propios'}{' '}
+              No hay{' '}
+              {pestana === 'vacaciones'
+                ? 'vacaciones'
+                : 'asuntos propios'}{' '}
               registrados.
             </p>
           </div>
@@ -241,7 +225,6 @@ export default function ModalVacacionesAsuntos({
                           minWidth: 0,
                         }}
                       >
-                        {/* Fecha mini */}
                         <div
                           style={{
                             minWidth: 44,
