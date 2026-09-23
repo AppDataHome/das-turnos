@@ -48,6 +48,7 @@ export interface Turno {
   fecha: string
   id_tipo_turno: string
   notas: string | null
+  anio_origen?: number | null
   codigo_turno?: string
   nombre_turno?: string
   color?: string
