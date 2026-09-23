@@ -1729,3 +1729,111 @@ nav a.activo { color: var(--acento); background: var(--acento-suave); }
 .toast-aviso .toast-accion-tiempo {
   background: rgba(0, 0, 0, 0.15);
 }
+
+
+/* ═══════════════════════════════════════════════════
+   ACORDEÓN (tarjetas que se expanden y contraen)
+   ═══════════════════════════════════════════════════ */
+
+.acordeon {
+  padding: 0;
+  overflow: hidden;
+}
+
+.acordeon-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.acordeon-cabecera:hover {
+  background: var(--fondo-tarjeta-2);
+}
+
+.acordeon-icono {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.acordeon-titulo {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--texto);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acordeon-flecha {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--texto-suave);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.acordeon-flecha.abierto {
+  transform: rotate(90deg);
+  color: var(--acento);
+}
+
+.acordeon-contenido {
+  padding: 4px 16px 16px 16px;
+  border-top: 1px solid var(--borde);
+  animation: acordeon-abrir 0.2s ease-out;
+}
+
+@keyframes acordeon-abrir {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* En móvil, algo más compacto */
+@media (max-width: 500px) {
+  .acordeon-cabecera {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .acordeon-icono {
+    font-size: 20px;
+  }
+  .acordeon-titulo {
+    font-size: 14px;
+  }
+  .acordeon-contenido {
+    padding: 4px 14px 14px 14px;
+  }
+}
+
+/* Ajuste cuando el acordeón contiene tarjetas internas */
+.acordeon-contenido > .card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 12px;
+  box-shadow: none;
+}
+
+.acordeon-contenido > .card:last-child {
+  margin-bottom: 0;
+}
