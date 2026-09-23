@@ -201,25 +201,54 @@ export default function Ayuda() {
             </li>
           </ul>
 
-          <h4>Tarjeta "DAS"</h4>
-          <ul>
-            <li>
-              <strong>Generados / Disfrutados / Disponibles</strong>: saldo
-              actual de DAS.
-            </li>
-            <li>
-              <strong>Festivos / Fines de semana trabajados</strong>: cuántos
-              llevas, cuántos DAS han generado y cuántos residuos tienes.
-            </li>
-            <li>
-              <strong>Noches entre semana trabajadas</strong>: lo mismo con las
-              noches.
-            </li>
-            <li>
-              <strong>Pulsable</strong>: al hacer clic se abre el{' '}
-              <strong>Informe de DAS</strong> (ver más abajo).
-            </li>
-          </ul>
+                  <h4>Tarjeta "DAS"</h4>
+        <ul>
+          <li>
+            <strong>Generados / Disfrutados / Disponibles</strong>: saldo
+            actual de DAS.
+          </li>
+          <li>
+            <strong>Festivos / Fines de semana trabajados</strong>: cuántos
+            llevas, cuántos DAS han generado y cuántos residuos tienes.
+          </li>
+          <li>
+            <strong>Noches entre semana trabajadas</strong>: lo mismo con las
+            noches.
+          </li>
+          <li>
+            <strong>Pulsable</strong>: al hacer clic se abre el{' '}
+            <strong>Informe de DAS</strong> (ver más abajo).
+          </li>
+        </ul>
+
+        <h4>Las 3 tarjetas son pulsables</h4>
+        <p>
+          Al tocar cualquiera de las tres tarjetas superiores, se abre una
+          ventana con información detallada:
+        </p>
+        <ul>
+          <li>
+            <strong>🖱️ Turnos Mes</strong>: se abre un listado con todos los
+            turnos del mes que estás viendo en el calendario, agrupados por
+            día. Arriba aparece un resumen por tipo de turno con colores.
+          </li>
+          <li>
+            <strong>🖱️ Vacaciones y Asuntos Propios</strong>: se abre una
+            ventana con <strong>dos pestañas</strong> (Vacaciones / Asuntos
+            Propios), cada una con el listado completo agrupado por año. En
+            cada día se ve la fecha, las notas y, si es arrastre, el año de
+            origen.
+          </li>
+          <li>
+            <strong>🖱️ DAS</strong>: se abre el informe completo de DAS con
+            opción de imprimir o guardar como PDF (ver más abajo).
+          </li>
+        </ul>
+        <p>
+          💡 Las tarjetas muestran un pequeño texto al pie (
+          <em>Ver detalle</em> o <em>Ver informe completo</em>) para indicar
+          que se pueden pulsar.
+        </p>
 
           <h4>Las 4 vistas del calendario</h4>
           <p>
