@@ -11,7 +11,11 @@ interface DasRemanente {
   creado_en: string
 }
 
-export default function SeccionDasRemanente() {
+interface Props {
+  sinCard?: boolean
+}
+
+export default function SeccionDasRemanente({ sinCard = false }: Props) {
   const { usuario } = useUsuario()
   const toast = useToast()
   const { confirmar } = useConfirmacion()
@@ -110,10 +114,8 @@ export default function SeccionDasRemanente() {
 
   const totalRemanente = remanentes.reduce((acc, r) => acc + r.cantidad, 0)
 
-  return (
-    <div className="card">
-      <h2 style={{ marginBottom: 8 }}>DAS remanentes (cambio de destino)</h2>
-
+  const contenido = (
+    <>
       <p
         style={{
           fontSize: 11,
@@ -219,84 +221,59 @@ export default function SeccionDasRemanente() {
           No tienes DAS remanentes registrados.
         </p>
       ) : (
-        <>
-          <div className="lista-movil" style={{ marginTop: 12 }}>
-            {remanentes.map((r) => (
-              <div key={r.id} className="item-lista">
-                <div className="cabecera-item">
-                  <span
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 800,
-                      color: 'var(--acento)',
-                      minWidth: 30,
-                    }}
-                  >
-                    {r.cantidad}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      flex: 1,
-                      minWidth: 0,
-                      overflowWrap: 'break-word',
-                    }}
-                  >
-                    {r.descripcion ?? '—'}
-                  </span>
+        <div style={{ marginTop: 12 }}>
+          {remanentes.map((r) => (
+            <div
+              key={r.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: 10,
+                background: 'var(--fondo-tarjeta-2)',
+                borderRadius: 8,
+                marginBottom: 6,
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: 'var(--acento)',
+                  minWidth: 30,
+                }}
+              >
+                {r.cantidad}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    overflowWrap: 'break-word',
+                  }}
+                >
+                  {r.descripcion ?? '—'}
                 </div>
                 <div
                   style={{
                     fontSize: 10,
                     color: 'var(--texto-suave)',
+                    marginTop: 2,
                   }}
                 >
                   {textoFecha(r.creado_en)}
                 </div>
-                <div className="acciones-item">
-                  <button
-                    className="btn-mini btn-mini-peligro"
-                    onClick={() => borrar(r.id)}
-                  >
-                    Borrar
-                  </button>
-                </div>
               </div>
-            ))}
-          </div>
-
-          <div className="tabla-desktop" style={{ marginTop: 12 }}>
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: 80 }}>Cantidad</th>
-                  <th>Descripción</th>
-                  <th style={{ width: 100 }}>Añadido</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {remanentes.map((r) => (
-                  <tr key={r.id}>
-                    <td style={{ fontWeight: 700 }}>{r.cantidad}</td>
-                    <td>{r.descripcion ?? '—'}</td>
-                    <td style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
-                      {textoFecha(r.creado_en)}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        className="btn-mini btn-mini-peligro"
-                        onClick={() => borrar(r.id)}
-                      >
-                        Borrar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+              <button
+                className="btn-mini btn-mini-peligro"
+                onClick={() => borrar(r.id)}
+              >
+                Borrar
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
       <style>{`
@@ -309,6 +286,17 @@ export default function SeccionDasRemanente() {
           }
         }
       `}</style>
+    </>
+  )
+
+  if (sinCard) {
+    return contenido
+  }
+
+  return (
+    <div className="card">
+      <h2 style={{ marginBottom: 8 }}>DAS remanentes (cambio de destino)</h2>
+      {contenido}
     </div>
   )
 }
