@@ -10,6 +10,8 @@ import GestionTurnos from './GestionTurnos'
 import ModalDia from './ModalDia'
 import ModalInformeDas from './ModalInformeDas'
 import ModalImprimirCalendario from './ModalImprimirCalendario'
+import ModalTurnosMes from './ModalTurnosMes'
+import ModalVacacionesAsuntos from './ModalVacacionesAsuntos'
 import AvisosBanner from './AvisosBanner'
 import {
   SkeletonTarjetas,
@@ -22,7 +24,7 @@ import {
   muestraDepartamento,
   etiquetaSinDepartamento,
 } from '../utilidades/turnos'
-import { FileText, Printer } from 'lucide-react'
+import { FileText, Printer, Eye } from 'lucide-react'
 
 interface ResumenVacaciones {
   anio_actual: number
@@ -67,6 +69,9 @@ export default function Calendario() {
   const [modalAbierto, setModalAbierto] = useState(false)
   const [modalInformeAbierto, setModalInformeAbierto] = useState(false)
   const [modalImprimirAbierto, setModalImprimirAbierto] = useState(false)
+  const [modalTurnosMesAbierto, setModalTurnosMesAbierto] = useState(false)
+  const [modalVacacionesAsuntosAbierto, setModalVacacionesAsuntosAbierto] =
+    useState(false)
   const [cargando, setCargando] = useState(true)
 
   const [mesVisible, setMesVisible] = useState<Date>(() => {
@@ -118,6 +123,7 @@ export default function Calendario() {
         id_tipo_turno,
         fecha,
         notas,
+        anio_origen,
         tipo_turno (codigo, nombre, color, orden, hora_inicio, hora_fin, categoria),
         departamento (nombre, icono)
       `)
@@ -133,6 +139,7 @@ export default function Calendario() {
           id_tipo_turno: t.id_tipo_turno,
           fecha: t.fecha,
           notas: t.notas,
+          anio_origen: t.anio_origen,
           codigo_turno: t.tipo_turno?.codigo || '?',
           nombre_turno: t.tipo_turno?.nombre || '?',
           color: t.tipo_turno?.color || '#6b7280',
@@ -186,7 +193,6 @@ export default function Calendario() {
     if (!error && data) setFestivos(data.map((f: any) => f.fecha))
   }
 
-  // ─────────── BORRAR con deshacer ───────────
   async function borrarTurnoRapido(turno: Turno) {
     const ok = await confirmar({
       titulo: '¿Borrar este turno?',
@@ -196,7 +202,6 @@ export default function Calendario() {
     })
     if (!ok) return
 
-    // Guardamos copia completa del turno para poder restaurarlo
     const copia = {
       id_usuario: turno.id_usuario,
       id_departamento: turno.id_departamento,
@@ -213,7 +218,6 @@ export default function Calendario() {
 
     cargarTodo()
 
-    // Toast con acción "Deshacer"
     toast.conAccion(
       'info',
       'Turno borrado',
@@ -327,7 +331,13 @@ export default function Calendario() {
       <AvisosBanner turnos={turnos} vacaciones={vacaciones} />
 
       <div className="grid-tarjetas">
-        <div className="card" style={{ textAlign: 'center' }}>
+        {/* Turnos Mes — clicable */}
+        <div
+          className="card"
+          onClick={() => setModalTurnosMesAbierto(true)}
+          style={{ textAlign: 'center', cursor: 'pointer', position: 'relative' }}
+          title="Pulsa para ver todos los turnos del mes"
+        >
           <h4
             style={{
               color: 'var(--texto-suave)',
@@ -393,9 +403,34 @@ export default function Calendario() {
               </div>
             </div>
           </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              paddingTop: 8,
+              borderTop: '1px dashed var(--borde)',
+              fontSize: 10,
+              color: 'var(--acento)',
+              textAlign: 'center',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+            }}
+          >
+            <Eye size={11} />
+            Ver detalle del mes
+          </div>
         </div>
 
-        <div className="card">
+        {/* Vacaciones y Asuntos Propios — clicable */}
+        <div
+          className="card"
+          onClick={() => setModalVacacionesAsuntosAbierto(true)}
+          style={{ cursor: 'pointer', position: 'relative' }}
+          title="Pulsa para ver el detalle"
+        >
           <h4
             style={{
               color: 'var(--texto-suave)',
@@ -549,8 +584,28 @@ export default function Calendario() {
               </>
             )}
           </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              paddingTop: 8,
+              borderTop: '1px dashed var(--borde)',
+              fontSize: 10,
+              color: 'var(--acento)',
+              textAlign: 'center',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+            }}
+          >
+            <Eye size={11} />
+            Ver detalle
+          </div>
         </div>
 
+        {/* DAS — clicable */}
         <div
           className="card"
           onClick={() => setModalInformeAbierto(true)}
@@ -645,9 +700,14 @@ export default function Calendario() {
               color: 'var(--acento)',
               textAlign: 'center',
               fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
             }}
           >
-            📄 Ver informe completo
+            <FileText size={11} />
+            Ver informe completo
           </div>
         </div>
       </div>
@@ -966,6 +1026,22 @@ export default function Calendario() {
       {modalImprimirAbierto && (
         <ModalImprimirCalendario
           onCerrar={() => setModalImprimirAbierto(false)}
+        />
+      )}
+
+      {modalTurnosMesAbierto && (
+        <ModalTurnosMes
+          turnos={turnos}
+          anio={anioVisible}
+          mes={mesVisibleNum}
+          onCerrar={() => setModalTurnosMesAbierto(false)}
+        />
+      )}
+
+      {modalVacacionesAsuntosAbierto && (
+        <ModalVacacionesAsuntos
+          turnos={turnos}
+          onCerrar={() => setModalVacacionesAsuntosAbierto(false)}
         />
       )}
     </>
