@@ -1518,11 +1518,20 @@ export default function Ayuda() {
             opciones: automático (según tu dispositivo), claro, oscuro y verde
             Guardia Civil.
           </p>
-
-          <h4>¿Y si me equivoco con las vacaciones o asuntos propios de un año?</h4>
+          <h4>¿Dónde veo la lista completa de mis vacaciones o asuntos propios?</h4>
           <p>
-            Abre el modal del día, borra el turno de tipo VAC (o AP) y vuelve
-            a crearlo con el año de origen correcto.
+            Pulsa la tarjeta <strong>"Vacaciones y Asuntos Propios"</strong> en
+            el calendario. Se abre una ventana con dos pestañas: una para
+            vacaciones y otra para asuntos propios. Cada una muestra el
+            listado completo agrupado por año, con las notas y el año de
+            origen si son días arrastrados.
+          </p>
+
+          <h4>¿Dónde veo todos los turnos de un mes?</h4>
+          <p>
+            Pulsa la tarjeta <strong>"Turnos Mes"</strong> en el calendario. Se
+            abre un listado con todos los turnos del mes que estás viendo, con
+            su resumen por tipo arriba y el detalle agrupado por día.
           </p>
 
           <h4>¿Por qué mi saldo de DAS no sube?</h4>
