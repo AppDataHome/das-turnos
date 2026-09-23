@@ -55,6 +55,10 @@ export default function Ayuda() {
               fechas, listo para guardar como PDF.
             </li>
             <li>
+              <strong>Imprimir el calendario</strong> por meses o por rango de
+              fechas.
+            </li>
+            <li>
               Marcar festivos del calendario (nacionales, autonómicos y
               locales).
             </li>
@@ -65,6 +69,14 @@ export default function Ayuda() {
             <li>
               Compartir tu calendario con <strong>invitados</strong> en modo
               solo lectura (familiares, etc.) mediante un código.
+            </li>
+            <li>
+              Elegir entre <strong>4 temas</strong>: automático (según tu
+              dispositivo), claro, oscuro o verde Guardia Civil.
+            </li>
+            <li>
+              <strong>Deshacer borrados</strong> accidentales de turnos
+              durante unos segundos.
             </li>
             <li>Instalarla en el móvil como una app normal.</li>
           </ul>
@@ -128,6 +140,12 @@ export default function Ayuda() {
             Vuelve al <strong>Calendario</strong> y pulsa cualquier día para
             abrir la ventana de edición. O usa la vista{' '}
             <strong>Gestión</strong> para meterlos en lista.
+          </p>
+
+          <h4>6. Elige tu tema preferido</h4>
+          <p>
+            En <strong>Ajustes → Preferencias</strong> puedes elegir el aspecto
+            visual: automático, claro, oscuro o verde Guardia Civil.
           </p>
         </>
       ),
@@ -270,6 +288,8 @@ export default function Ayuda() {
             </li>
             <li>
               <strong>Borrar</strong>: pulsa el botón Borrar y confirma.
+              Durante unos segundos podrás <strong>deshacer</strong> el
+              borrado.
             </li>
           </ul>
           <p>
@@ -305,6 +325,26 @@ export default function Ayuda() {
             Al pulsar <strong>Crear en bloque</strong> la app te dirá cuántos
             días ha creado y cuántos ha ignorado porque ya existían.
           </p>
+
+          <h4>🆕 Deshacer borrados</h4>
+          <p>
+            Cuando borras un turno, aparece un aviso en la parte superior
+            derecha con un <strong>botón "Deshacer"</strong> y una{' '}
+            <strong>cuenta atrás</strong> de 7 segundos.
+          </p>
+          <ul>
+            <li>
+              Si pulsas <strong>Deshacer</strong> antes de que acabe el
+              tiempo → el turno se restaura.
+            </li>
+            <li>
+              Si no haces nada, el turno queda borrado definitivamente.
+            </li>
+            <li>
+              Verás una <strong>barra de progreso</strong> que se va vaciando
+              para saber cuánto tiempo te queda.
+            </li>
+          </ul>
         </>
       ),
     },
@@ -339,8 +379,8 @@ export default function Ayuda() {
                   modificar ese turno en detalle.
                 </li>
                 <li>
-                  <strong>🗑️ Borrar</strong>: elimina el turno (con
-                  confirmación).
+                  <strong>🗑️ Borrar</strong>: elimina el turno (con opción de
+                  deshacer).
                 </li>
               </ul>
             </li>
@@ -375,6 +415,88 @@ export default function Ayuda() {
 
     // ─────────────────────────────────────────
     {
+      id: 'imprimir-calendario',
+      titulo: 'Imprimir el calendario',
+      icono: '🖨️',
+      contenido: (
+        <>
+          <p>
+            Puedes generar una versión <strong>imprimible del calendario</strong>{' '}
+            con todos tus turnos, festivos y notas. Cada mes ocupa una hoja
+            A4.
+          </p>
+
+          <h4>Cómo hacerlo</h4>
+          <ol>
+            <li>
+              En el <strong>Calendario</strong>, busca el botón{' '}
+              <strong>🖨️ Imprimir</strong> junto a las pestañas de vista
+              (Mensual / Semanal / Anual / Gestión).
+            </li>
+            <li>
+              Se abre una ventana para <strong>elegir el rango de fechas</strong>.
+            </li>
+          </ol>
+
+          <h4>Atajos rápidos</h4>
+          <p>Los botones de la parte superior permiten seleccionar:</p>
+          <ul>
+            <li>Mes actual</li>
+            <li>Mes anterior / siguiente</li>
+            <li>Año actual</li>
+            <li>Cada uno de los 4 trimestres</li>
+          </ul>
+
+          <h4>Fechas personalizadas</h4>
+          <p>
+            También puedes poner cualquier rango con los campos{' '}
+            <strong>Desde / Hasta</strong>. El máximo es de 24 meses.
+          </p>
+
+          <h4>Qué incluye la impresión</h4>
+          <ul>
+            <li>
+              Una <strong>hoja por mes</strong> dentro del rango.
+            </li>
+            <li>
+              En la cabecera de cada hoja: nombre del empleado, Nº, mes y año.
+            </li>
+            <li>Cada día con su chip de turno, notas y color de fondo.</li>
+            <li>
+              Si has elegido varios meses, al final se añade una{' '}
+              <strong>hoja de resumen</strong> con el total de turnos por tipo.
+            </li>
+          </ul>
+
+          <h4>Guardar como PDF o imprimir en papel</h4>
+          <ol>
+            <li>
+              Pulsa el botón <strong>Imprimir</strong> arriba del todo.
+            </li>
+            <li>
+              Se abre el diálogo de impresión del navegador. Elige:
+              <ul>
+                <li>
+                  <strong>Impresora</strong> para papel, o
+                </li>
+                <li>
+                  <strong>Guardar como PDF</strong> / Microsoft Print to PDF
+                  para archivo.
+                </li>
+              </ul>
+            </li>
+          </ol>
+
+          <p>
+            💡 También puedes imprimir desde el móvil usando{' '}
+            <em>Compartir → Imprimir</em> si tienes una impresora en red.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
       id: 'das',
       titulo: 'Cómo se calculan los DAS',
       icono: '🎁',
@@ -382,50 +504,116 @@ export default function Ayuda() {
         <>
           <p>
             Los <strong>DAS (Descansos Adicionales Singularizados)</strong> se
-            generan automáticamente según la normativa (Orden General 11/2014):
+            generan automáticamente según la <strong>Orden General
+            11/2014</strong> (artículos 12 y 25):
           </p>
 
-          <h4>Generación</h4>
+          <h4>Reglas de generación</h4>
           <ul>
             <li>
-              <strong>1 DAS por cada 3 festivos</strong> trabajados.
+              <strong>1 DAS por cada 3 servicios festivos</strong> trabajados.
             </li>
             <li>
-              <strong>1 DAS por cada 6 noches</strong> trabajadas.
+              <strong>1 DAS por cada 6 servicios nocturnos</strong> trabajados.
+            </li>
+          </ul>
+          <p>
+            Los dos contadores son <strong>independientes</strong>: los
+            festivos generan DAS por su cuenta, y las noches por la suya.
+          </p>
+
+          <h4>Regla de las 3 horas</h4>
+          <p>
+            Un turno <strong>solo cuenta</strong> como festivo o nocturno si{' '}
+            <strong>al menos 3 horas</strong> de su duración cumplen la
+            condición correspondiente.
+          </p>
+
+          <h4>¿Qué es una "hora festiva"?</h4>
+          <p>Según la Orden General, se consideran horas festivas:</p>
+          <ul>
+            <li>
+              Las comprendidas entre las <strong>15:00 del sábado y las 06:00
+              del lunes</strong> siguiente.
+            </li>
+            <li>
+              Las <strong>24 horas</strong> de los días marcados como festivos
+              en el calendario (nacionales, autonómicos o locales).
+            </li>
+            <li>
+              Las <strong>horas de especial significación</strong>: desde las
+              14:00 del 24 de diciembre hasta las 06:00 del 26 de diciembre, y
+              desde las 14:00 del 31 de diciembre hasta las 06:00 del 2 de
+              enero.
             </li>
           </ul>
 
-          <h4>¿Qué cuenta como festivo?</h4>
+          <h4>¿Qué es una "hora nocturna"?</h4>
           <p>
-            Un turno de trabajo (Mañana, Tarde o Noche) en el que al menos 3
-            horas caen en:
+            Las comprendidas entre las <strong>22:00 y las 06:00</strong> del
+            día siguiente, <strong>excluyendo</strong> las que ya son festivas
+            o de especial significación.
+          </p>
+          <p>
+            Es decir, una hora no puede contar dos veces. Si una hora de la
+            noche cae en fin de semana, cuenta como <strong>festiva</strong>,
+            no como nocturna.
+          </p>
+
+          <h4>Ejemplos con los turnos de la app</h4>
+
+          <p>
+            <strong>🎉 Cuentan como FESTIVO:</strong>
           </p>
           <ul>
-            <li>
-              Un día festivo del calendario (nacional, autonómico o local).
-            </li>
-            <li>Un sábado.</li>
-            <li>Un domingo.</li>
+            <li>Mañana de festivo (06:00–14:00 de un día festivo).</li>
+            <li>Tarde de festivo (14:00–22:00 de un día festivo).</li>
+            <li>Noche de festivo (22:00–06:00 de un día festivo).</li>
+            <li>Sábado Tarde (14:00–22:00).</li>
+            <li>Sábado Noche (22:00–06:00 del domingo).</li>
+            <li>Domingo Mañana (06:00–14:00).</li>
+            <li>Domingo Tarde (14:00–22:00).</li>
+            <li>Domingo Noche (22:00–06:00 del lunes).</li>
           </ul>
 
-          <h4>¿Qué cuenta como noche?</h4>
           <p>
-            Un turno de Noche (22:00–06:00) en el que al menos 3 horas son
-            nocturnas <strong>puras</strong>, es decir,{' '}
-            <strong>excluyendo las que ya cuentan como festivas</strong>. Por
-            eso un turno de Noche en sábado cuenta como festivo, pero no como
-            noche.
+            <strong>🌙 Cuentan como NOCTURNO:</strong>
           </p>
+          <ul>
+            <li>Noche de lunes a jueves (22:00–06:00).</li>
+            <li>
+              <strong>Noche de viernes</strong> (22:00–06:00 del sábado): solo
+              las 2 horas del viernes son nocturnas puras, pero el turno
+              completo se considera nocturno porque tiene 2h de viernes + 6h
+              del sábado que <em>aún no son festivas</em> (el festivo del
+              sábado empieza a las 15:00).
+            </li>
+          </ul>
+
+          <p>
+            <strong>❌ NO cuentan:</strong>
+          </p>
+          <ul>
+            <li>Mañana de lunes a viernes (06:00–14:00): no es festiva ni nocturna.</li>
+            <li>Tarde de lunes a viernes (14:00–22:00): termina justo cuando empieza la noche.</li>
+            <li>
+              <strong>Mañana del sábado</strong> (06:00–14:00): el festivo del
+              sábado empieza a las 15:00, así que no computa.
+            </li>
+          </ul>
 
           <h4>Caducidad</h4>
           <p>
-            Los servicios (festivos o noches) caducan a los 12 meses si entre
-            uno y el siguiente pasa más de un año sin acumular.
+            Los servicios (festivos o nocturnos) caducan a los{' '}
+            <strong>12 meses</strong> si entre uno y el siguiente pasa más de
+            un año sin acumular del mismo tipo. Es decir, si llevas 1 festivo
+            y estás 12 meses sin hacer otro festivo, ese se pierde.
           </p>
 
-          <h4>Límites de disfrute</h4>
+          <h4>Límite de disfrute</h4>
           <p>
-            La normativa permite <strong>un máximo de 2 DAS al mes</strong>. La
+            La normativa permite <strong>un máximo de 2 DAS al mes</strong>.
+            Los que no puedas disfrutar en el mes, pasan a los siguientes. La
             app te avisa cuando llegas a 2 y cuando lo superas, pero no bloquea
             nada.
           </p>
@@ -539,9 +727,7 @@ export default function Ayuda() {
       icono: '🏖️',
       contenido: (
         <>
-          <p>
-            La app controla dos cupos independientes de días:
-          </p>
+          <p>La app controla dos cupos independientes de días:</p>
           <ul>
             <li>
               <strong>🏖️ Vacaciones</strong>: por defecto 22 días al año.
@@ -694,7 +880,6 @@ export default function Ayuda() {
             inicio.
           </p>
 
-          {/* ─── PROPIETARIO ─── */}
           <h4>🟢 Para el propietario (tú)</h4>
 
           <p>
@@ -731,8 +916,8 @@ export default function Ayuda() {
               para otra persona.
             </li>
             <li>
-              Si quieres invitar a otra persona, crea un <strong>código
-              nuevo</strong>.
+              Si quieres invitar a otra persona, crea un{' '}
+              <strong>código nuevo</strong>.
             </li>
           </ul>
 
@@ -783,19 +968,14 @@ export default function Ayuda() {
             </li>
           </ul>
 
-          {/* ─── INVITADO ─── */}
           <h4>🔵 Para el invitado</h4>
 
           <p>
             <strong>1. Abrir la app</strong>
           </p>
           <ul>
-            <li>
-              Abre la URL de la app en cualquier navegador.
-            </li>
-            <li>
-              No necesitas registrarte ni descargar nada.
-            </li>
+            <li>Abre la URL de la app en cualquier navegador.</li>
+            <li>No necesitas registrarte ni descargar nada.</li>
           </ul>
 
           <p>
@@ -810,9 +990,7 @@ export default function Ayuda() {
               Escribe tu nombre (opcional, para que el propietario te
               identifique).
             </li>
-            <li>
-              Introduce el código que te han dado.
-            </li>
+            <li>Introduce el código que te han dado.</li>
             <li>
               Pulsa <strong>Acceder</strong>.
             </li>
@@ -831,8 +1009,11 @@ export default function Ayuda() {
               (no la de Gestión).
             </li>
             <li>
-              Puedes consultar el <strong>Informe de DAS</strong> y exportarlo
-              a PDF.
+              Puedes consultar el <strong>Informe de DAS</strong> y
+              exportarlo a PDF.
+            </li>
+            <li>
+              Puedes <strong>imprimir el calendario</strong>.
             </li>
             <li>
               En <strong>Ajustes</strong> solo ves: Perfil, Invitados,
@@ -879,27 +1060,11 @@ export default function Ayuda() {
           </p>
 
           <p>
-            <strong>¿El invitado puede ver mis datos personales?</strong>
-          </p>
-          <p>
-            Ve tu nombre y tu Nº de empleado (que aparecen en la cabecera).
-            Nada más.
-          </p>
-
-          <p>
             <strong>¿Puedo ser propietario e invitado a la vez?</strong>
           </p>
           <p>
             No. Si te vinculas como invitado, dejarás de gestionar tus propios
             turnos hasta que te desvincules.
-          </p>
-
-          <p>
-            <strong>He perdido el código, ¿qué hago?</strong>
-          </p>
-          <p>
-            Ve a Ajustes → Invitados y crea uno nuevo. El anterior, si nadie lo
-            ha usado, lo puedes eliminar.
           </p>
         </>
       ),
@@ -928,8 +1093,7 @@ export default function Ayuda() {
               propietario) o desvincularte (si eres invitado).
             </li>
             <li>
-              <strong>🎨 Preferencias</strong>: tema (negro o verde Guardia
-              Civil).
+              <strong>🎨 Preferencias</strong>: tema de la app (4 opciones).
             </li>
             <li>
               <strong>🚪 Sesión</strong>: cerrar sesión.
@@ -956,6 +1120,122 @@ export default function Ayuda() {
             <li>
               En <strong>móvil</strong>: botón redondo con el icono de puerta
               en la cabecera, junto a tu foto.
+            </li>
+          </ul>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
+      id: 'temas',
+      titulo: 'Temas de la aplicación',
+      icono: '🎨',
+      contenido: (
+        <>
+          <p>
+            En <strong>Ajustes → Preferencias</strong> puedes elegir el aspecto
+            visual. Hay <strong>4 opciones</strong>:
+          </p>
+
+          <h4>📱 Automático</h4>
+          <p>
+            <strong>Opción por defecto.</strong> La app se adapta al modo
+            claro/oscuro de tu dispositivo. Si tienes el móvil en modo oscuro,
+            la app se ve oscura; si lo tienes en modo claro, la app se ve
+            blanca.
+          </p>
+          <p>
+            Se cambia automáticamente cuando cambias el modo del móvil o del
+            sistema operativo.
+          </p>
+
+          <h4>☀️ Claro</h4>
+          <p>
+            Fondo blanco con texto oscuro y acentos dorados más suaves. Ideal
+            para ambientes muy iluminados o para usar la app al aire libre.
+          </p>
+
+          <h4>🌙 Oscuro</h4>
+          <p>
+            Fondo negro con acentos dorados. Es el tema por defecto de las
+            versiones anteriores. Ideal para uso nocturno o ambientes oscuros.
+          </p>
+
+          <h4>🍃 Verde Guardia Civil</h4>
+          <p>
+            Fondo verde oscuro con acentos verde claro. Inspirado en el color
+            institucional.
+          </p>
+
+          <h4>¿Cómo se aplica?</h4>
+          <p>
+            Pulsa sobre cualquiera de los 4 botones y el cambio se aplica al
+            instante. La opción activa aparece resaltada con un borde dorado y
+            un check.
+          </p>
+        </>
+      ),
+    },
+
+    // ─────────────────────────────────────────
+    {
+      id: 'recuperar-password',
+      titulo: 'Recuperar contraseña',
+      icono: '🔑',
+      contenido: (
+        <>
+          <p>
+            Si olvidas tu contraseña, puedes restablecerla en un par de
+            minutos.
+          </p>
+
+          <h4>Cómo hacerlo</h4>
+          <ol>
+            <li>
+              En la pantalla de inicio de sesión, pulsa el enlace{' '}
+              <strong>"¿Olvidaste tu contraseña?"</strong> que aparece debajo
+              del campo de contraseña.
+            </li>
+            <li>
+              Introduce el correo con el que te registraste y pulsa{' '}
+              <strong>Enviar enlace de recuperación</strong>.
+            </li>
+            <li>
+              Recibirás un <strong>correo electrónico</strong> con un enlace.
+              Revisa también la carpeta de <strong>spam</strong> si no lo ves.
+            </li>
+            <li>
+              Pulsa el enlace del correo. Se abrirá la app en la pantalla
+              "Nueva contraseña".
+            </li>
+            <li>
+              Escribe tu nueva contraseña dos veces y pulsa{' '}
+              <strong>Guardar nueva contraseña</strong>.
+            </li>
+            <li>
+              Aparecerá el mensaje "Contraseña actualizada" y volverás
+              automáticamente al inicio de sesión.
+            </li>
+            <li>
+              Inicia sesión con tu <strong>nueva contraseña</strong>.
+            </li>
+          </ol>
+
+          <h4>Cosas a tener en cuenta</h4>
+          <ul>
+            <li>
+              El enlace del correo <strong>solo funciona una vez</strong>. Si
+              lo pulsas dos veces, puede dar error. En ese caso, pide uno
+              nuevo.
+            </li>
+            <li>
+              El correo llega en inglés (es una limitación del plan gratuito de
+              Supabase). Próximamente lo traduciremos al español.
+            </li>
+            <li>
+              Si has pedido muchos enlaces seguidos, es posible que el sistema
+              te bloquee temporalmente. Espera 1 hora e inténtalo de nuevo.
             </li>
           </ul>
         </>
@@ -1152,6 +1432,10 @@ export default function Ayuda() {
               <strong>Calendario con familiares</strong>: comparte un código
               de invitación para que puedan verlo sin tocar nada.
             </li>
+            <li>
+              <strong>Imprimir un mes</strong>: usa el botón 🖨️ Imprimir para
+              tener el calendario en papel o en PDF.
+            </li>
           </ul>
 
           <h4>Sobre los iconos de departamento</h4>
@@ -1188,8 +1472,22 @@ export default function Ayuda() {
           <h4>¿Puedo borrar un turno equivocado?</h4>
           <p>
             Sí. Abre el día, pulsa el botón <strong>Borrar</strong> del turno
-            y confirma. También puedes hacerlo desde la vista{' '}
-            <strong>Gestión</strong>.
+            y confirma. Durante <strong>7 segundos</strong> verás un aviso con
+            un botón <strong>Deshacer</strong> para recuperarlo si te has
+            equivocado.
+          </p>
+
+          <h4>He borrado algo y ya no aparece el botón Deshacer</h4>
+          <p>
+            Una vez pasados los 7 segundos, el borrado es definitivo. Si
+            tienes una copia CSV reciente, puedes volver a importar los datos.
+          </p>
+
+          <h4>¿Puedo cambiar el color de la app?</h4>
+          <p>
+            Sí. Ve a <strong>Ajustes → Preferencias</strong>. Tienes 4
+            opciones: automático (según tu dispositivo), claro, oscuro y verde
+            Guardia Civil.
           </p>
 
           <h4>¿Y si me equivoco con las vacaciones o asuntos propios de un año?</h4>
@@ -1242,8 +1540,9 @@ export default function Ayuda() {
 
           <h4>¿Puedo recuperar si borro algo por error?</h4>
           <p>
-            No hay papelera. Si haces exportaciones periódicas a CSV, puedes
-            volver a importar los datos.
+            Sí, durante 7 segundos después de borrar un turno aparece un aviso
+            con un botón <strong>Deshacer</strong>. Pasado ese tiempo, no hay
+            papelera, pero puedes recurrir a tus copias de seguridad en CSV.
           </p>
 
           <h4>¿Cómo cambio la contraseña?</h4>
@@ -1253,13 +1552,21 @@ export default function Ayuda() {
             El ojito 👁️ te ayuda a revisar lo escrito.
           </p>
 
+          <h4>He olvidado mi contraseña, ¿qué hago?</h4>
+          <p>
+            En la pantalla de inicio, pulsa <strong>"¿Olvidaste tu
+            contraseña?"</strong>, introduce tu correo y recibirás un enlace
+            para crear una nueva. Más detalles en la sección{' '}
+            <strong>🔑 Recuperar contraseña</strong>.
+          </p>
+
           <h4>¿Por qué no veo la pestaña X?</h4>
           <p>
             En móvil, la navegación está en la barra inferior. En escritorio,
             arriba. Si eres invitado, algunas pestañas (Festivos, Gestión,
-            Configuración, Datos) no están disponibles porque no las necesitas.
-            Si has instalado la app hace tiempo, desinstálala y vuelve a
-            instalarla para actualizar icono y menús.
+            Configuración, Datos) no están disponibles porque no las
+            necesitas. Si has instalado la app hace tiempo, desinstálala y
+            vuelve a instalarla para actualizar icono y menús.
           </p>
         </>
       ),
@@ -1340,7 +1647,8 @@ export default function Ayuda() {
                   abierta === s.id
                     ? 'var(--acento)'
                     : 'var(--fondo-tarjeta-2)',
-                color: abierta === s.id ? '#0b0e13' : 'var(--texto)',
+                color:
+                  abierta === s.id ? 'var(--acento-texto)' : 'var(--texto)',
                 fontWeight: 500,
               }}
             >
