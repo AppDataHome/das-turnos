@@ -5,6 +5,7 @@ import { useToast } from '../contexto/ToastContexto'
 import { useConfirmacion } from '../contexto/ConfirmacionContexto'
 import Avatar from '../componentes/Avatar'
 import CampoPassword from '../componentes/CampoPassword'
+import Acordeon from '../componentes/Acordeon'
 import Configuracion from './Configuracion'
 import SeccionDatos from './SeccionDatos'
 import SeccionDasRemanente from './SeccionDasRemanente'
@@ -17,10 +18,6 @@ import {
   Palette,
   Users,
   LogOut,
-  Sun,
-  Moon,
-  Smartphone,
-  Leaf,
 } from 'lucide-react'
 
 type Pestana =
@@ -233,7 +230,8 @@ function PestanaPerfil() {
     e.preventDefault()
     setErrorPass('')
 
-    if (!passActual) return setErrorPass('Debes introducir tu contraseña actual')
+    if (!passActual)
+      return setErrorPass('Debes introducir tu contraseña actual')
     if (pass1.length < 6)
       return setErrorPass('La nueva contraseña debe tener al menos 6 caracteres')
     if (pass1 !== pass2)
@@ -273,9 +271,7 @@ function PestanaPerfil() {
 
   return (
     <>
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Foto de perfil</h2>
-
+      <Acordeon titulo="Foto de perfil" icono="📷" abiertoPorDefecto>
         <div
           style={{
             display: 'flex',
@@ -338,11 +334,9 @@ function PestanaPerfil() {
             </div>
           </div>
         </div>
-      </div>
+      </Acordeon>
 
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Mi perfil</h2>
-
+      <Acordeon titulo="Mi perfil" icono="👤">
         <form onSubmit={guardarPerfil}>
           <label className="label">Correo electrónico</label>
           <input
@@ -382,11 +376,9 @@ function PestanaPerfil() {
             {guardando ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </form>
-      </div>
+      </Acordeon>
 
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Seguridad · Cambiar contraseña</h2>
-
+      <Acordeon titulo="Seguridad · Cambiar contraseña" icono="🔒">
         <form onSubmit={cambiarContrasena}>
           <label className="label">Contraseña actual</label>
           <CampoPassword
@@ -425,7 +417,7 @@ function PestanaPerfil() {
             {cambiandoPass ? 'Cambiando…' : 'Cambiar contraseña'}
           </button>
         </form>
-      </div>
+      </Acordeon>
     </>
   )
 }
@@ -572,9 +564,7 @@ function PestanaConfiguracion() {
 
   return (
     <>
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>🏖️ Vacaciones</h2>
-
+      <Acordeon titulo="Vacaciones" icono="🏖️">
         <form onSubmit={guardarVacaciones}>
           <label className="label">Días de vacaciones anuales</label>
           <input
@@ -658,11 +648,9 @@ function PestanaConfiguracion() {
 
           {error && <p className="error">{error}</p>}
         </form>
-      </div>
+      </Acordeon>
 
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>📋 Asuntos Propios</h2>
-
+      <Acordeon titulo="Asuntos Propios" icono="📋">
         <form onSubmit={guardarAsuntosPropios}>
           <label className="label">Días de asuntos propios anuales</label>
           <input
@@ -746,14 +734,15 @@ function PestanaConfiguracion() {
 
           {error && <p className="error">{error}</p>}
         </form>
-      </div>
+      </Acordeon>
 
-      <SeccionDasRemanente />
+      <Acordeon titulo="DAS remanentes" icono="🎁">
+        <SeccionDasRemanente sinCard />
+      </Acordeon>
 
-      <div className="card">
-        <h2 style={{ marginBottom: 12 }}>Departamentos y tipos de turno</h2>
+      <Acordeon titulo="Departamentos y tipos de turno" icono="⚙️">
         <Configuracion />
-      </div>
+      </Acordeon>
     </>
   )
 }
@@ -764,17 +753,9 @@ function PestanaConfiguracion() {
 
 function PestanaDatos() {
   return (
-    <>
-      <div className="card">
-        <h2 style={{ marginBottom: 8 }}>Datos</h2>
-        <p style={{ fontSize: 11, color: 'var(--texto-suave)' }}>
-          Exporta tus datos a CSV (se abre en Excel) o impórtalos. La
-          importación no borra nada: los duplicados se ignoran.
-        </p>
-      </div>
-
-      <SeccionDatos />
-    </>
+    <Acordeon titulo="Exportar e importar (CSV)" icono="💾" abiertoPorDefecto>
+      <SeccionDatos sinCard />
+    </Acordeon>
   )
 }
 
@@ -801,38 +782,36 @@ function PestanaPreferencias() {
     valor: Tema
     etiqueta: string
     descripcion: string
-    Icono: any
+    emoji: string
   }[] = [
     {
       valor: 'auto',
       etiqueta: 'Automático',
       descripcion: 'Se adapta al modo claro/oscuro de tu dispositivo',
-      Icono: Smartphone,
+      emoji: '📱',
     },
     {
       valor: 'claro',
       etiqueta: 'Claro',
       descripcion: 'Fondo blanco, ideal para ambientes muy iluminados',
-      Icono: Sun,
+      emoji: '☀️',
     },
     {
       valor: 'negro',
       etiqueta: 'Oscuro',
       descripcion: 'Fondo negro con acentos dorados',
-      Icono: Moon,
+      emoji: '🌙',
     },
     {
       valor: 'verde',
       etiqueta: 'Verde Guardia Civil',
       descripcion: 'Fondo verde oscuro con acentos verde claro',
-      Icono: Leaf,
+      emoji: '🍃',
     },
   ]
 
   return (
-    <div className="card">
-      <h2 style={{ marginBottom: 12 }}>Tema de la aplicación</h2>
-
+    <Acordeon titulo="Tema de la aplicación" icono="🎨" abiertoPorDefecto>
       <p
         style={{
           fontSize: 11,
@@ -853,7 +832,6 @@ function PestanaPreferencias() {
       >
         {opciones.map((op) => {
           const activo = usuario.tema === op.valor
-          const Icono = op.Icono
 
           return (
             <button
@@ -892,9 +870,10 @@ function PestanaPreferencias() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  fontSize: 20,
                 }}
               >
-                <Icono size={20} />
+                {op.emoji}
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -941,7 +920,7 @@ function PestanaPreferencias() {
           )
         })}
       </div>
-    </div>
+    </Acordeon>
   )
 }
 
@@ -965,8 +944,7 @@ function PestanaSesion() {
   }
 
   return (
-    <div className="card">
-      <h2 style={{ marginBottom: 10 }}>Cerrar sesión</h2>
+    <Acordeon titulo="Cerrar sesión" icono="🚪" abiertoPorDefecto>
       <p
         style={{
           fontSize: 11,
@@ -980,6 +958,6 @@ function PestanaSesion() {
       <button className="btn btn-danger" onClick={cerrarSesion}>
         Cerrar sesión
       </button>
-    </div>
+    </Acordeon>
   )
 }
