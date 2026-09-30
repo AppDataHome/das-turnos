@@ -294,6 +294,23 @@ Con los últimos cambios (acordeones, corrección DAS, tarjetas clicables). Guá
 
 ## 0. Cambios recientes importantes
 
+### 30-09-2026 — Corrección de seguridad: activar RLS en todas las tablas
+
+**Incidente**: Supabase detectó y avisó de que **todas las tablas** del proyecto tenían RLS (Row Level Security) **desactivado**, exponiendo los datos a cualquier persona con la URL del proyecto.
+
+**Causa**: al crear las tablas por SQL, RLS no se activa automáticamente. Las políticas existían (se habían creado en su momento), pero no surtían efecto porque RLS estaba apagado. La tabla `usuario` además se había quedado sin políticas.
+
+**Solución aplicada**:
+- Se borró la tabla `evento_das_backup_20260923` (backup temporal que ya no se necesitaba).
+- Se activó RLS en todas las tablas: `usuario`, `departamento`, `usuario_departamento`, `tipo_turno`, `festivo_calendario`, `turno`, `evento_das`, `ausencia`, `das_remanente`, `invitacion`.
+- Se crearon 6 políticas nuevas para la tabla `usuario`: `usuario_select_propio`, `usuario_select_invitados`, `usuario_insert_propio`, `usuario_update_propio`, `usuario_delete_propio`, `usuario_delete_invitados`.
+
+**Lección aprendida**: **siempre** que se cree una tabla nueva por SQL, hay que activar RLS explícitamente con `alter table ... enable row level security;` y añadir las políticas necesarias. Sin esto, la tabla queda expuesta.
+
+**Nota**: la tabla `usuario_departamento` tiene RLS activo pero sin políticas. No se usa desde la app, así que no afecta. Si se necesita en el futuro, habrá que añadirle políticas.
+
+### 23-09-2026 — CORRECCIÓN CRÍTICA DE LA LÓGICA DAS
+
 ### 23-09-2026 — CORRECCIÓN CRÍTICA DE LA LÓGICA DAS
 
 La lógica de cálculo de DAS estaba **mal** desde el principio. Corregida según Orden General 11/2014 (arts. 12 y 25).
@@ -486,6 +503,10 @@ La integración GitHub ↔ Vercel se ha atascado varias veces. Síntoma: commits
 `trg_turno_eventos_das` sobre `turno`: al insertar/actualizar/borrar, recalcula si es festivo/nocturno y actualiza `evento_das`.
 
 ### 3.6. Políticas RLS
+
+> ⚠️ **IMPORTANTE (30-09-2026)**: RLS debe estar **explícitamente activado** en cada tabla. Al crear una tabla por SQL, RLS está desactivado por defecto. Siempre hay que ejecutar `alter table ... enable row level security;` y añadir las políticas necesarias. Ver histórico de cambios.
+
+Todas las tablas con RLS activo. Patrón:
 
 Patrón general:
 - **SELECT**: `id_usuario = usuario_efectivo()` (usuario ve lo suyo, invitado ve lo del propietario).
@@ -833,4 +854,5 @@ Fecha	Cambio
 2026-09-23	Tarjetas clicables (Turnos Mes / Vacaciones-AP)
 2026-09-23	Acordeones en Ajustes
 2026-09-23	HANDOFF.md en el repo
+2026-09-30  Corrección de seguridad: activar RLS en todas las tablas y añadir políticas de `usuario`
 Fin del hand-off v3.
